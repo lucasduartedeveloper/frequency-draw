@@ -121,7 +121,7 @@ $(document).ready(function() {
         prompt("Period length: ", periodLength);
 
         var value = parseInt(input);
-        if (!value) return;
+        //if (!value) return;
 
         periodLength = value;
         periodLengthView.innerText = periodLength+" ms";
@@ -305,7 +305,7 @@ $(document).ready(function() {
     }, 10);*/
 
     drawImage();
-    //animate();
+    animate();
 });
 
 frequencyPath = [{
@@ -405,7 +405,6 @@ var updateValue = function(value, callback) {
 
         if (callback) callback();
     }
-    drawImage();
 };
 
 var toHertz = function(no) {
@@ -544,7 +543,7 @@ var drawImage =
 
     var reversed = frequencyPath.toReversed();
 
-    if (reversed[0].readingCount > 10)
+    if (reversed[0].readingCount >= 10)
     for (var n = 0; n < reversed.length; n++) {
         ctx.lineWidth = 1;
         ctx.strokeStyle = "#555";
@@ -577,7 +576,7 @@ var drawImage =
         ctx.stroke();
     }
 
-    if (reversed[0].readingCount <= 10) {
+    if (reversed[0].readingCount < 10) {
         ctx.lineWidth = 3;
         ctx.strokeStyle = "#fff";
         ctx.lineJoin = "round";
@@ -615,6 +614,75 @@ var animate = function() {
     }
     renderTime = new Date().getTime();
     requestAnimationFrame(animate);
+};
+
+var alertTime = 0;
+var lightTime = 0;
+
+var lightAmmount = 0;
+var deviceUsed = false;
+
+var ambientLight_topValue = 0;
+var ambientLight_currentValue = 0;
+
+window.addEventListener("devicelight", function(e) {
+    if (backgroundMode) return;
+
+    ambientLight_topValue = 
+    ambientLight_topValue < e.value ? 
+    e.value : ambientLight_topValue;
+
+    ambientLight_currentValue = 
+    (1/ambientLight_topValue)*e.value;
+
+    updateValue(ambientLight_currentValue);
+
+    var elapsedTime = new Date().getTime() - lightTime;
+    //console.clear();
+    //console.log(lightAmmount, e.value, elapsedTime);
+
+    if (Math.abs(e.value-lightAmmount) > 50) {
+        lightTime = new Date().getTime();
+
+        //console.log(
+        //Math.floor(elapsedTime/1000) + " seconds ago");
+
+        if (elapsedTime > 0 && elapsedTime < 1000*60*60 &&
+            new Date().getTime() - alertTime > 30000) {
+            alertTime = new Date().getTime();
+            say(toTimestamp(elapsedTime));
+        }
+    }
+
+    lightAmmount = e.value;
+});
+
+var toTimestamp = function(ms) {
+    var hours = Math.floor(((ms/1000)/60)/60)%24;
+    var minutes = Math.floor((ms/1000)/60)%60;
+    var seconds = Math.floor(ms/1000)%60;
+
+    var text = "";
+    if (hours > 0)
+    text += hours + " hour"+(hours > 1 ? "s" : "");
+
+    if (hours > 0 && (minutes > 0 && seconds > 0))
+    text += ", ";
+    else if (hours > 0 && (minutes > 0 || seconds > 0))
+    text += " and ";
+
+    if (minutes > 0)
+    text += minutes + " minute"+(minutes > 1 ? "s" : "");
+
+    if (minutes > 0 && seconds > 0)
+    text += " and ";
+
+    if (seconds > 0)
+    text += seconds + " second"+(seconds > 1 ? "s" : "");
+
+    text += " ago";
+
+    return text;
 };
 
 var visibilityChange;
