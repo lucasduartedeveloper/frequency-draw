@@ -101,6 +101,32 @@ $(document).ready(function() {
         prediction.steps+" / "+predictionDistance;
     };
 
+    periodLength = 1000;
+    periodLengthView = document.createElement("span");
+    periodLengthView.style.position = "absolute";
+    periodLengthView.style.color = "#fff";
+    periodLengthView.innerText = periodLength+" ms";
+    periodLengthView.style.textAlign = "center";
+    periodLengthView.style.fontFamily = "Khand";
+    periodLengthView.style.fontSize = "20px";
+    periodLengthView.style.left = ((sw/2)-50)+"px";
+    periodLengthView.style.top = (45)+"px";
+    periodLengthView.style.width = (100)+"px";
+    periodLengthView.style.height = (25)+"px";
+    periodLengthView.style.zIndex = "15";
+    document.body.appendChild(periodLengthView);
+
+    periodLengthView.onclick = function() {
+        var input = 
+        prompt("Period length: ", periodLength);
+
+        var value = parseInt(input);
+        if (!value) return;
+
+        periodLength = value;
+        periodLengthView.innerText = periodLength+" ms";
+    };
+
     predictionCount = 0;
     correctPredictionCountView = 
     document.createElement("span");
@@ -111,9 +137,9 @@ $(document).ready(function() {
     correctPredictionCountView.style.textAlign = "right";
     correctPredictionCountView.style.fontFamily = "Khand";
     correctPredictionCountView.style.fontSize = "20px";
-    correctPredictionCountView.style.left = (sw-110)+"px";
+    correctPredictionCountView.style.left = (sw-60)+"px";
     correctPredictionCountView.style.top = (10)+"px";
-    correctPredictionCountView.style.width = (100)+"px";
+    correctPredictionCountView.style.width = (50)+"px";
     correctPredictionCountView.style.height = (25)+"px";
     correctPredictionCountView.style.zIndex = "15";
     document.body.appendChild(correctPredictionCountView);
@@ -126,9 +152,9 @@ $(document).ready(function() {
     "fa-solid fa-gear";
     correctPredictionIconView.style.textAlign = "left";
     correctPredictionIconView.style.fontSize = "20px";
-    correctPredictionIconView.style.left = (sw-110)+"px";
+    correctPredictionIconView.style.left = (sw-60)+"px";
     correctPredictionIconView.style.top = (10)+"px";
-    correctPredictionIconView.style.width = (100)+"px";
+    correctPredictionIconView.style.width = (50)+"px";
     correctPredictionIconView.style.height = (25)+"px";
     correctPredictionIconView.style.zIndex = "15";
     document.body.appendChild(correctPredictionIconView);
@@ -228,25 +254,6 @@ $(document).ready(function() {
     pictureView.onmouseup = pictureView_touchend;
 
     micAvgValue = 0;
-    frequencyPath = [{
-        openValue: 0,
-        highValue: 0,
-        lowValue: 0,
-        closeValue: 0,
-        readingCount: 0,
-        volumeValue: 0
-    }];
-
-    var restartTimeout = 0;
-
-    var lastPeriodTime = 0;
-    var openValue = 0;
-    var highValue = 0;
-    var lowValue = 0;
-    var closeValue = 0;
-
-    var readingCount = 0;
-    var volumeValue = 0;
 
     mic = new EasyMicrophone();
     mic.onsuccess = function() { 
@@ -256,82 +263,7 @@ $(document).ready(function() {
         micAvgValue = avgValue;
 
         var frequency = ((1/250)*reachedFreq);
-        var currentTime = new Date().getTime();
-
-        readingCount += 1;
-        volumeValue += micAvgValue;
-
-        if (frequency > highValue)
-        highValue = frequency;
-
-        if (frequency < lowValue)
-        lowValue = frequency;
-
-        if (currentTime - lastPeriodTime > 1000) {
-            if (openValue == 0) {
-                openValue = frequency;
-                highValue = frequency;
-                lowValue = frequency;
-            }
-            closeValue = frequency;
-
-            frequencyPath.push({ 
-                openValue: openValue,
-                highValue: highValue,
-                lowValue: lowValue,
-                closeValue: closeValue,
-                readingCount: readingCount,
-                volumeValue: (volumeValue/readingCount)
-            });
-
-            currentValueView.innerText = 
-            closeValue.toFixed(2);
-
-            if (prediction.ready && prediction.steps > 0) {
-                prediction.steps -= 1;
-                predictionDistanceView.innerText = 
-                prediction.steps+" / "+predictionDistance;
-            }
-
-            if (prediction.ready && prediction.steps == 0) {
-                if (prediction.direction == -1 && 
-                closeValue >= prediction.value) {
-                    predictionCount += 1;
-                    prediction.correct = true;
-                }
-
-                if (prediction.direction == 1 && 
-                closeValue <=prediction.value) {
-                    predictionCount += 1;
-                    prediction.correct = true;
-                }
-
-                prediction.met = true;
-                //prediction.positionY = -1;
-                prediction.direction = 0;
-                prediction.ready = false;
-                prediction.closeValue = closeValue;
-
-                correctPredictionCountView.innerText = 
-                predictionCount;
-
-                if (prediction.correct)
-                say("Your prediction was correct!");
-                else
-                say("Your prediction failed.");
-            }
-
-            openValue = frequency;
-            highValue = frequency;
-            lowValue = frequency;
-            closeValue = frequency;
-
-            readingCount = 0;
-            volumeValue = 0;
-
-            lastPeriodTime = currentTime;
-        }
-        drawImage();
+        updateValue(frequency);
     };
     mic.onclose = function() { 
         console.log("mic closed");
@@ -363,9 +295,122 @@ $(document).ready(function() {
         }
     };
 
+    /*
+    var min = 0;
+    setInterval(function() {
+        var frequency = min + Math.random()*(1/3);
+        updateValue(frequency, function() {
+            min = [ 0, (1/3), (2/3) ][Math.floor(Math.random()*3)];
+        });
+    }, 10);*/
+
     drawImage();
     //animate();
 });
+
+frequencyPath = [{
+    openValue: 0,
+    highValue: 0,
+    lowValue: 0,
+    closeValue: 0,
+    readingCount: 0,
+    volumeValue: 0
+}];
+
+var lastPeriodTime = 0;
+var openValue = 0;
+var highValue = 0;
+var lowValue = 0;
+var closeValue = 0;
+
+var readingCount = 0;
+var volumeValue = 0;
+
+var updateValue = function(value, callback) {
+    var frequency = value;
+    var currentTime = new Date().getTime();
+
+    readingCount += 1;
+    volumeValue += micAvgValue;
+
+    if (frequency > highValue)
+    highValue = frequency;
+
+    if (frequency < lowValue)
+    lowValue = frequency;
+
+    if (currentTime - lastPeriodTime > periodLength) {
+        if (openValue == 0) {
+            openValue = frequency;
+            highValue = frequency;
+            lowValue = frequency;
+        }
+        closeValue = frequency;
+
+        frequencyPath.push({ 
+            openValue: openValue,
+            highValue: highValue,
+            lowValue: lowValue,
+            closeValue: closeValue,
+            readingCount: readingCount,
+            volumeValue: (volumeValue/readingCount)
+        });
+
+        currentValueView.innerText = 
+        closeValue.toFixed(2);
+
+        if (prediction.ready && prediction.steps > 0) {
+            prediction.steps -= 1;
+            predictionDistanceView.innerText = 
+            prediction.steps+" / "+predictionDistance;
+        }
+
+        if (prediction.ready && prediction.steps == 0) {
+            if (prediction.direction == -1 && 
+            closeValue >= prediction.value) {
+                predictionCount += 1;
+                prediction.correct = true;
+            }
+
+            if (prediction.direction == 1 && 
+            closeValue <=prediction.value) {
+                predictionCount += 1;
+                prediction.correct = true;
+            }
+
+            prediction.met = true;
+            //prediction.positionY = -1;
+            prediction.direction = 0;
+            prediction.ready = false;
+            prediction.closeValue = closeValue;
+
+            correctPredictionCountView.innerText = 
+            predictionCount;
+
+            if (prediction.correct)
+            say("Your prediction was correct!");
+            else
+            say("Your prediction failed.");
+        }
+
+        openValue = frequency;
+        highValue = frequency;
+        lowValue = frequency;
+        closeValue = frequency;
+
+        readingCount = 0;
+        volumeValue = 0;
+
+        lastPeriodTime = currentTime;
+
+        if (callback) callback();
+    }
+    drawImage();
+};
+
+var toHertz = function(no) {
+    return (no*250)*((24000)/512);
+};
 
 Math.curve = function(value, scale) {
     var c = {
@@ -419,6 +464,18 @@ var drawImage =
     ctx.beginPath();
     ctx.moveTo(0, (sh/2));
     ctx.lineTo(sw, (sh/2));
+    ctx.stroke();
+
+    ctx.lineWidth = 0.5;
+
+    ctx.beginPath();
+    ctx.moveTo(0, (sh/2)-(sw/gridSize));
+    ctx.lineTo(sw, (sh/2)-(sw/gridSize));
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(0, (sh/2)+(sw/gridSize));
+    ctx.lineTo(sw, (sh/2)+(sw/gridSize));
     ctx.stroke();
 
     if (prediction.positionY != -1) {
@@ -478,7 +535,7 @@ var drawImage =
 
             ctx.fillStyle = "#fff";
             ctx.font = "15px sans serif";
-            ctx.textAlign = "center";
+             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
             ctx.fillText(prediction.closeValue.toFixed(2), 
             sw-(sw/4)+55, prediction.positionY);
@@ -487,6 +544,7 @@ var drawImage =
 
     var reversed = frequencyPath.toReversed();
 
+    if (reversed[0].readingCount > 10)
     for (var n = 0; n < reversed.length; n++) {
         ctx.lineWidth = 1;
         ctx.strokeStyle = "#555";
@@ -506,13 +564,34 @@ var drawImage =
         else
         ctx.strokeStyle = "#f55";
 
+        var flipped = 
+        reversed[n].openValue < reversed[n].closeValue;
+
         ctx.beginPath();
         ctx.moveTo(
-        (sw/2)-(n*10), 
+        (sw/2)-(n*10),
         (sh/2)-((reversed[n].openValue-0.5)*((sw/gridSize)*4)));
         ctx.lineTo(
         (sw/2)-(n*10), 
         (sh/2)-((reversed[n].closeValue-0.5)*((sw/gridSize)*4)));
+        ctx.stroke();
+    }
+
+    if (reversed[0].readingCount <= 10) {
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#fff";
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+
+        ctx.beginPath();
+        ctx.moveTo(
+        (sw/2)-(n*10), 
+        (sh/2)-((reversed[0].closeValue-0.5)*((sw/gridSize)*4)));
+        for (var n = 1; n < reversed.length; n++) {
+            ctx.lineTo(
+            (sw/2)-(n*10), 
+            (sh/2)-((reversed[n].closeValue-0.5)*((sw/gridSize)*4)));
+        }
         ctx.stroke();
     }
 
