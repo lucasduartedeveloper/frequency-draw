@@ -60,7 +60,7 @@ var afterAudio = false;
 
 var speaking = false;
 var lastText = "";
-function say(text, afterAudio) {
+function say(text, lang=language, afterAudio) {
     if (!audioBot) return;
     if (beforeAudio) beforeAudio(text);
     //if (text == lastText) return;
@@ -68,7 +68,7 @@ function say(text, afterAudio) {
     if (!speaking) {
          //speaking = true;
          var msg = new SpeechSynthesisUtterance();
-         if (!voicesLoaded) msg.lang = language;
+         if (!voicesLoaded) msg.lang = lang;
          else {
              msg.lang = voiceList[voice_no].lang;
              msg.voice = voiceList[voice_no];

@@ -101,7 +101,7 @@ $(document).ready(function() {
         prediction.steps+" / "+predictionDistance;
     };
 
-    periodLength = 1000;
+    periodLength = 0;
     periodLengthView = document.createElement("span");
     periodLengthView.style.position = "absolute";
     periodLengthView.style.color = "#fff";
@@ -295,6 +295,31 @@ $(document).ready(function() {
         }
     };
 
+    drawingMode = 0;
+    buttonModeView = document.createElement("button");
+    buttonModeView.style.position = "absolute";
+    buttonModeView.style.color = "#000";
+    buttonModeView.innerText = 
+    drawingMode == 0 ? "candlesticks" : "line";
+    buttonModeView.style.fontFamily = "Khand";
+    buttonModeView.style.fontSize = "15px";
+    buttonModeView.style.left = (120)+"px";
+    buttonModeView.style.top = (sh-35)+"px";
+    buttonModeView.style.width = (100)+"px";
+    buttonModeView.style.height = (25)+"px";
+    buttonModeView.style.border = "1px solid white";
+    buttonModeView.style.borderRadius = "25px";
+    buttonModeView.style.zIndex = "15";
+    document.body.appendChild(buttonModeView);
+
+    buttonModeView.onclick = function() {
+        drawingMode = 
+        (drawingMode+1) < 2 ? (drawingMode+1) : 0;
+
+        buttonModeView.innerText = 
+        drawingMode == 0 ? "candlesticks" : "line";
+    };
+
     /*
     var min = 0;
     setInterval(function() {
@@ -304,9 +329,37 @@ $(document).ready(function() {
         });
     }, 10);*/
 
+    loadImages();
+
     drawImage();
     animate();
 });
+
+var img_list = [
+    "img/line-draw-0.png"
+];
+
+var imagesLoaded = false;
+var loadImages = function(callback) {
+    var count = 0;
+    for (var n = 0; n < img_list.length; n++) {
+        var img = document.createElement("img");
+        img.n = n;
+        img.onload = function() {
+            count += 1;
+            console.log("loading ("+count+"/"+img_list.length+")");
+            img_list[this.n] = this;
+            if (count == img_list.length) {
+                imagesLoaded = true;
+                //callback();
+            }
+        };
+        var rnd = Math.random();
+        img.src = img_list[n].includes("img") ? 
+        img_list[n]+"?f="+rnd : 
+        img_list[n];
+    }
+};
 
 frequencyPath = [{
     openValue: 0,
@@ -339,6 +392,14 @@ var updateValue = function(value, callback) {
     if (frequency < lowValue)
     lowValue = frequency;
 
+    frequencyPath[0].highValue = highValue;
+    frequencyPath[0].lowValue = lowValue;
+    frequencyPath[0].closeValue = frequency;
+
+    frequencyPath[0].readingCount = readingCount;
+    frequencyPath[0].volumeValue = 
+    (volumeValue/readingCount);
+
     if (currentTime - lastPeriodTime > periodLength) {
         if (openValue == 0) {
             openValue = frequency;
@@ -347,7 +408,10 @@ var updateValue = function(value, callback) {
         }
         closeValue = frequency;
 
-        frequencyPath.push({ 
+        if (frequencyPath.length > 99)
+        frequencyPath.splice(99, (frequencyPath.length-99));
+
+        frequencyPath.splice(0, 0, { 
             openValue: openValue,
             highValue: highValue,
             lowValue: lowValue,
@@ -472,9 +536,43 @@ var drawImage =
     ctx.lineTo(sw, (sh/2)-(sw/gridSize));
     ctx.stroke();
 
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect((sw/2)-(sw/4), (sh/2)-(sw/2), (sw/2), 0);
+    ctx.clip();
+
+    var image = img_list[0];
+    var size = {
+        width: image.naturalWidth,
+        height: image.naturalHeight
+    };
+    var frame = {
+        width: getSquare(image),
+        height: getSquare(image)
+    };
+    var format = fitImageCover(size, frame);
+
+    if (imagesLoaded)
+    ctx.drawImage(image, 
+    -format.left, 0, format.width, format.height, 
+    (sw/2)-(sw/4), 
+    (sh/2)+(sw/4)-(frequencyPath[0].closeValue*(sw/2)), 
+    (sw/2), (sw/2));
+
+    ctx.restore();
+
     ctx.beginPath();
     ctx.moveTo(0, (sh/2)+(sw/gridSize));
     ctx.lineTo(sw, (sh/2)+(sw/gridSize));
+    ctx.stroke();
+
+    ctx.lineWidth = 0.5;
+
+    ctx.beginPath();
+    ctx.moveTo((sw/2)-5, 
+    (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
+    ctx.lineTo(sw, 
+    (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
     ctx.stroke();
 
     if (prediction.positionY != -1) {
@@ -541,42 +639,40 @@ var drawImage =
         }
     }
 
-    var reversed = frequencyPath.toReversed();
-
-    if (reversed[0].readingCount >= 10)
-    for (var n = 0; n < reversed.length; n++) {
+    if (drawingMode == 0)
+    for (var n = 0; n < frequencyPath.length; n++) {
         ctx.lineWidth = 1;
         ctx.strokeStyle = "#555";
 
         ctx.beginPath();
         ctx.moveTo(
         (sw/2)-(n*10), 
-        (sh/2)-((reversed[n].highValue-0.5)*((sw/gridSize)*4)));
+        (sh/2)-((frequencyPath[n].highValue-0.5)*((sw/gridSize)*4)));
         ctx.lineTo(
         (sw/2)-(n*10), 
-        (sh/2)-((reversed[n].lowValue-0.5)*((sw/gridSize)*4)));
+        (sh/2)-((frequencyPath[n].lowValue-0.5)*((sw/gridSize)*4)));
         ctx.stroke();
 
         ctx.lineWidth = 5;
-        if (reversed[n].openValue > reversed[n].closeValue)
+        if (frequencyPath[n].openValue < frequencyPath[n].closeValue)
         ctx.strokeStyle = "#5f5";
         else
         ctx.strokeStyle = "#f55";
 
         var flipped = 
-        reversed[n].openValue < reversed[n].closeValue;
+        frequencyPath[n].openValue < frequencyPath[n].closeValue;
 
         ctx.beginPath();
         ctx.moveTo(
         (sw/2)-(n*10),
-        (sh/2)-((reversed[n].openValue-0.5)*((sw/gridSize)*4)));
+        (sh/2)-((frequencyPath[n].openValue-0.5)*((sw/gridSize)*4)));
         ctx.lineTo(
         (sw/2)-(n*10), 
-        (sh/2)-((reversed[n].closeValue-0.5)*((sw/gridSize)*4)));
+        (sh/2)-((frequencyPath[n].closeValue-0.5)*((sw/gridSize)*4)));
         ctx.stroke();
     }
 
-    if (reversed[0].readingCount < 10) {
+    if (drawingMode == 1) {
         ctx.lineWidth = 3;
         ctx.strokeStyle = "#fff";
         ctx.lineJoin = "round";
@@ -585,11 +681,11 @@ var drawImage =
         ctx.beginPath();
         ctx.moveTo(
         (sw/2)-(n*10), 
-        (sh/2)-((reversed[0].closeValue-0.5)*((sw/gridSize)*4)));
-        for (var n = 1; n < reversed.length; n++) {
+        (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
+        for (var n = 1; n < frequencyPath.length; n++) {
             ctx.lineTo(
             (sw/2)-(n*10), 
-            (sh/2)-((reversed[n].closeValue-0.5)*((sw/gridSize)*4)));
+            (sh/2)-((frequencyPath[n].closeValue-0.5)*((sw/gridSize)*4)));
         }
         ctx.stroke();
     }
@@ -647,9 +743,10 @@ window.addEventListener("devicelight", function(e) {
         //console.log(
         //Math.floor(elapsedTime/1000) + " seconds ago");
 
-        if (elapsedTime > 0 && elapsedTime < 1000*60*60 &&
+        if (elapsedTime > 0 && elapsedTime < 86400000 &&
             new Date().getTime() - alertTime > 30000) {
             alertTime = new Date().getTime();
+
             say(toTimestamp(elapsedTime));
         }
     }
@@ -657,32 +754,99 @@ window.addEventListener("devicelight", function(e) {
     lightAmmount = e.value;
 });
 
-var toTimestamp = function(ms) {
+var toTimestamp = function(ms, lang=language) {
     var hours = Math.floor(((ms/1000)/60)/60)%24;
     var minutes = Math.floor((ms/1000)/60)%60;
     var seconds = Math.floor(ms/1000)%60;
 
     var text = "";
-    if (hours > 0)
-    text += hours + " hour"+(hours > 1 ? "s" : "");
+    if (lang == "pt-BR") {
+        if (hours > 0)
+        text += hours + " hora"+(hours > 1 ? "s" : "");
 
-    if (hours > 0 && (minutes > 0 && seconds > 0))
-    text += ", ";
-    else if (hours > 0 && (minutes > 0 || seconds > 0))
-    text += " and ";
+        if (hours > 0 && (minutes > 0 && seconds > 0))
+        text += ", ";
+        else if (hours > 0 && (minutes > 0 || seconds > 0))
+        text += " e ";
 
-    if (minutes > 0)
-    text += minutes + " minute"+(minutes > 1 ? "s" : "");
+        if (minutes > 0)
+        text += minutes + " minuto"+(minutes > 1 ? "s" : "");
 
-    if (minutes > 0 && seconds > 0)
-    text += " and ";
+        if (minutes > 0 && seconds > 0)
+        text += " e ";
 
-    if (seconds > 0)
-    text += seconds + " second"+(seconds > 1 ? "s" : "");
+        if (seconds > 0)
+        text += seconds + " segundo"+(seconds > 1 ? "s" : "");
 
-    text += " ago";
+        text += " atrás";
+    }
+    else {
+        if (hours > 0)
+        text += hours + " hour"+(hours > 1 ? "s" : "");
+
+        if (hours > 0 && (minutes > 0 && seconds > 0))
+        text += ", ";
+        else if (hours > 0 && (minutes > 0 || seconds > 0))
+        text += " and ";
+
+        if (minutes > 0)
+        text += minutes + " minute"+(minutes > 1 ? "s" : "");
+
+        if (minutes > 0 && seconds > 0)
+        text += " and ";
+
+        if (seconds > 0)
+        text += seconds + " second"+(seconds > 1 ? "s" : "");
+
+        text += " ago";
+    }
 
     return text;
+};
+
+var fitImageCover = function(img, frame) {
+    var obj = {
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0
+    };
+
+    var left, top, width, height;
+
+    var img_aspectRatio = img.width/img.height;
+    var frame_aspectRatio = frame.width/frame.height;
+
+    if (frame_aspectRatio > img_aspectRatio) {
+        width = frame.width;
+        height = (img.height/img.width)*frame.width;
+
+        left = 0;
+        top = -(height-frame.height)/2;
+    }
+    else {
+        height = frame.height;
+        width = (img.width/img.height)*frame.height;
+
+        top = 0;
+        left = -(width-frame.width)/2;
+    }
+
+    obj.left = left;
+    obj.top = top;
+    obj.width = width;
+    obj.height = height;
+
+    return obj;
+};
+
+var getSquare = function(item) {
+    var width = item.naturalWidth ? 
+    item.naturalWidth : item.width;
+    var height = item.naturalHeight ? 
+    item.naturalHeight : item.height;
+
+    return width < height ? width : height;
 };
 
 var visibilityChange;
