@@ -59,48 +59,6 @@ $(document).ready(function() {
     currentValueView.style.zIndex = "15";
     document.body.appendChild(currentValueView);
 
-    predictionDistance = 1;
-
-    prediction = {
-        positionY: -1,
-        startValue: 0,
-        value: 0,
-        direction: 0,
-        ready: false,
-        correct: false,
-        met: false,
-        closeValue: 0,
-        steps: predictionDistance
-    };
-
-    predictionDistanceView = 
-    document.createElement("span");
-    predictionDistanceView.style.position = "absolute";
-    predictionDistanceView.style.color = "#fff";
-    predictionDistanceView.innerText = 
-    prediction.steps+" / "+predictionDistance;
-    predictionDistanceView.style.textAlign = "center";
-    predictionDistanceView.style.fontFamily = "Khand";
-    predictionDistanceView.style.fontSize = "20px";
-    predictionDistanceView.style.left = ((sw/2)-50)+"px";
-    predictionDistanceView.style.top = (10)+"px";
-    predictionDistanceView.style.width = (100)+"px";
-    predictionDistanceView.style.height = (25)+"px";
-    predictionDistanceView.style.zIndex = "15";
-    document.body.appendChild(predictionDistanceView);
-
-    predictionDistanceView.onclick = function() {
-        var input = 
-        prompt("Prediction distance: ", predictionDistance);
-
-        var value = parseInt(input);
-        if (!value) return;
-
-        predictionDistance = value;
-        predictionDistanceView.innerText = 
-        prediction.steps+" / "+predictionDistance;
-    };
-
     periodLength = 0;
     periodLengthView = document.createElement("span");
     periodLengthView.style.position = "absolute";
@@ -110,7 +68,7 @@ $(document).ready(function() {
     periodLengthView.style.fontFamily = "Khand";
     periodLengthView.style.fontSize = "20px";
     periodLengthView.style.left = ((sw/2)-50)+"px";
-    periodLengthView.style.top = (45)+"px";
+    periodLengthView.style.top = (10)+"px";
     periodLengthView.style.width = (100)+"px";
     periodLengthView.style.height = (25)+"px";
     periodLengthView.style.zIndex = "15";
@@ -164,6 +122,16 @@ $(document).ready(function() {
     var moveX = 0;
     var moveY = 0;
 
+    prediction = {
+        positionY: -1,
+        startValue: 0,
+        value: 0,
+        direction: 0,
+        ready: false,
+        met: false,
+        openValue: 0
+    };
+
     var ontouch = false;
     var pictureView_touchstart = function(e) {
         ontouch = true;
@@ -191,14 +159,9 @@ $(document).ready(function() {
             }
         }
 
-        prediction.steps = predictionDistance;
-        predictionDistanceView.innerText = 
-        prediction.steps+" / "+predictionDistance;
-
         prediction.ready = false;
-        prediction.correct = false;
         prediction.met = false;
-        prediction.closeValue = 0;
+        prediction.openValue = 0;
 
         var y = startY;
         if (startY < (sh/2)-((sw/gridSize)*2))
@@ -236,7 +199,6 @@ $(document).ready(function() {
         prediction.positionY = y;
         prediction.value = 
         (1/((sw/gridSize)* 4)) * (((sh/2)+((sw/gridSize)*2))-y);
-        prediction.direction = startY > moveY ? -1 : 1;
     };
 
     pictureView_touchend = function(e) {
@@ -320,6 +282,50 @@ $(document).ready(function() {
         drawingMode == 0 ? "candlesticks" : "line";
     };
 
+    buttonBuyView = document.createElement("button");
+    buttonBuyView.style.position = "absolute";
+    buttonBuyView.style.background = "#595";
+    buttonBuyView.style.color = "#fff";
+    buttonBuyView.innerText = "WILL ENTER";
+    buttonBuyView.style.fontFamily = "Khand";
+    buttonBuyView.style.fontSize = "15px";
+    buttonBuyView.style.left = (sw-110)+"px";
+    buttonBuyView.style.top = (sh-180)+"px";
+    buttonBuyView.style.width = (100)+"px";
+    buttonBuyView.style.height = (50)+"px";
+    //buttonBuyView.style.border = "1px solid white";
+    buttonBuyView.style.borderRadius = "5px";
+    buttonBuyView.style.zIndex = "15";
+    document.body.appendChild(buttonBuyView);
+
+    buttonBuyView.onclick = function() {
+        prediction.met = false;
+        prediction.ready = true;
+        prediction.direction = -1;
+    };
+
+    buttonSellView = document.createElement("button");
+    buttonSellView.style.position = "absolute";
+    buttonSellView.style.background = "#955";
+    buttonSellView.style.color = "#fff";
+    buttonSellView.innerText = "WILL LEAVE";
+    buttonSellView.style.fontFamily = "Khand";
+    buttonSellView.style.fontSize = "15px";
+    buttonSellView.style.left = (sw-110)+"px";
+    buttonSellView.style.top = (sh-120)+"px";
+    buttonSellView.style.width = (100)+"px";
+    buttonSellView.style.height = (50)+"px";
+    //buttonBuyView.style.border = "1px solid white";
+    buttonSellView.style.borderRadius = "5px";
+    buttonSellView.style.zIndex = "15";
+    document.body.appendChild(buttonSellView);
+
+    buttonSellView.onclick = function() {
+        prediction.met = false;
+        prediction.ready = true;
+        prediction.direction = 1;
+    };
+
     /*
     var min = 0;
     setInterval(function() {
@@ -327,7 +333,7 @@ $(document).ready(function() {
         updateValue(frequency, function() {
             min = [ 0, (1/3), (2/3) ][Math.floor(Math.random()*3)];
         });
-    }, 10);*/
+    }, 250);*/
 
     loadImages();
 
@@ -401,11 +407,6 @@ var updateValue = function(value, callback) {
     (volumeValue/readingCount);
 
     if (currentTime - lastPeriodTime > periodLength) {
-        if (openValue == 0) {
-            openValue = frequency;
-            highValue = frequency;
-            lowValue = frequency;
-        }
         closeValue = frequency;
 
         if (frequencyPath.length > 99)
@@ -423,38 +424,36 @@ var updateValue = function(value, callback) {
         currentValueView.innerText = 
         closeValue.toFixed(2);
 
-        if (prediction.ready && prediction.steps > 0) {
-            prediction.steps -= 1;
-            predictionDistanceView.innerText = 
-            prediction.steps+" / "+predictionDistance;
-        }
-
-        if (prediction.ready && prediction.steps == 0) {
-            if (prediction.direction == -1 && 
+        if (prediction.direction == -1 && 
             closeValue >= prediction.value) {
-                predictionCount += 1;
-                prediction.correct = true;
-            }
 
-            if (prediction.direction == 1 && 
-            closeValue <=prediction.value) {
+            if (closeValue > openValue) {
                 predictionCount += 1;
-                prediction.correct = true;
             }
 
             prediction.met = true;
-            //prediction.positionY = -1;
             prediction.direction = 0;
             prediction.ready = false;
-            prediction.closeValue = closeValue;
+            prediction.openValue = openValue;
 
             correctPredictionCountView.innerText = 
             predictionCount;
+        }
 
-            if (prediction.correct)
-            say("Your prediction was correct!");
-            else
-            say("Your prediction failed.");
+        if (prediction.direction == 1 && 
+            closeValue <= prediction.value) {
+
+            if (openValue > closeValue) {
+                predictionCount += 1;
+            }
+
+            prediction.met = true;
+            prediction.direction = 0;
+            prediction.ready = false;
+            prediction.openValue = openValue;
+
+            correctPredictionCountView.innerText = 
+            predictionCount;
         }
 
         openValue = frequency;
@@ -566,7 +565,7 @@ var drawImage =
     ctx.lineTo(sw, (sh/2)+(sw/gridSize));
     ctx.stroke();
 
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 2;
 
     ctx.beginPath();
     ctx.moveTo((sw/2)-5, 
@@ -574,6 +573,20 @@ var drawImage =
     ctx.lineTo(sw, 
     (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
     ctx.stroke();
+
+    ctx.beginPath();
+    ctx.rect(sw-(sw/4)-80, 
+    (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4))-10, 50, 20);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "15px sans serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(frequencyPath[0].closeValue.toFixed(2), 
+    sw-(sw/4)-55, 
+    (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
 
     if (prediction.positionY != -1) {
         ctx.lineWidth = 1;
@@ -585,14 +598,15 @@ var drawImage =
         ctx.strokeStyle = "#f55";
 
         ctx.beginPath();
-        ctx.moveTo(0, prediction.positionY);
+        ctx.moveTo((sw/2)-25, prediction.positionY);
         ctx.lineTo(sw, prediction.positionY);
         ctx.stroke();
 
         ctx.fillStyle = "#000";
 
         ctx.beginPath();
-        ctx.rect(sw-(sw/4)-25, prediction.positionY-10, 50, 20);
+        ctx.rect(!prediction.met ? sw-(sw/4)-25 : sw-(sw/4)+30,
+        prediction.positionY-10, 50, 20);
         ctx.fill();
         ctx.stroke();
 
@@ -601,22 +615,11 @@ var drawImage =
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(prediction.value.toFixed(2), 
-        sw-(sw/4), prediction.positionY);
+        !prediction.met ? sw-(sw/4) : sw-(sw/4)+55, 
+        prediction.positionY);
 
         ctx.strokeStyle = "#555";
         ctx.fillStyle = "#000";
-
-        ctx.beginPath();
-        ctx.rect(sw-(sw/4)-80, prediction.positionY-10, 50, 20);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#fff";
-        ctx.font = "15px sans serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(prediction.startValue.toFixed(2), 
-        sw-(sw/4)-55, prediction.positionY);
 
         if (prediction.met) {
             ctx.fillStyle = "#000";
@@ -626,7 +629,7 @@ var drawImage =
             ctx.strokeStyle = "#555";
 
             ctx.beginPath();
-            ctx.rect(sw-(sw/4)+30, prediction.positionY-10, 50, 20);
+            ctx.rect(sw-(sw/4)-25, prediction.positionY-10, 50, 20);
             ctx.fill();
             ctx.stroke();
 
@@ -634,42 +637,60 @@ var drawImage =
             ctx.font = "15px sans serif";
              ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(prediction.closeValue.toFixed(2), 
-            sw-(sw/4)+55, prediction.positionY);
+            ctx.fillText(prediction.openValue.toFixed(2), 
+            sw-(sw/4), prediction.positionY);
         }
     }
 
     if (drawingMode == 0)
     for (var n = 0; n < frequencyPath.length; n++) {
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 2;
         ctx.strokeStyle = "#555";
 
         ctx.beginPath();
         ctx.moveTo(
-        (sw/2)-(n*10), 
+        (sw/2)-(n*20), 
         (sh/2)-((frequencyPath[n].highValue-0.5)*((sw/gridSize)*4)));
         ctx.lineTo(
-        (sw/2)-(n*10), 
+        (sw/2)-(n*20), 
         (sh/2)-((frequencyPath[n].lowValue-0.5)*((sw/gridSize)*4)));
         ctx.stroke();
 
-        ctx.lineWidth = 5;
+        ctx.lineWidth = 10;
+
         if (frequencyPath[n].openValue < frequencyPath[n].closeValue)
         ctx.strokeStyle = "#5f5";
         else
         ctx.strokeStyle = "#f55";
 
-        var flipped = 
-        frequencyPath[n].openValue < frequencyPath[n].closeValue;
-
         ctx.beginPath();
         ctx.moveTo(
-        (sw/2)-(n*10),
+        (sw/2)-(n*20),
         (sh/2)-((frequencyPath[n].openValue-0.5)*((sw/gridSize)*4)));
         ctx.lineTo(
-        (sw/2)-(n*10), 
+        (sw/2)-(n*20), 
         (sh/2)-((frequencyPath[n].closeValue-0.5)*((sw/gridSize)*4)));
         ctx.stroke();
+
+        var flipped = 
+        frequencyPath[n].openValue > frequencyPath[n].closeValue;
+
+        var top = !flipped ? 
+        (sh/2)-((frequencyPath[n].closeValue-0.5)*((sw/gridSize)*4)) : 
+        (sh/2)-((frequencyPath[n].openValue-0.5)*((sw/gridSize)*4));
+
+        var height = !flipped ? 
+        (frequencyPath[n].closeValue-
+        frequencyPath[n].openValue)*((sw/gridSize)*4) : 
+        (frequencyPath[n].openValue-
+        frequencyPath[n].closeValue)*((sw/gridSize)*4);
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#000";
+
+        ctx.beginPath();
+        ctx.rect((sw/2)-(n*20)-5, top, 10, height);
+        //ctx.stroke();
     }
 
     if (drawingMode == 1) {
@@ -682,7 +703,7 @@ var drawImage =
         ctx.moveTo(
         (sw/2)-(n*10), 
         (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
-        for (var n = 1; n < frequencyPath.length; n++) {
+        for (var n = 0; n < frequencyPath.length; n++) {
             ctx.lineTo(
             (sw/2)-(n*10), 
             (sh/2)-((frequencyPath[n].closeValue-0.5)*((sw/gridSize)*4)));
