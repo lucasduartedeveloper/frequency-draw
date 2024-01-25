@@ -22,10 +22,11 @@ $thirdpart_script = [
 ];
 
 $script = [
-    0 => "script/mic-helper.js",
-    1 => "script/audio-helper.js",
-    2 => "script/math-helper.js",
-    3 => "script/frequency-draw.js"
+    0 => "script/websocket.js",
+    1 => "script/mic-helper.js",
+    2 => "script/audio-helper.js",
+    3 => "script/math-helper.js",
+    4 => "script/frequency-draw.js"
 ];
 
 $module = [];

@@ -30,6 +30,12 @@ $(document).ready(function() {
         sendText(text);
     };
 
+    if (window.innerWidth > window.innerHeight) {
+        sw = window.innerWidth;
+        sh = window.innerHeight;
+        gridSize = 20;
+    }
+
     tileSize = (sw/7);
 
     pictureView = document.createElement("canvas");
@@ -59,7 +65,7 @@ $(document).ready(function() {
     currentValueView.style.zIndex = "15";
     document.body.appendChild(currentValueView);
 
-    periodLength = 0;
+    periodLength = 1000;
     periodLengthView = document.createElement("span");
     periodLengthView.style.position = "absolute";
     periodLengthView.style.color = "#fff";
@@ -225,6 +231,10 @@ $(document).ready(function() {
         micAvgValue = avgValue;
 
         var frequency = ((1/250)*reachedFreq);
+
+        if (websocketBot.messageRequested)
+        websocketBot.sendUsage(frequency);
+
         updateValue(frequency);
     };
     mic.onclose = function() { 
@@ -354,6 +364,7 @@ $(document).ready(function() {
         if (!exampleDataEnabled) {
             clearInterval(exampleDataInterval);
             frequencyPath = [{
+                timestamp: 0,
                 openValue: 0,
                 highValue: 0,
                 lowValue: 0,
@@ -365,19 +376,135 @@ $(document).ready(function() {
         }
 
         var min = 0;
+        var minArr = [ 0, (1/5), (2/5), (3/5), (4/5)];
         exampleDataInterval = setInterval(function() {
-            var frequency = min + Math.random()*(1/3);
+            var frequency = min + Math.random()*(1/5);
             updateValue(frequency, function() {
-                min = [ 0, (1/3), (2/3) ][Math.floor(Math.random()*3)];
+                min = minArr[Math.floor(Math.random()*5)];
             });
         }, 250);
     }
 
+    lastMessageView = document.createElement("span");
+    lastMessageView.style.position = "absolute";
+    lastMessageView.style.color = "#fff";
+    lastMessageView.innerText = 
+    "Last message: "+
+    moment(websocketBot.lastUpdate)
+    .format("HH:mm:ss.SSS");
+    lastMessageView.style.fontFamily = "Khand";
+    lastMessageView.style.fontSize = "15px";
+    lastMessageView.style.left = (10)+"px";
+    lastMessageView.style.top = (sh-105)+"px";
+    lastMessageView.style.width = (150)+"px";
+    lastMessageView.style.height = (25)+"px";
+    //lastMessageView.style.border = "1px solid white";
+    //lastMessageView.style.borderRadius = "25px";
+    lastMessageView.style.zIndex = "15";
+    document.body.appendChild(lastMessageView);
+
+    periodTimestampView = document.createElement("span");
+    periodTimestampView.style.position = "absolute";
+    periodTimestampView.style.color = "#fff";
+    periodTimestampView.innerText = 
+    "Period start: "+
+    moment(frequencyPath[0].timestamp)
+    .format("HH:mm:ss.SSS");
+    periodTimestampView.style.fontFamily = "Khand";
+    periodTimestampView.style.fontSize = "15px";
+    periodTimestampView.style.left = (10)+"px";
+    periodTimestampView.style.top = (sh-175)+"px";
+    periodTimestampView.style.width = (150)+"px";
+    periodTimestampView.style.height = (25)+"px";
+    //lastMessageView.style.border = "1px solid white";
+    //lastMessageView.style.borderRadius = "25px";
+    periodTimestampView.style.zIndex = "15";
+    document.body.appendChild(periodTimestampView);
+
+    periodOpenValueView = document.createElement("span");
+    periodOpenValueView.style.position = "absolute";
+    periodOpenValueView.style.color = "#fff";
+    periodOpenValueView.innerText = 
+    "Open value: "+frequencyPath[0].openValue.toFixed(2);
+    periodOpenValueView.style.fontFamily = "Khand";
+    periodOpenValueView.style.fontSize = "15px";
+    periodOpenValueView.style.left = (10)+"px";
+    periodOpenValueView.style.top = (sh-140)+"px";
+    periodOpenValueView.style.width = (150)+"px";
+    periodOpenValueView.style.height = (25)+"px";
+    //lastMessageView.style.border = "1px solid white";
+    //lastMessageView.style.borderRadius = "25px";
+    periodOpenValueView.style.zIndex = "15";
+    document.body.appendChild(periodOpenValueView);
+
+    websocketBot.attachMessageHandler();
     loadImages();
 
     drawImage();
     animate();
 });
+
+var websocketBot = {
+    messageRequested: false,
+    lastUpdate: 0,
+    periodTimestamp: 0,
+    sendUsage: function(value) {
+        var obj = {
+            timestamp: new Date().getTime(),
+            frequencyData: frequencyPath[0]
+        };
+        ws.send("PAPER|"+playerId+"|frequency-data|"+
+        JSON.stringify(obj));
+        this.messageRequested = false;
+    },
+    attachMessageHandler: function() {
+        ws.onmessage = function(e) {
+            var msg = e.data.split("|");
+            //console.log(msg[2] + " from " + msg[1]);
+
+            if (msg[0] == "PAPER" &&
+                msg[1] != playerId &&
+                msg[2] == "frequency-data") {
+                var obj = JSON.parse(msg[3]);
+
+                if (obj.timestamp < this.lastUpdate) return;
+                this.lastUpdate = obj.timestamp;
+
+                lastMessageView.innerText = 
+                "Last message: "+
+                moment(this.lastUpdate).format("HH:mm:ss.SSS");
+
+                if (obj.frequencyData.timestamp > 
+                    this.periodTimestamp) {
+                    frequencyPath.push(obj.frequencyData);
+                    this.periodTimestamp = 
+                    obj.frequencyData.timestamp;
+
+                    periodTimestampView.innerText = 
+                    "Period start: "+
+                    moment(this.periodTimestamp)
+                    .format("HH:mm:ss.SSS");
+                }
+                else {
+                    frequencyPath[0].highValue = 
+                    obj.frequencyData.highValue;
+                    frequencyPath[0].lowValue = 
+                    obj.frequencyData.lowValue;
+                    frequencyPath[0].closeValue = 
+                    obj.frequencyData.closeValue;
+                }
+
+                ws.send("PAPER|"+playerId+"|data-missing");
+            }
+            else if (msg[0] == "PAPER" &&
+                msg[1] != playerId &&
+                msg[2] == "data-missing") {
+                this.messageRequested = true;
+            }
+        }.bind(this);
+        ws.send("PAPER|"+playerId+"|data-missing");
+    }
+};
 
 var img_list = [
     "img/line-draw-0.png"
@@ -406,6 +533,7 @@ var loadImages = function(callback) {
 };
 
 frequencyPath = [{
+    timestamp: 0,
     openValue: 0,
     highValue: 0,
     lowValue: 0,
@@ -414,7 +542,6 @@ frequencyPath = [{
     volumeValue: 0
 }];
 
-var lastPeriodTime = 0;
 var openValue = 0;
 var highValue = 0;
 var lowValue = 0;
@@ -426,6 +553,15 @@ var volumeValue = 0;
 var updateValue = function(value, callback) {
     var frequency = value;
     var currentTime = new Date().getTime();
+
+    if (frequencyPath[0].timestamp == 0) {
+        frequencyPath[0].timestamp = currentTime;
+        frequencyPath[0].openValue = frequency;
+    }
+
+    lastMessageView.innerText = 
+    "Server time: "+
+    moment(currentTime).format("HH:mm:ss.SSS");
 
     readingCount += 1;
     volumeValue += micAvgValue;
@@ -444,13 +580,29 @@ var updateValue = function(value, callback) {
     frequencyPath[0].volumeValue = 
     (volumeValue/readingCount);
 
-    if (currentTime - lastPeriodTime > periodLength) {
+    if (currentTime - frequencyPath[0].timestamp >= 
+        periodLength) {
         closeValue = frequency;
 
+        currentValueView.innerText = 
+        closeValue.toFixed(2);
+
+        // clip to last 100 periods
         if (frequencyPath.length > 99)
         frequencyPath.splice(99, (frequencyPath.length-99));
 
+        // reset fixed fields
+        openValue = closeValue;
+        highValue = frequency;
+        lowValue = frequency;
+        closeValue = 0;
+
+        readingCount = 0;
+        volumeValue = 0;
+
+        // start new period
         frequencyPath.splice(0, 0, { 
+            timestamp: currentTime,
             openValue: openValue,
             highValue: highValue,
             lowValue: lowValue,
@@ -458,9 +610,6 @@ var updateValue = function(value, callback) {
             readingCount: readingCount,
             volumeValue: (volumeValue/readingCount)
         });
-
-        currentValueView.innerText = 
-        closeValue.toFixed(2);
 
         if (prediction.direction == -1 && 
             closeValue >= prediction.value) {
@@ -494,15 +643,13 @@ var updateValue = function(value, callback) {
             predictionCount;
         }
 
-        openValue = frequency;
-        highValue = frequency;
-        lowValue = frequency;
-        closeValue = frequency;
+        periodTimestampView.innerText = 
+        "Period start: "+
+        moment(frequencyPath[0].timestamp)
+        .format("HH:mm:ss.SSS");
 
-        readingCount = 0;
-        volumeValue = 0;
-
-        lastPeriodTime = currentTime;
+        periodOpenValueView.innerText = 
+        "Open value: "+frequencyPath[0].openValue.toFixed(2);
 
         if (callback) callback();
     }
@@ -625,6 +772,13 @@ var drawImage =
     ctx.fillText(frequencyPath[0].closeValue.toFixed(2), 
     sw-(sw/4)-55, 
     (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
+
+    if (imagesLoaded)
+    ctx.drawImage(image, 
+    -format.left, 0, format.width, format.height, 
+    (sw)-(sw/4)-25, 
+    prediction.positionY-60, 
+    50, 50);
 
     if (prediction.positionY != -1) {
         ctx.lineWidth = 1;
