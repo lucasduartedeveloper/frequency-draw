@@ -50,6 +50,42 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
+    mapEnabled = false;
+    mapView = document.createElement("div");
+    mapView.style.position = "absolute";
+    mapView.style.display = mapEnabled ? "initial" : "none";
+    mapView.id = "map";
+    mapView.className = "map-box";
+    mapView.style.background = "#fff";
+    mapView.style.left = (0)+"px";
+    mapView.style.top = (0)+"px";
+    mapView.style.width = (sw)+"px";
+    mapView.style.height = (sh)+"px";
+    mapView.style.zIndex = "35";
+    document.body.appendChild(mapView);
+
+    startMap();
+
+    mapToggleView = document.createElement("button");
+    mapToggleView.style.position = "absolute";
+    mapToggleView.style.color = "#000";
+    mapToggleView.innerText = "MAP";
+    mapToggleView.style.fontFamily = "Khand";
+    mapToggleView.style.fontSize = "20px";
+    mapToggleView.style.left = (sw-60)+"px";
+    mapToggleView.style.top = (45)+"px";
+    mapToggleView.style.width = (50)+"px";
+    mapToggleView.style.height = (50)+"px";
+    mapToggleView.style.zIndex = "35";
+    document.body.appendChild(mapToggleView);
+
+    mapToggleView.onclick = function() {
+        mapEnabled = !mapEnabled;
+
+        mapView.style.display = mapEnabled ? "initial" : "none";
+        map.invalidateSize();
+    };
+
     currentValueView = document.createElement("span");
     currentValueView.style.position = "absolute";
     currentValueView.style.color = "#fff";
@@ -122,6 +158,27 @@ $(document).ready(function() {
     correctPredictionIconView.style.height = (25)+"px";
     correctPredictionIconView.style.zIndex = "15";
     document.body.appendChild(correctPredictionIconView);
+
+   colorPalletes = [ 
+       [ "#5f5", "#f55" ],
+       [ "orange", "purple" ],
+       [ "#fff", "#999" ]
+    ];
+    colorPalleteNo = 0;
+
+    correctPredictionIconView.onclick = function() {
+        var input = 
+        prompt("Color pallete: \n"+
+        "0 - green/red \n"+
+        "1 - orange/purple \n"+
+        "2 - white/gray", 
+        colorPalleteNo);
+
+        var value = parseInt(input);
+        if (value < 0 || value > (colorPalletes.length-1)) return;
+
+        colorPalleteNo = value;
+    };
 
     var startX = 0;
     var startY = 0;
@@ -445,9 +502,67 @@ $(document).ready(function() {
     websocketBot.attachMessageHandler();
     loadImages();
 
+    locationInterval = setInterval(function() {
+        navigator.geolocation.getCurrentPosition(
+        success, error, options);
+    }, 1000);
+
     drawImage();
     animate();
 });
+
+var map;
+var startMap = function() {
+    // Create the map
+    map = L.map("map").setView([-23.37062642645644,  -51.15587314318577], 18);
+
+    var tileLayer = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+        attribution: "",
+        maxZoom: 20,
+        id: "mapbox/streets-v11",
+        tileSize: 512,
+        zoomOffset: -1,
+        accessToken: "pk.eyJ1IjoibHVjYXNkdWFydGUxOTkyIiwiYSI6ImNreGZieWE3ODFwNTQyb3N0cW4zNHMxMG8ifQ.HXS54wWrm6wPz-29LVVRbg"
+    }).addTo(map);
+
+    $(".leaflet-control-container").hide();
+};
+
+var markerArr = [];
+var putMarker = function(playerId, lat, lon, isServer=false) {
+    var search = markerArr.filter((o) => {
+        return o.playerId == playerId;
+    });
+
+    var rnd = Math.random();
+    var markerIcon= L.icon({
+        iconUrl: isServer ? 
+        "img/marker.png?rnd="+rnd : 
+        "img/marker-b.png?rnd="+rnd,
+        /*shadowUrl: '/img/icon-shadow.png',*/
+        iconSize: [ 5, 5 ], // size of the icon
+        shadowSize: [ 5, 5 ], // size of the shadow
+        iconAnchor: [ 2.5, 2.5 ], // point of the icon which will correspond to marker's location
+        shadowAnchor: [ 2.5, 2.5 ], // the same for the shadow
+        popupAnchor: [ 2.5, 2.5 ] // point from which the popup should open relative to the iconAnchor
+    });
+
+    if (search.length > 0) {
+        search[0].marker.setIcon(markerIcon);
+        search[0].marker.setLatLng([ lat, lon ]);
+        return;
+    };
+
+    var marker = 
+    L.marker([ lat, lon ], { icon: markerIcon }).addTo(map);
+
+    var obj = {
+        playerId: playerId,
+        isServer: isServer,
+        marker: marker
+    };
+    markerArr.push(obj);
+};
 
 var websocketBot = {
     messageRequested: false,
@@ -478,32 +593,10 @@ var websocketBot = {
 
                 lastMessageView.innerText = 
                 "Last message: "+
-                moment(this.lastUpdate).format("HH:mm:ss.SSS");
+                moment(this.lastUpdate).format("HH:mm:ss.SSS")+
+                " \n"+(new Date().getTime()-this.lastUpdate)+" ms"
 
-                if (obj.frequencyData.timestamp > 
-                    this.periodTimestamp) {
-                    frequencyPath.push(obj.frequencyData);
-                    this.periodTimestamp = 
-                    obj.frequencyData.timestamp;
-
-                    periodTimestampView.innerText = 
-                    "Period start: "+
-                    moment(this.periodTimestamp)
-                    .format("HH:mm:ss.SSS");
-                }
-                else {
-                    frequencyPath[0].highValue = 
-                    obj.frequencyData.highValue;
-                    frequencyPath[0].lowValue = 
-                    obj.frequencyData.lowValue;
-                    frequencyPath[0].closeValue = 
-                    obj.frequencyData.closeValue;
-
-                    frequencyPath[0].readingCount = 
-                    obj.frequencyData.readingCount;
-                    frequencyPath[0].volumeValue = 
-                    obj.frequencyData.volumeValue;
-                }
+                frequencyPath = obj.frequencyPath;
 
                 ws.send("PAPER|"+playerId+"|data-missing");
             }
@@ -687,6 +780,8 @@ var gridSize = 10;
 
 var drawImage = 
     function(angle=0, color="#000", gridColor="#333") {
+    var currentColorPallete = colorPalletes[colorPalleteNo];
+
     var ctx = pictureView.getContext("2d");
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, sw, sh);
@@ -796,9 +891,9 @@ var drawImage =
         ctx.strokeStyle = "#555";
 
         if (prediction.direction == -1)
-        ctx.strokeStyle = "#5f5";
+        ctx.strokeStyle = currentColorPallete[0];
         if (prediction.direction == 1)
-        ctx.strokeStyle = "#f55";
+        ctx.strokeStyle = currentColorPallete[1];
 
         ctx.beginPath();
         ctx.moveTo(sw-(sw/4), prediction.positionY);
@@ -869,9 +964,9 @@ var drawImage =
         ctx.lineWidth = 10;
 
         if (frequencyPath[n].openValue < frequencyPath[n].closeValue)
-        ctx.strokeStyle = "#5f5";
+        ctx.strokeStyle = currentColorPallete[0];
         else
-        ctx.strokeStyle = "#f55";
+        ctx.strokeStyle = currentColorPallete[1];
 
         ctx.beginPath();
         ctx.moveTo(
