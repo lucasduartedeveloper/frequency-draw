@@ -326,14 +326,52 @@ $(document).ready(function() {
         prediction.direction = 1;
     };
 
-    /*
-    var min = 0;
-    setInterval(function() {
-        var frequency = min + Math.random()*(1/3);
-        updateValue(frequency, function() {
-            min = [ 0, (1/3), (2/3) ][Math.floor(Math.random()*3)];
-        });
-    }, 250);*/
+    exampleDataEnabled = false;
+    buttonExampleDataView = document.createElement("button");
+    buttonExampleDataView.style.position = "absolute";
+    buttonExampleDataView.style.color = "#000";
+    buttonExampleDataView.innerText = 
+    exampleDataEnabled ? "test data: yes" : 
+    "test data: no";
+    buttonExampleDataView.style.fontFamily = "Khand";
+    buttonExampleDataView.style.fontSize = "15px";
+    buttonExampleDataView.style.left = (230)+"px";
+    buttonExampleDataView.style.top = (sh-35)+"px";
+    buttonExampleDataView.style.width = (100)+"px";
+    buttonExampleDataView.style.height = (25)+"px";
+    buttonExampleDataView.style.border = "1px solid white";
+    buttonExampleDataView.style.borderRadius = "25px";
+    buttonExampleDataView.style.zIndex = "15";
+    document.body.appendChild(buttonExampleDataView);
+
+    var exampleDataInterval = 0;
+    buttonExampleDataView.onclick = function() {
+        exampleDataEnabled = !exampleDataEnabled;
+        buttonExampleDataView.innerText = 
+        exampleDataEnabled ? "test data: yes" : 
+        "test data: no";
+
+        if (!exampleDataEnabled) {
+            clearInterval(exampleDataInterval);
+            frequencyPath = [{
+                openValue: 0,
+                highValue: 0,
+                lowValue: 0,
+                closeValue: 0,
+                readingCount: 0,
+                volumeValue: 0
+            }];
+            return;
+        }
+
+        var min = 0;
+        exampleDataInterval = setInterval(function() {
+            var frequency = min + Math.random()*(1/3);
+            updateValue(frequency, function() {
+                min = [ 0, (1/3), (2/3) ][Math.floor(Math.random()*3)];
+            });
+        }, 250);
+    }
 
     loadImages();
 
@@ -598,7 +636,14 @@ var drawImage =
         ctx.strokeStyle = "#f55";
 
         ctx.beginPath();
-        ctx.moveTo((sw/2)-25, prediction.positionY);
+        ctx.moveTo(sw-(sw/4), prediction.positionY);
+        ctx.lineTo(sw-(sw/4), 
+        (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
+        if (!prediction.met)
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(sw-(sw/4), prediction.positionY);
         ctx.lineTo(sw, prediction.positionY);
         ctx.stroke();
 
@@ -694,21 +739,54 @@ var drawImage =
     }
 
     if (drawingMode == 1) {
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
         ctx.strokeStyle = "#fff";
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
 
         ctx.beginPath();
         ctx.moveTo(
-        (sw/2)-(n*10), 
+        (sw/2), 
         (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
-        for (var n = 0; n < frequencyPath.length; n++) {
+        for (var n = 1; n < frequencyPath.length; n++) {
             ctx.lineTo(
             (sw/2)-(n*10), 
             (sh/2)-((frequencyPath[n].closeValue-0.5)*((sw/gridSize)*4)));
         }
         ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(
+        (sw/2), 
+        (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)), 2.5, 0, (Math.PI*2));
+        ctx.fill();
+
+        // Create gradient
+        var grd = 
+        ctx.createLinearGradient((sw/2), (sh/2)-((sw/gridSize)*2), 
+        (sw/2), (sh/2)+((sw/gridSize)*2));
+
+        grd.addColorStop(0, "#fff");
+        grd.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+        // Fill with gradient
+        ctx.fillStyle = grd;
+
+        ctx.beginPath();
+        ctx.moveTo(
+        (sw/2)-((frequencyPath.length-1)*10), 
+        (sh/2)+((sw/gridSize)*2));
+        ctx.lineTo((sw/2), (sh/2)+((sw/gridSize)*2));
+        ctx.lineTo(
+        (sw/2), 
+        (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
+        for (var n = 1; n < frequencyPath.length; n++) {
+            ctx.lineTo(
+            (sw/2)-(n*10), 
+            (sh/2)-((frequencyPath[n].closeValue-0.5)*((sw/gridSize)*4)));
+        }
+        ctx.closePath();
+        ctx.fill();
     }
 
     ctx.restore();
