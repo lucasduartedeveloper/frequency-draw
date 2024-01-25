@@ -548,6 +548,7 @@ var putMarker = function(playerId, lat, lon, isServer=false) {
     });
 
     if (search.length > 0) {
+        search[0].isServer = isServer;
         search[0].marker.setIcon(markerIcon);
         search[0].marker.setLatLng([ lat, lon ]);
         return;
@@ -561,7 +562,40 @@ var putMarker = function(playerId, lat, lon, isServer=false) {
         isServer: isServer,
         marker: marker
     };
+
     markerArr.push(obj);
+    //drawCircle();
+};
+
+var circle;
+var drawCircle = function() {
+    var server = markerArr.filter((o) => {
+        return o.isServer;
+    });
+    var clients = markerArr.filter((o) => {
+        return o.isServer;
+    });
+
+    if (server.length == 0 || clients.length == 0) return;
+
+    var pos0 = server[0].marker.getLatLng();
+
+    var radius = 0;
+    for (var n = 0; n < clients.length; n++) {
+        var pos1 = clients[n].marker.getLatLng();
+
+        var co = Math.abs(pos1.lat-pos0.lat);
+        var ca = Math.abs(pos1.lng-pos0.lng);
+        var hyp = Math.sqrt(
+        Math.pow(co, 2)+
+        Math.pow(ca, 2));
+
+        if (hyp > radius)
+        radius = hyp;
+    }
+
+    if (circle) map.removeControl(circle);
+    circle = L.circle([ pos0.lat, pos0.lng ], radius).addTo(map);
 };
 
 var websocketBot = {
@@ -571,6 +605,7 @@ var websocketBot = {
     sendUsage: function(value) {
         var obj = {
             timestamp: new Date().getTime(),
+            coordinates: { lat: latitude, lon: longitude },
             frequencyData: frequencyPath[0],
             frequencyPath: frequencyPath
         };
@@ -591,6 +626,11 @@ var websocketBot = {
                 if (obj.timestamp < this.lastUpdate) return;
                 this.lastUpdate = obj.timestamp;
 
+                var from = parseInt(msg[1]);
+                putMarker(from, 
+                obj.coordinates.lat, 
+                obj.coordinates.lon, true);
+
                 lastMessageView.innerText = 
                 "Last message: "+
                 moment(this.lastUpdate).format("HH:mm:ss.SSS")+
@@ -598,15 +638,21 @@ var websocketBot = {
 
                 frequencyPath = obj.frequencyPath;
 
-                ws.send("PAPER|"+playerId+"|data-missing");
+                ws.send("PAPER|"+playerId+"|data-missing|"+
+                JSON.stringify({ lat: latitude, lon: longitude }));
             }
             else if (msg[0] == "PAPER" &&
                 msg[1] != playerId &&
                 msg[2] == "data-missing") {
                 this.messageRequested = true;
+
+                var from = parseInt(msg[1]);
+                var obj = JSON.parse(msg[3]);
+                putMarker(from, obj.lat, obj.lon);
             }
         }.bind(this);
-        ws.send("PAPER|"+playerId+"|data-missing");
+        ws.send("PAPER|"+playerId+"|data-missing|"+
+        JSON.stringify({ lat: latitude, lon: longitude }));
     }
 };
 
