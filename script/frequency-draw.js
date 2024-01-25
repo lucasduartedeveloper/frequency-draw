@@ -65,7 +65,7 @@ $(document).ready(function() {
     currentValueView.style.zIndex = "15";
     document.body.appendChild(currentValueView);
 
-    periodLength = 1000;
+    periodLength = 15000;
     periodLengthView = document.createElement("span");
     periodLengthView.style.position = "absolute";
     periodLengthView.style.color = "#fff";
@@ -421,6 +421,11 @@ $(document).ready(function() {
     periodTimestampView.style.zIndex = "15";
     document.body.appendChild(periodTimestampView);
 
+    periodTimestampView.onclick = function() {
+        console.clear();
+        console.log(frequencyPath[0]);
+    };
+
     periodOpenValueView = document.createElement("span");
     periodOpenValueView.style.position = "absolute";
     periodOpenValueView.style.color = "#fff";
@@ -451,7 +456,8 @@ var websocketBot = {
     sendUsage: function(value) {
         var obj = {
             timestamp: new Date().getTime(),
-            frequencyData: frequencyPath[0]
+            frequencyData: frequencyPath[0],
+            frequencyPath: frequencyPath
         };
         ws.send("PAPER|"+playerId+"|frequency-data|"+
         JSON.stringify(obj));
@@ -492,6 +498,11 @@ var websocketBot = {
                     obj.frequencyData.lowValue;
                     frequencyPath[0].closeValue = 
                     obj.frequencyData.closeValue;
+
+                    frequencyPath[0].readingCount = 
+                    obj.frequencyData.readingCount;
+                    frequencyPath[0].volumeValue = 
+                    obj.frequencyData.volumeValue;
                 }
 
                 ws.send("PAPER|"+playerId+"|data-missing");
