@@ -12,7 +12,7 @@ var backgroundColor = "rgba(50,50,65,1)";
 var buttonColor = "rgba(75,75,90,1)";
 
 var audioStream = 
-new Audio("https://cast2.hoost.com.br:8801/stream");
+new Audio("audio/music/stream-0.wav");
 
 // Botão de gravação
 $(document).ready(function() {
@@ -104,7 +104,7 @@ $(document).ready(function() {
     currentValueView.style.zIndex = "15";
     document.body.appendChild(currentValueView);
 
-    periodLength = 15000;
+    periodLength = 1000;
     periodLengthView = document.createElement("span");
     periodLengthView.style.position = "absolute";
     periodLengthView.style.color = "#fff";
@@ -305,14 +305,13 @@ $(document).ready(function() {
     media.onupdate = function(freqArray, reachedFreq, avgValue) {
         micAvgValue = avgValue;
 
-        var frequency = ((1/250)*reachedFreq);
+        var frequency = ((1/250)*(reachedFreq/2));
 
         if (websocketBot.messageRequested)
         websocketBot.sendUsage(frequency);
 
         updateValue(frequency);
     };
-    
 
     buttonMicView = document.createElement("button");
     buttonMicView.style.position = "absolute";
@@ -769,7 +768,7 @@ var updateValue = function(value, callback) {
         openValue = closeValue;
         highValue = frequency;
         lowValue = frequency;
-        closeValue = 0;
+        closeValue = frequency;
 
         readingCount = 0;
         volumeValue = 0;
@@ -1046,26 +1045,6 @@ var drawImage =
         (sw/2)-(n*20), 
         (sh/2)-((frequencyPath[n].closeValue-0.5)*((sw/gridSize)*4)));
         ctx.stroke();
-
-        var flipped = 
-        frequencyPath[n].openValue > frequencyPath[n].closeValue;
-
-        var top = !flipped ? 
-        (sh/2)-((frequencyPath[n].closeValue-0.5)*((sw/gridSize)*4)) : 
-        (sh/2)-((frequencyPath[n].openValue-0.5)*((sw/gridSize)*4));
-
-        var height = !flipped ? 
-        (frequencyPath[n].closeValue-
-        frequencyPath[n].openValue)*((sw/gridSize)*4) : 
-        (frequencyPath[n].openValue-
-        frequencyPath[n].closeValue)*((sw/gridSize)*4);
-
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "#000";
-
-        ctx.beginPath();
-        ctx.rect((sw/2)-(n*20)-5, top, 10, height);
-        //ctx.stroke();
     }
 
     if (drawingMode == 1) {
@@ -1120,17 +1099,32 @@ var drawImage =
     }
 
     if (drawingMode == 2) {
-        ctx.fillStyle = "purple";
+        var offset = (Math.PI/180);
+
+        ctx.lineWidth = (sw/gridSize);
+ 
+        if (frequencyPath[0].openValue < frequencyPath[0].closeValue)
+        ctx.strokeStyle = "#0b0";
+        else
+        ctx.strokeStyle = "#b00";
+
+        var startAngle = 0;
+
+        var endAngle = !flipped ? 
+        frequencyPath[0].openValue * (Math.PI*2) : 
+        frequencyPath[0].closeValue * (Math.PI*2);
 
         ctx.beginPath();
         ctx.arc(
-        (sw/4), (sh/2), ((sw/gridSize)*2), 0, (Math.PI*2));
-        ctx.fill();
+        (sw/4), (sh/2), ((sw/gridSize)*1.5), 
+        startAngle-(Math.PI/2)+offset, 
+        endAngle-(Math.PI/2)-offset);
+        ctx.stroke();
 
         if (frequencyPath[0].openValue < frequencyPath[0].closeValue)
-        ctx.fillStyle = currentColorPallete[0];
+        ctx.strokeStyle = currentColorPallete[0];
         else
-        ctx.fillStyle = currentColorPallete[1];
+        ctx.strokeStyle = currentColorPallete[1];
 
         var flipped = 
         frequencyPath[0].openValue > frequencyPath[0].closeValue;
@@ -1144,26 +1138,26 @@ var drawImage =
         frequencyPath[0].openValue * (Math.PI*2);
 
         ctx.beginPath();
-        ctx.moveTo((sw/4), (sh/2));
         ctx.arc(
-        (sw/4), (sh/2), ((sw/gridSize)*2), 
-        startAngle-(Math.PI/2), endAngle-(Math.PI/2));
-        ctx.fill();
+        (sw/4), (sh/2), ((sw/gridSize)*1.5), 
+        startAngle-(Math.PI/2)+offset, 
+        endAngle-(Math.PI/2)-offset);
+        ctx.stroke();
 
-        ctx.fillStyle = "orange";
+        ctx.strokeStyle = "#fff";
 
-        var startAngle = 0;
+        var startAngle = !flipped ? 
+        frequencyPath[0].closeValue * (Math.PI*2) : 
+        frequencyPath[0].openValue * (Math.PI*2);
 
-        var endAngle = !flipped ? 
-        frequencyPath[0].openValue * (Math.PI*2) : 
-        frequencyPath[0].closeValue * (Math.PI*2);
+        var endAngle = (Math.PI * 2);
 
         ctx.beginPath();
-        ctx.moveTo((sw/4), (sh/2));
         ctx.arc(
-        (sw/4), (sh/2), ((sw/gridSize)*2), 
-        startAngle-(Math.PI/2), endAngle-(Math.PI/2));
-        ctx.fill();
+        (sw/4), (sh/2), ((sw/gridSize)*1.5), 
+        startAngle-(Math.PI/2)+offset, 
+        endAngle-(Math.PI/2)-offset);
+        ctx.stroke();
     }
 
     ctx.restore();
