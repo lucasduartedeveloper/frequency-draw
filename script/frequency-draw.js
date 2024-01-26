@@ -11,6 +11,9 @@ var canvasBackgroundColor = "rgba(255,255,255,1)";
 var backgroundColor = "rgba(50,50,65,1)";
 var buttonColor = "rgba(75,75,90,1)";
 
+var audioStream = 
+new Audio("https://cast2.hoost.com.br:8801/stream");
+
 // Botão de gravação
 $(document).ready(function() {
     $("html, body").css("overscroll-behavior", "none");
@@ -298,6 +301,19 @@ $(document).ready(function() {
         console.log("mic closed");
     };
 
+    media = new MediaAnalyser(audioStream, false, 1);
+    media.onupdate = function(freqArray, reachedFreq, avgValue) {
+        micAvgValue = avgValue;
+
+        var frequency = ((1/250)*reachedFreq);
+
+        if (websocketBot.messageRequested)
+        websocketBot.sendUsage(frequency);
+
+        updateValue(frequency);
+    };
+    
+
     buttonMicView = document.createElement("button");
     buttonMicView.style.position = "absolute";
     buttonMicView.style.color = "#000";
@@ -314,6 +330,13 @@ $(document).ready(function() {
     document.body.appendChild(buttonMicView);
 
     buttonMicView.onclick = function() {
+        if (!navigator.mediaDevices && audioStream.paused) {
+            audioStream.play();
+            media.start();
+            return;
+        }
+        else if (!navigator.mediaDevices) return;
+
         if (mic.closed) {
             mic.open(false, 1);
             buttonMicView.innerText = "mic: on";

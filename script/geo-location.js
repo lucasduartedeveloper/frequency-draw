@@ -13,6 +13,8 @@ var logLocation = function(pos) {
     locationName(crd.latitude, crd.longitude);
 };
 
+var wire;
+var positionArr = [];
 function success(pos) {
     var crd = pos.coords;
 
@@ -25,6 +27,21 @@ function success(pos) {
         crd.latitude, 
         crd.longitude
     ], map.zoom);
+
+    positionArr.push(
+    new L.LatLng(crd.latitude, crd.longitude));
+
+    if (wire) map.removeControl(wire);
+
+    wire = new L.Polyline(positionArr, {
+         color: "#595",
+         weight: 2,
+         opacity: 0.5,
+         smoothFactor: 1,
+         dashArray: "3",
+         dashOffset: "0"
+    });
+    wire.addTo(map);
 
     putMarker(playerId, crd.latitude, crd.longitude, !mic.closed);
 }
