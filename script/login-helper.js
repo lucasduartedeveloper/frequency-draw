@@ -45,21 +45,43 @@ var createLogin = function() {
     var moveX = 0;
     var moveY = 0;
 
-    loginContainerView.ontouchstart = function(e) {
-        startX = e.touches[0].clientX - ((sw/2)-(size/2));
-        startY = e.touches[0].clientY - ((sh/2)-(size/2));
+    var loginContainerView_touchstart = function(e) {
+        if (e.touches) {
+            startX = e.touches[0].clientX - ((sw/2)-(size/2));
+            startY = e.touches[0].clientY - ((sh/2)-(size/2));
+        }
+        else {
+            startX = e.clientX - ((sw/2)-(size/2));
+            startY = e.clientY - ((sh/2)-(size/2));
+        }
 
         updateKeyPosition(startX, startY);
         websocketBot.sendKey(startX, startY);
     };
 
-    loginContainerView.ontouchmove = function(e) {
-        moveX = e.touches[0].clientX - ((sw/2)-(size/2));
-        moveY = e.touches[0].clientY - ((sh/2)-(size/2));
+    var loginContainerView_touchmove = function(e) {
+        if (e.touches) {
+            moveX = e.touches[0].clientX - ((sw/2)-(size/2));
+            moveY = e.touches[0].clientY - ((sh/2)-(size/2));
+        }
+        else {
+            moveX = e.clientX - ((sw/2)-(size/2));
+            moveY = e.clientY - ((sh/2)-(size/2));
+        }
 
         updateKeyPosition(moveX, moveY);
         websocketBot.sendKey(moveX, moveY);
     };
+
+    loginContainerView.ontouchstart = 
+    loginContainerView_touchstart;
+    loginContainerView.ontouchmove = 
+    loginContainerView_touchmove;
+
+    loginContainerView.onmousedown = 
+    loginContainerView_touchstart;
+    loginContainerView.onmousemove = 
+    loginContainerView_touchmove;
 
     var keyPosX = 
     10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
