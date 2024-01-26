@@ -163,9 +163,9 @@ $(document).ready(function() {
     document.body.appendChild(correctPredictionIconView);
 
    colorPalletes = [ 
-       [ "#5f5", "#f55" ],
-       [ "orange", "purple" ],
-       [ "#fff", "#999" ]
+       [ "#5f5", "#f55", "#0b0", "#b00", "#fff" ],
+       [ "#fc9d03", "#ac05ff", "#f05d02", "#620491", "#fff" ],
+       [ "#ddd", "#999", "#fff", "#ddd", "#000" ]
     ];
     colorPalleteNo = 0;
 
@@ -1130,9 +1130,9 @@ var drawImage =
         ctx.lineWidth = (sw/gridSize);
  
         if (frequencyPath[0].openValue < frequencyPath[0].closeValue)
-        ctx.strokeStyle = "#0b0";
+        ctx.strokeStyle = currentColorPallete[2];
         else
-        ctx.strokeStyle = "#b00";
+        ctx.strokeStyle = currentColorPallete[3];
 
         var startAngle = 0;
         var angle0 = startAngle;
@@ -1169,7 +1169,7 @@ var drawImage =
         endAngle-(Math.PI/2)-offset);
         ctx.stroke();
 
-        ctx.strokeStyle = "#fff";
+        ctx.strokeStyle = currentColorPallete[4];
 
         var startAngle = !flipped ? 
         frequencyPath[0].closeValue * (Math.PI*2) : 
