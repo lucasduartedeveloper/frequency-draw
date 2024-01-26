@@ -647,23 +647,39 @@ var websocketBot = {
                 msg[2] == "frequency-data") {
                 var obj = JSON.parse(msg[3]);
 
+                var currentTime = new Date().getTime();
+
                 if (obj.timestamp < this.lastUpdate) return;
-                this.lastUpdate = obj.timestamp;
 
                 var from = parseInt(msg[1]);
                 putMarker(from, 
                 obj.coordinates.lat, 
                 obj.coordinates.lon, true);
 
-                lastMessageView.innerText = 
-                "Last message: "+
-                moment(this.lastUpdate).format("HH:mm:ss.SSS")+
-                " \n"+(new Date().getTime()-this.lastUpdate)+" ms"
-
                 frequencyPath = obj.frequencyPath;
+
+                periodTimestampView.innerText = 
+                "Period start: "+
+                moment(frequencyPath[0].timestamp)
+                .format("HH:mm:ss.SSS");
+
+                periodOpenValueView.innerText = 
+                "Open value: "+frequencyPath[0].openValue.toFixed(2);
 
                 ws.send("PAPER|"+playerId+"|data-missing|"+
                 JSON.stringify({ lat: latitude, lon: longitude }));
+
+                lastMessageView.innerText = 
+                "Last message: "+
+                moment(this.lastUpdate).format("HH:mm:ss.SSS")+
+                " \n"+(currentTime-this.lastUpdate)+" ms";
+
+                if (frequencyPath.length > 1)
+                currentValueView.innerText = 
+                frequencyPath[1].closeValue.toFixed(2);
+
+                this.lastUpdate = currentTime;
+                //obj.timestamp;
             }
             else if (msg[0] == "PAPER" &&
                 msg[1] != playerId &&
