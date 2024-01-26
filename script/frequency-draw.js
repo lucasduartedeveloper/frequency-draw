@@ -531,6 +531,8 @@ $(document).ready(function() {
         success, error, options);
     }, 1000);
 
+    showLogin();
+
     drawImage();
     animate();
 });
