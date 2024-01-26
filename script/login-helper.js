@@ -132,15 +132,15 @@ var showLogin = function() {
     keyPlaced = false;
     var size = sw < sh ? (sw/2) : (sh/2);
 
-    var keyPosX = 
+    lockPosX = 
     10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
-    var keyPosY = 
+    lockPosY = 
     10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
 
-    keyPositionView.style.left = 
-    (keyPosX-(((size-20)/3)/2))+"px";
-    keyPositionView.style.top = 
-    (keyPosY-(((size-20)/3)/2))+"px";
+    lockPositionView.style.left = 
+    (lockPosX-(((size-20)/3)/2))+"px";
+    lockPositionView.style.top = 
+    (lockPosY-(((size-20)/3)/2))+"px";
 };
 
 var hideLogin = function() {
