@@ -1,6 +1,7 @@
-var showLogin = function() {
+var createLogin = function() {
     loginBackgroundView = document.createElement("div");
     loginBackgroundView.style.position = "absolute";
+    loginBackgroundView.style.display = "none";
     loginBackgroundView.style.background = "#000";
     loginBackgroundView.width = (sw);
     loginBackgroundView.height = (sh); 
@@ -15,6 +16,7 @@ var showLogin = function() {
 
     titleView = document.createElement("span");
     titleView.style.position = "absolute";
+    titleView.style.display = "none";
     titleView.style.color = "#fff";
     titleView.innerText = "";
     titleView.style.textAlign = "center";
@@ -27,38 +29,9 @@ var showLogin = function() {
     titleView.style.zIndex = "50";
     document.body.appendChild(titleView);
 
-    var alphabet = 
-    ("ABCDEFGHIJKLMNOPQRSTUVWXYZ").split("");
-
-    var resumedAlphabet = "";
-    for (var n = 0; n < 12; n++) {
-        var rnd = Math.floor(Math.random()*alphabet.length);
-        resumedAlphabet += alphabet.splice(rnd, 1);
-    }
-
-    var password = "";
-    for (var n = 0; n < 4; n++) {
-        var rnd = 
-        Math.floor(Math.random()*resumedAlphabet.length);
-        password += resumedAlphabet[rnd];
-    }
-
-    passwordView = document.createElement("span");
-    passwordView.style.position = "absolute";
-    passwordView.style.color = "#fff";
-    passwordView.innerText = password;
-    passwordView.style.textAlign = "center";
-    passwordView.style.fontFamily = "Khand";
-    passwordView.style.fontSize = "20px";
-    passwordView.style.left = ((sw/2)-50)+"px";
-    passwordView.style.top = ((sh/2)-(size/2)-35)+"px";
-    passwordView.style.width = (100)+"px";
-    passwordView.style.height = (25)+"px";
-    passwordView.style.zIndex = "50";
-    document.body.appendChild(passwordView);
-
     loginContainerView = document.createElement("div");
     loginContainerView.style.position = "absolute";
+    loginContainerView.style.display = "none";
     loginContainerView.style.background = "#fff";
     loginContainerView.style.left = ((sw/2)-(size/2))+"px";
     loginContainerView.style.top = ((sh/2)-(size/2))+"px";
@@ -67,39 +40,84 @@ var showLogin = function() {
     loginContainerView.style.zIndex = "50";
     document.body.appendChild(loginContainerView);
 
-    var buttonArr = [];
-    for (var n = 0; n < 12; n++) {
-        var x = (n%3);
-        var y = Math.floor(n/3);
-        var buttonView = document.createElement("button");
-        buttonView.style.position = "absolute";
-        buttonView.style.background = "#fff";
-        buttonView.style.color = "#000";
-        buttonView.innerText = resumedAlphabet[n];
-        buttonView.style.fontWeight = 900;
-        buttonView.style.fontFamily = "Khand";
-        buttonView.style.fontSize = "15px";
-        buttonView.style.left = 10+(x*((size-20)/3))+"px";
-        buttonView.style.top = 10+(y*((size-20)/4))+"px";
-        buttonView.style.width = ((size-20)/3)+"px";
-        buttonView.style.height = ((size-20)/4)+"px";
-        buttonView.style.border = "1px solid #000";
-        //buttonView.style.borderRadius = "25px";
-        buttonView.style.zIndex = "15";
-        loginContainerView.appendChild(buttonView);
+    var keyPosX = 
+    10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
+    var keyPosY = 
+    10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
 
-        buttonView.no = n;
-        buttonView.onclick = function() {
-            password = 
-            password.replace(resumedAlphabet[this.no], "");
-            passwordView.innerText = password;
+    keyPositionView = document.createElement("div");
+    keyPositionView.style.position = "absolute";
+    keyPositionView.style.display = "none";
+    keyPositionView.style.background = "#f55";
+    keyPositionView.style.left = 
+    (keyPosX-(((size-20)/3)/2))+"px";
+    keyPositionView.style.top = 
+    (keyPosY-(((size-20)/3)/2))+"px";
+    keyPositionView.style.width = (size/3)+"px";
+    keyPositionView.style.height = (size/3)+"px";
+    //lockPositionView.style.border = "1px solid #000";
+    keyPositionView.style.zIndex = "50";
+    loginContainerView.appendChild(keyPositionView);
 
-            if (password.length > 0) return;
+    lockPosX = 
+    10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
+    lockPosY = 
+    10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
 
-            loginBackgroundView.style.display = "none";
-            titleView.style.display = "none";
-            passwordView.style.display = "none";
-            loginContainerView.style.display = "none";
-        };
+    lockPositionView = document.createElement("div");
+    lockPositionView.style.position = "absolute";
+    lockPositionView.style.display = "none";
+    //lockPositionView.style.background = "#fff";
+    lockPositionView.style.left = 
+    (lockPosX-(((size-20)/3)/2))+"px";
+    lockPositionView.style.top = 
+    (lockPosY-(((size-20)/3)/2))+"px";
+    lockPositionView.style.width = (size/3)+"px";
+    lockPositionView.style.height = (size/3)+"px";
+    lockPositionView.style.border = "2px solid #000";
+    lockPositionView.style.zIndex = "50";
+    loginContainerView.appendChild(lockPositionView);
+};
+
+var showLogin = function() {
+    loginBackgroundView.style.display = "initial";
+    titleView.style.display = "initial";
+    loginContainerView.style.display = "initial";
+    keyPositionView.style.display = "initial";
+    lockPositionView.style.display = "initial";
+};
+
+var hideLogin = function() {
+    loginBackgroundView.style.display = "none";
+    titleView.style.display = "none";
+    loginContainerView.style.display = "none";
+    keyPositionView.style.display = "none";
+    lockPositionView.style.display = "none";
+};
+
+var updateKeyPosition = function(x, y) {
+    var size = sw < sh ? (sw/2) : (sh/2);
+
+    keyPositionView.style.left = 
+    (x-(((size-20)/3)/2))+"px";
+    keyPositionView.style.top = 
+    (y-(((size-20)/3)/2))+"px";
+
+    var co = Math.abs(x-lockPosX);
+    var ca = Math.abs(y-lockPosY);
+    var hyp = Math.sqrt(
+    Math.pow(co, 2)+
+    Math.pow(ca, 2));
+
+    var interpretationTimeout = 0;
+    if (hyp < 5) {
+        keyPositionView.style.background = "#5f5";
+        interpretationTimeout = setTimeout(function() {
+            hideLogin();
+        }, 1000);
+    }
+    else {
+        keyPositionView.style.background = "#f55";
+        clearTimeout(interpretationTimeout);
     }
 };

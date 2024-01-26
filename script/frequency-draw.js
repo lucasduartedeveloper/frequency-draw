@@ -532,6 +532,21 @@ $(document).ready(function() {
         success, error, options);
     }, 1000);
 
+    createLogin();
+    showLogin();
+
+    motion = true;
+    gyroUpdated = function(e) {
+        var size = sw < sh ? (sw/2) : (sh/2);
+
+        var posX = 
+        (size/2)-(((0.5/9.8)*e.accX)*(((size-20)/3)*2));
+        var posY = 
+        (size/2)-(((-0.5/9.8)*e.accY)*(((size-20)/3)*2));
+
+        updateKeyPosition(posX, posY);
+    };
+
     drawImage();
     animate();
 });
