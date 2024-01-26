@@ -166,6 +166,10 @@ var updateKeyPosition = function(x, y) {
     Math.pow(co, 2)+
     Math.pow(ca, 2));
 
+    var border = (hyp/5) < (((size-20)/3)/2) ? 
+    (hyp/5) : (((size-20)/3)/2);
+    lockPositionView.style.border = (border)+"px solid #000";
+
     //console.log(hyp);
     var interpretationTimeout = 0;
     if (hyp < 5) {
