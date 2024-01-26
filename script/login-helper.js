@@ -106,6 +106,19 @@ var showLogin = function() {
     loginContainerView.style.display = "initial";
     keyPositionView.style.display = "initial";
     lockPositionView.style.display = "initial";
+
+    keyPlaced = false;
+    var size = sw < sh ? (sw/2) : (sh/2);
+
+    var keyPosX = 
+    10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
+    var keyPosY = 
+    10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
+
+    keyPositionView.style.left = 
+    (keyPosX-(((size-20)/3)/2))+"px";
+    keyPositionView.style.top = 
+    (keyPosY-(((size-20)/3)/2))+"px";
 };
 
 var hideLogin = function() {
@@ -116,6 +129,7 @@ var hideLogin = function() {
     lockPositionView.style.display = "none";
 };
 
+var keyPlaced = false;
 var updateKeyPosition = function(x, y) {
     var size = sw < sh ? (sw/2) : (sh/2);
 
@@ -131,15 +145,24 @@ var updateKeyPosition = function(x, y) {
     Math.pow(ca, 2));
 
     //console.log(hyp);
-
     var interpretationTimeout = 0;
     if (hyp < 5) {
-        keyPositionView.style.background = "#5f5";
-        interpretationTimeout = setTimeout(function() {
-            hideLogin();
-        }, 1000);
+        keyPositionView.style.left = 
+        (lockPosX-(((size-20)/3)/2))+"px";
+        keyPositionView.style.top = 
+        (lockPosY-(((size-20)/3)/2))+"px";
+
+        if (!keyPlaced) {
+            keyPositionView.style.background = "#5f5";
+            interpretationTimeout = setTimeout(function() {
+                //sfxPool.play("audio/jump-sfx.wav");
+                hideLogin();
+            }, 1000);
+
+            keyPlaced = true;
+        }
     }
-    else {
+    else if (!keyPlaced) {
         keyPositionView.style.background = "#f55";
         clearTimeout(interpretationTimeout);
     }
