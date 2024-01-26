@@ -1105,6 +1105,28 @@ var drawImage =
         var flipped = 
         frequencyPath[0].openValue > frequencyPath[0].closeValue;
 
+        /*
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect((sw/4)-((sw/gridSize)*2), (sh/2)-((sw/gridSize)*2),
+        ((sw/gridSize)*4), ((sw/gridSize)*4));
+        //ctx.clip();
+
+        var angle0 = 0;
+        var angle1 = !flipped ? 
+        frequencyPath[0].openValue * (Math.PI*2) : 
+        frequencyPath[0].closeValue * (Math.PI*2);
+        var angle2 = !flipped ? 
+        frequencyPath[0].closeValue * (Math.PI*2) : 
+        frequencyPath[0].openValue * (Math.PI*2);
+
+        clipLine(
+        ctx, (sw/4), (sh/2), ((sw/gridSize)*2), angle0, offset);
+        clipLine(
+        ctx, (sw/4), (sh/2), ((sw/gridSize)*2), angle1, offset);
+        clipLine(
+        ctx, (sw/4), (sh/2), ((sw/gridSize)*2), angle2, offset);*/
+
         ctx.lineWidth = (sw/gridSize);
  
         if (frequencyPath[0].openValue < frequencyPath[0].closeValue)
@@ -1163,6 +1185,8 @@ var drawImage =
         endAngle-(Math.PI/2)-offset);
         ctx.stroke();
 
+        //ctx.restore();
+
         drawLine(
         ctx, (sw/4), (sh/2), ((sw/gridSize)*2), angle0, offset);
         drawLine(
@@ -1179,35 +1203,7 @@ var drawImage =
     ctx.restore();
 };
 
-var drawArc = function(ctx, c, r0, r1, startAngle, endAngle) {
-    var angle = (endAngle-startAngle);
-
-    var p1 = {
-        x: c.x,
-        y: c.y-r1
-    };
-
-    var polygon = [];
-    for (var n = 0; n < 50; n++) {
-        var rp = _rotate2d(c, p1, startAngle+(n*(angle/50)));
-        polygon.push(rp);
-    }
-
-    var p0 = {
-        x: c.x,
-        y: c.y-r0
-    };
-
-    for (var n = 50; n < 0; n++) {
-        var rp = _rotate2d(c, p0, startAngle+(n*(angle/50)));
-        polygon.push(rp);
-    }
-
-    polygon.push(polygon[0]);
-};
-
 var drawLine = function(ctx, x, y, r, angle, offset) {
-    ctx.save();
     var c = {
         x: x,
         y: y
@@ -1232,8 +1228,6 @@ var drawLine = function(ctx, x, y, r, angle, offset) {
     ctx.moveTo(c.x, c.y);
     ctx.lineTo(rp.x, rp.y);
     ctx.stroke();
-
-    ctx.restore();
 }
 
 var updateImage = true;
