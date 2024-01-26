@@ -544,12 +544,21 @@ $(document).ready(function() {
 
     motion = true;
     gyroUpdated = function(e) {
+        if (hasControl) { 
+            titleView.innerText = "";
+            return;
+        }
+        else {
+            titleView.innerText = 
+            "CONTROLLER RESISTANCE: "+resistance.toFixed(1);
+        }
+
         var size = sw < sh ? (sw/2) : (sh/2);
 
         var posX = 
-        (size/2)-(((0.5/9.8)*e.accX)*(((size-20)/3)*2));
+        (size/2)-((((0.5/resistance)/9.8)*e.accX)*(((size-20)/3)*2));
         var posY = 
-        (size/2)-(((-0.5/9.8)*e.accY)*(((size-20)/3)*2));
+        (size/2)-(((-(0.5/resistance)/9.8)*e.accY)*(((size-20)/3)*2));
 
         updateKeyPosition(posX, posY);
         websocketBot.sendKey(posX, posY);

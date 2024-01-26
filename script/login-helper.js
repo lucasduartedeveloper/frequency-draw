@@ -14,6 +14,7 @@ var createLogin = function() {
 
     var size = sw < sh ? (sw/2) : (sh/2);
 
+    resistance = 1;
     titleView = document.createElement("span");
     titleView.style.position = "absolute";
     titleView.style.display = "none";
@@ -28,6 +29,16 @@ var createLogin = function() {
     titleView.style.height = (25)+"px";
     titleView.style.zIndex = "50";
     document.body.appendChild(titleView);
+
+    titleView.onclick = function() {
+        var input = 
+        prompt("Controller resistance: ", resistance);
+
+        var value = parseFloat(input);
+        //if (!value) return;
+
+        resistance = value;
+    };
 
     loginContainerView = document.createElement("div");
     loginContainerView.style.position = "absolute";
@@ -45,7 +56,9 @@ var createLogin = function() {
     var moveX = 0;
     var moveY = 0;
 
+    hasControl = false;
     var loginContainerView_touchstart = function(e) {
+        hasControl = true;
         if (e.touches) {
             startX = e.touches[0].clientX - ((sw/2)-(size/2));
             startY = e.touches[0].clientY - ((sh/2)-(size/2));
@@ -73,15 +86,23 @@ var createLogin = function() {
         websocketBot.sendKey(moveX, moveY);
     };
 
+    var loginContainerView_touchend = function(e) {
+        hasControl = false;
+    };
+
     loginContainerView.ontouchstart = 
     loginContainerView_touchstart;
     loginContainerView.ontouchmove = 
     loginContainerView_touchmove;
+    loginContainerView.ontouchend = 
+    loginContainerView_touchend;
 
     loginContainerView.onmousedown = 
     loginContainerView_touchstart;
     loginContainerView.onmousemove = 
     loginContainerView_touchmove;
+    loginContainerView.onmouseup = 
+    loginContainerView_touchend;
 
     lockPosX = 
     10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
