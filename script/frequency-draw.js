@@ -443,17 +443,18 @@ $(document).ready(function() {
 
         if (!exampleDataEnabled) {
             clearInterval(exampleDataInterval);
-            frequencyPath = [{
-                timestamp: 0,
-                openValue: 0,
-                highValue: 0,
-                lowValue: 0,
-                closeValue: 0,
-                readingCount: 0,
-                volumeValue: 0
-            }];
             return;
         }
+
+        frequencyPath = [{
+            timestamp: 0,
+            openValue: 0,
+            highValue: 0,
+            lowValue: 0,
+            closeValue: 0,
+            readingCount: 0,
+            volumeValue: 0
+        }];
 
         var min = 0;
         var minArr = [ 0, (1/5), (2/5), (3/5), (4/5)];
@@ -1101,6 +1102,9 @@ var drawImage =
     if (drawingMode == 2) {
         var offset = (Math.PI/180);
 
+        var flipped = 
+        frequencyPath[0].openValue > frequencyPath[0].closeValue;
+
         ctx.lineWidth = (sw/gridSize);
  
         if (frequencyPath[0].openValue < frequencyPath[0].closeValue)
@@ -1109,6 +1113,7 @@ var drawImage =
         ctx.strokeStyle = "#b00";
 
         var startAngle = 0;
+        var angle0 = startAngle;
 
         var endAngle = !flipped ? 
         frequencyPath[0].openValue * (Math.PI*2) : 
@@ -1126,12 +1131,10 @@ var drawImage =
         else
         ctx.strokeStyle = currentColorPallete[1];
 
-        var flipped = 
-        frequencyPath[0].openValue > frequencyPath[0].closeValue;
-
         var startAngle = !flipped ? 
         frequencyPath[0].openValue * (Math.PI*2) : 
         frequencyPath[0].closeValue * (Math.PI*2);
+        var angle1 = startAngle;
 
         var endAngle = !flipped ? 
         frequencyPath[0].closeValue * (Math.PI*2) : 
@@ -1149,6 +1152,7 @@ var drawImage =
         var startAngle = !flipped ? 
         frequencyPath[0].closeValue * (Math.PI*2) : 
         frequencyPath[0].openValue * (Math.PI*2);
+        var angle2 = startAngle;
 
         var endAngle = (Math.PI * 2);
 
@@ -1158,10 +1162,79 @@ var drawImage =
         startAngle-(Math.PI/2)+offset, 
         endAngle-(Math.PI/2)-offset);
         ctx.stroke();
+
+        drawLine(
+        ctx, (sw/4), (sh/2), ((sw/gridSize)*2), angle0, offset);
+        drawLine(
+        ctx, (sw/4), (sh/2), ((sw/gridSize)*2), angle1, offset);
+        drawLine(
+        ctx, (sw/4), (sh/2), ((sw/gridSize)*2), angle2, offset);
+
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc((sw/4), (sh/2), 2.5, 0, (Math.PI*2));
+        ctx.fill();
     }
 
     ctx.restore();
 };
+
+var drawArc = function(ctx, c, r0, r1, startAngle, endAngle) {
+    var angle = (endAngle-startAngle);
+
+    var p1 = {
+        x: c.x,
+        y: c.y-r1
+    };
+
+    var polygon = [];
+    for (var n = 0; n < 50; n++) {
+        var rp = _rotate2d(c, p1, startAngle+(n*(angle/50)));
+        polygon.push(rp);
+    }
+
+    var p0 = {
+        x: c.x,
+        y: c.y-r0
+    };
+
+    for (var n = 50; n < 0; n++) {
+        var rp = _rotate2d(c, p0, startAngle+(n*(angle/50)));
+        polygon.push(rp);
+    }
+
+    polygon.push(polygon[0]);
+};
+
+var drawLine = function(ctx, x, y, r, angle, offset) {
+    ctx.save();
+    var c = {
+        x: x,
+        y: y
+    };
+    var p = {
+        x: c.x,
+        y: c.y-r
+    };
+    var rp = _rotate2d(c, p, offset*(180/-Math.PI));
+    var co = Math.abs(rp.x-p.x);
+    var ca = Math.abs(rp.y-p.y);
+    var hyp = Math.sqrt(
+    Math.pow(co, 2)+
+    Math.pow(ca, 2));
+
+    var rp = _rotate2d(c, p, angle*(180/-Math.PI));
+
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = hyp;
+
+    ctx.beginPath();
+    ctx.moveTo(c.x, c.y);
+    ctx.lineTo(rp.x, rp.y);
+    ctx.stroke();
+
+    ctx.restore();
+}
 
 var updateImage = true;
 
