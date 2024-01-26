@@ -347,12 +347,13 @@ $(document).ready(function() {
         }
     };
 
+    drawingModes = [ "candlesticks", "line", "circle" ];
     drawingMode = 0;
     buttonModeView = document.createElement("button");
     buttonModeView.style.position = "absolute";
     buttonModeView.style.color = "#000";
     buttonModeView.innerText = 
-    drawingMode == 0 ? "candlesticks" : "line";
+    drawingModes[drawingMode];
     buttonModeView.style.fontFamily = "Khand";
     buttonModeView.style.fontSize = "15px";
     buttonModeView.style.left = (120)+"px";
@@ -366,10 +367,10 @@ $(document).ready(function() {
 
     buttonModeView.onclick = function() {
         drawingMode = 
-        (drawingMode+1) < 2 ? (drawingMode+1) : 0;
+        (drawingMode+1) < 3 ? (drawingMode+1) : 0;
 
         buttonModeView.innerText = 
-        drawingMode == 0 ? "candlesticks" : "line";
+        drawingModes[drawingMode];
     };
 
     buttonBuyView = document.createElement("button");
@@ -561,13 +562,13 @@ var putMarker = function(playerId, lat, lon, isServer=false) {
     var markerIcon= L.icon({
         iconUrl: isServer ? 
         "img/marker.png?rnd="+rnd : 
-        "img/marker-b.png?rnd="+rnd,
+        "img/marker-shovel.png?rnd="+rnd,
         /*shadowUrl: '/img/icon-shadow.png',*/
-        iconSize: [ 5, 5 ], // size of the icon
-        shadowSize: [ 5, 5 ], // size of the shadow
-        iconAnchor: [ 2.5, 2.5 ], // point of the icon which will correspond to marker's location
-        shadowAnchor: [ 2.5, 2.5 ], // the same for the shadow
-        popupAnchor: [ 2.5, 2.5 ] // point from which the popup should open relative to the iconAnchor
+        iconSize: [ 20, 20 ], // size of the icon
+        shadowSize: [ 20, 20 ], // size of the shadow
+        iconAnchor: [ 6.7, 8 ], // point of the icon which will correspond to marker's location
+        shadowAnchor: [ 10, 10 ], // the same for the shadow
+        popupAnchor: [ 10, 10 ] // point from which the popup should open relative to the iconAnchor
     });
 
     if (search.length > 0) {
@@ -1115,6 +1116,53 @@ var drawImage =
             (sh/2)-((frequencyPath[n].closeValue-0.5)*((sw/gridSize)*4)));
         }
         ctx.closePath();
+        ctx.fill();
+    }
+
+    if (drawingMode == 2) {
+        ctx.fillStyle = "purple";
+
+        ctx.beginPath();
+        ctx.arc(
+        (sw/4), (sh/2), ((sw/gridSize)*2), 0, (Math.PI*2));
+        ctx.fill();
+
+        if (frequencyPath[0].openValue < frequencyPath[0].closeValue)
+        ctx.fillStyle = currentColorPallete[0];
+        else
+        ctx.fillStyle = currentColorPallete[1];
+
+        var flipped = 
+        frequencyPath[0].openValue > frequencyPath[0].closeValue;
+
+        var startAngle = !flipped ? 
+        frequencyPath[0].openValue * (Math.PI*2) : 
+        frequencyPath[0].closeValue * (Math.PI*2);
+
+        var endAngle = !flipped ? 
+        frequencyPath[0].closeValue * (Math.PI*2) : 
+        frequencyPath[0].openValue * (Math.PI*2);
+
+        ctx.beginPath();
+        ctx.moveTo((sw/4), (sh/2));
+        ctx.arc(
+        (sw/4), (sh/2), ((sw/gridSize)*2), 
+        startAngle-(Math.PI/2), endAngle-(Math.PI/2));
+        ctx.fill();
+
+        ctx.fillStyle = "orange";
+
+        var startAngle = 0;
+
+        var endAngle = !flipped ? 
+        frequencyPath[0].openValue * (Math.PI*2) : 
+        frequencyPath[0].closeValue * (Math.PI*2);
+
+        ctx.beginPath();
+        ctx.moveTo((sw/4), (sh/2));
+        ctx.arc(
+        (sw/4), (sh/2), ((sw/gridSize)*2), 
+        startAngle-(Math.PI/2), endAngle-(Math.PI/2));
         ctx.fill();
     }
 
