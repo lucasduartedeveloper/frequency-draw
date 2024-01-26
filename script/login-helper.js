@@ -117,7 +117,7 @@ var createLogin = function() {
     (lockPosY-(((size-20)/3)/2))+"px";
     lockPositionView.style.width = (size/3)+"px";
     lockPositionView.style.height = (size/3)+"px";
-    lockPositionView.style.border = "2px solid #000";
+    lockPositionView.style.border = "1px solid #000";
     lockPositionView.style.zIndex = "50";
     loginContainerView.appendChild(lockPositionView);
 };
@@ -155,20 +155,22 @@ var keyPlaced = false;
 var updateKeyPosition = function(x, y) {
     var size = sw < sh ? (sw/2) : (sh/2);
 
-    keyPositionView.style.left = 
-    (x-(((size-20)/3)/2))+"px";
-    keyPositionView.style.top = 
-    (y-(((size-20)/3)/2))+"px";
-
     var co = Math.abs(x-lockPosX);
     var ca = Math.abs(y-lockPosY);
     var hyp = Math.sqrt(
     Math.pow(co, 2)+
     Math.pow(ca, 2));
 
-    var border = (hyp/5) < (((size-20)/3)/2) ? 
-    (hyp/5) : (((size-20)/3)/2);
-    lockPositionView.style.border = (border)+"px solid #000";
+    if (!keyPlaced) {
+        keyPositionView.style.left = 
+        (x-(((size-20)/3)/2))+"px";
+        keyPositionView.style.top = 
+        (y-(((size-20)/3)/2))+"px";
+
+        var border = (hyp/5) < (((size-20)/3)/2) ? 
+        (hyp/5) : (((size-20)/3)/2);
+        lockPositionView.style.border = (border)+"px solid #000";
+    }
 
     //console.log(hyp);
     var interpretationTimeout = 0;
