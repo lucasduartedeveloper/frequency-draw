@@ -4,6 +4,19 @@ var warningBeep = new Audio("audio/warning_beep.wav");
 var sw = 360; //window.innerWidth;
 var sh = 669; //window.innerHeight;
 
+var gridSize = 10;
+
+if (window.innerWidth > window.innerHeight) {
+    sw = window.innerWidth;
+    sh = window.innerHeight;
+    gridSize = 20;
+}
+
+var queryString = window.location.search;
+var urlParams = new URLSearchParams(queryString);
+if (urlParams.has("height"))
+sh = parseInt(urlParams.get("height"));
+
 var audioBot = true;
 var playerId = new Date().getTime();
 
@@ -32,12 +45,6 @@ $(document).ready(function() {
         var text = prompt();
         sendText(text);
     };
-
-    if (window.innerWidth > window.innerHeight) {
-        sw = window.innerWidth;
-        sh = window.innerHeight;
-        gridSize = 20;
-    }
 
     tileSize = (sw/7);
 
@@ -647,8 +654,7 @@ var websocketBot = {
         var obj = {
             x: x,
             y: y,
-            sw: sw,
-            sh: sh
+            size: (sw < sh ? (sw/2) : (sh/2))
         };
         ws.send("PAPER|"+playerId+"|key-position|"+
         JSON.stringify(obj));
@@ -670,7 +676,7 @@ var websocketBot = {
     attachMessageHandler: function() {
         ws.onmessage = function(e) {
             var msg = e.data.split("|");
-            console.log(msg[2] + " from " + msg[1]);
+            //console.log(msg[2] + " from " + msg[1]);
 
             if (msg[0] == "PAPER" &&
                 msg[1] != playerId &&
@@ -734,10 +740,11 @@ var websocketBot = {
                 msg[2] == "key-position") {
 
                 var obj = JSON.parse(msg[3]);
-                var scaleX = obj.sw/sw;
-                var scaleY = obj.sh/sh;
 
-                updateKeyPosition(obj.x*scaleX, obj.y*scaleY);
+                var size = sw < sh ? (sw/2) : (sh/2);
+                var scale = size/obj.size;
+
+                updateKeyPosition(obj.x*scale, obj.y*scale);
             }
         }.bind(this);
         ws.send("PAPER|"+playerId+"|data-missing|"+
@@ -910,8 +917,6 @@ Math.curve = function(value, scale) {
     var rp = _rotate2d(c, p, (value*90));
     return rp.y*scale;
 };
-
-var gridSize = 10;
 
 var drawImage = 
     function(angle=0, color="#000", gridColor="#333") {
