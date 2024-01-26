@@ -339,6 +339,7 @@ $(document).ready(function() {
         if (mic.closed) {
             mic.open(false, 1);
             buttonMicView.innerText = "mic: on";
+            websocketBot.sendDoor();
         }
         else {
             mic.close();
@@ -531,8 +532,6 @@ $(document).ready(function() {
         success, error, options);
     }, 1000);
 
-    showLogin();
-
     drawImage();
     animate();
 });
@@ -628,6 +627,9 @@ var websocketBot = {
     messageRequested: false,
     lastUpdate: 0,
     periodTimestamp: 0,
+    sendDoor: function() {
+        ws.send("PAPER|"+playerId+"|lock-access");
+    },
     sendUsage: function(value) {
         var obj = {
             timestamp: new Date().getTime(),
@@ -691,6 +693,15 @@ var websocketBot = {
                 var from = parseInt(msg[1]);
                 var obj = JSON.parse(msg[3]);
                 putMarker(from, obj.lat, obj.lon);
+            }
+            else if (msg[0] == "PAPER" &&
+                msg[1] != playerId &&
+                msg[2] == "lock-access") {
+
+                showLogin();
+
+                ws.send("PAPER|"+playerId+"|data-missing|"+
+                JSON.stringify({ lat: latitude, lon: longitude }));
             }
         }.bind(this);
         ws.send("PAPER|"+playerId+"|data-missing|"+
@@ -967,12 +978,13 @@ var drawImage =
     sw-(sw/4)-55, 
     (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
 
+    /*
     if (imagesLoaded)
     ctx.drawImage(image, 
     -format.left, 0, format.width, format.height, 
     (sw)-(sw/4)-25, 
     prediction.positionY-60, 
-    50, 50);
+    50, 50);*/
 
     if (prediction.positionY != -1) {
         ctx.lineWidth = 1;
