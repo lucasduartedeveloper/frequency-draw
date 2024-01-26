@@ -18,6 +18,7 @@ var createLogin = function() {
     titleView = document.createElement("span");
     titleView.style.position = "absolute";
     titleView.style.display = "none";
+    titleView.style.userSelect = "none";
     titleView.style.color = "#fff";
     titleView.innerText = "";
     titleView.style.textAlign = "center";
@@ -31,12 +32,8 @@ var createLogin = function() {
     document.body.appendChild(titleView);
 
     titleView.onclick = function() {
-        var input = 
-        prompt("Controller resistance: ", resistance);
-
-        var value = parseFloat(input);
-        //if (!value) return;
-
+        resistance = (resistance+0.25) < 1.25 ? 
+        (resistance+0.25) : 0.25;
         resistance = value;
     };
 
