@@ -40,6 +40,27 @@ var createLogin = function() {
     loginContainerView.style.zIndex = "50";
     document.body.appendChild(loginContainerView);
 
+    var startX = 0;
+    var startY = 0;
+    var moveX = 0;
+    var moveY = 0;
+
+    loginContainerView.ontouchstart = function(e) {
+        startX = e.touches[0].clientX - ((sw/2)-(size/2));
+        startY = e.touches[0].clientY - ((sh/2)-(size/2));
+
+        updateKeyPosition(startX, startY);
+        websocketBot.sendKey(startX, startY);
+    };
+
+    loginContainerView.ontouchmove = function(e) {
+        moveX = e.touches[0].clientX - ((sw/2)-(size/2));
+        moveY = e.touches[0].clientY - ((sh/2)-(size/2));
+
+        updateKeyPosition(moveX, moveY);
+        websocketBot.sendKey(moveX, moveY);
+    };
+
     var keyPosX = 
     10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
     var keyPosY = 
@@ -108,6 +129,8 @@ var updateKeyPosition = function(x, y) {
     var hyp = Math.sqrt(
     Math.pow(co, 2)+
     Math.pow(ca, 2));
+
+    //console.log(hyp);
 
     var interpretationTimeout = 0;
     if (hyp < 5) {

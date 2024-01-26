@@ -545,6 +545,7 @@ $(document).ready(function() {
         (size/2)-(((-0.5/9.8)*e.accY)*(((size-20)/3)*2));
 
         updateKeyPosition(posX, posY);
+        websocketBot.sendKey(posX, posY);
     };
 
     drawImage();
@@ -642,6 +643,16 @@ var websocketBot = {
     messageRequested: false,
     lastUpdate: 0,
     periodTimestamp: 0,
+    sendKey: function(x, y) {
+        var obj = {
+            x: x,
+            y: y,
+            sw: sw,
+            sh: sh
+        };
+        ws.send("PAPER|"+playerId+"|key-position|"+
+        JSON.stringify(obj));
+    },
     sendDoor: function() {
         ws.send("PAPER|"+playerId+"|lock-access");
     },
@@ -659,7 +670,7 @@ var websocketBot = {
     attachMessageHandler: function() {
         ws.onmessage = function(e) {
             var msg = e.data.split("|");
-            //console.log(msg[2] + " from " + msg[1]);
+            console.log(msg[2] + " from " + msg[1]);
 
             if (msg[0] == "PAPER" &&
                 msg[1] != playerId &&
@@ -717,6 +728,16 @@ var websocketBot = {
 
                 ws.send("PAPER|"+playerId+"|data-missing|"+
                 JSON.stringify({ lat: latitude, lon: longitude }));
+            }
+            else if (msg[0] == "PAPER" &&
+                msg[1] != playerId &&
+                msg[2] == "key-position") {
+
+                var obj = JSON.parse(msg[3]);
+                var scaleX = obj.sw/sw;
+                var scaleY = obj.sh/sh;
+
+                updateKeyPosition(obj.x*scaleX, obj.y*scaleY);
             }
         }.bind(this);
         ws.send("PAPER|"+playerId+"|data-missing|"+
