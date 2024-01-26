@@ -83,6 +83,25 @@ var createLogin = function() {
     loginContainerView.onmousemove = 
     loginContainerView_touchmove;
 
+    lockPosX = 
+    10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
+    lockPosY = 
+    10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
+
+    lockPositionView = document.createElement("div");
+    lockPositionView.style.position = "absolute";
+    lockPositionView.style.display = "none";
+    lockPositionView.style.background = "#000";
+    lockPositionView.style.left = 
+    (lockPosX-(((size-20)/3)/2))+"px";
+    lockPositionView.style.top = 
+    (lockPosY-(((size-20)/3)/2))+"px";
+    lockPositionView.style.width = (size/3)+"px";
+    lockPositionView.style.height = (size/3)+"px";
+    lockPositionView.style.border = "1px solid #000";
+    lockPositionView.style.zIndex = "50";
+    loginContainerView.appendChild(lockPositionView);
+
     var keyPosX = 
     10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
     var keyPosY = 
@@ -101,25 +120,6 @@ var createLogin = function() {
     //lockPositionView.style.border = "1px solid #000";
     keyPositionView.style.zIndex = "50";
     loginContainerView.appendChild(keyPositionView);
-
-    lockPosX = 
-    10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
-    lockPosY = 
-    10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
-
-    lockPositionView = document.createElement("div");
-    lockPositionView.style.position = "absolute";
-    lockPositionView.style.display = "none";
-    //lockPositionView.style.background = "#fff";
-    lockPositionView.style.left = 
-    (lockPosX-(((size-20)/3)/2))+"px";
-    lockPositionView.style.top = 
-    (lockPosY-(((size-20)/3)/2))+"px";
-    lockPositionView.style.width = (size/3)+"px";
-    lockPositionView.style.height = (size/3)+"px";
-    lockPositionView.style.border = "1px solid #000";
-    lockPositionView.style.zIndex = "50";
-    loginContainerView.appendChild(lockPositionView);
 };
 
 var showLogin = function() {
@@ -169,7 +169,7 @@ var updateKeyPosition = function(x, y) {
 
         var border = (hyp/5) < (((size-20)/3)/2) ? 
         (hyp/5) : (((size-20)/3)/2);
-        lockPositionView.style.border = (border)+"px solid #000";
+        //lockPositionView.style.border = (border)+"px solid #000";
     }
 
     //console.log(hyp);
@@ -183,6 +183,7 @@ var updateKeyPosition = function(x, y) {
         if (!keyPlaced) {
             keyPositionView.style.background = "#5f5";
             interpretationTimeout = setTimeout(function() {
+                keyPositionView.style.background = "#fff";
                 //sfxPool.play("audio/jump-sfx.wav");
                 hideLogin();
             }, 1000);
