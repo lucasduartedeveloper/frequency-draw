@@ -40,16 +40,3 @@ Math.normalize = function(v, max=1) {
     var n = _rotate2d(c, p, -a, false);
     return n;
 };
-
-Math.curve = function(value, scale=1) {
-    var c = {
-        x: 0,
-        y: 0
-    };
-    var p = {
-        x: -1,
-        y: 0
-    };
-    var rp = _rotate2d(c, p, (value*90));
-    return rp.y*scale;
-};

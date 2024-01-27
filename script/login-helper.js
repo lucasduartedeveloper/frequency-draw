@@ -34,7 +34,6 @@ var createLogin = function() {
     titleView.onclick = function() {
         resistance = (resistance+0.25) < 1.25 ? 
         (resistance+0.25) : 0.25;
-        resistance = value;
     };
 
     loginContainerView = document.createElement("div");
