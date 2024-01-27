@@ -2,7 +2,7 @@ var createLogin = function() {
     loginBackgroundView = document.createElement("div");
     loginBackgroundView.style.position = "absolute";
     loginBackgroundView.style.display = "none";
-    loginBackgroundView.style.background = "#000";
+    loginBackgroundView.style.background = "#fff";
     loginBackgroundView.width = (sw);
     loginBackgroundView.height = (sh); 
     loginBackgroundView.style.left = (0)+"px";
@@ -19,8 +19,9 @@ var createLogin = function() {
     titleView.style.position = "absolute";
     titleView.style.display = "none";
     titleView.style.userSelect = "none";
-    titleView.style.color = "#fff";
-    titleView.innerText = "";
+    titleView.style.color = "#000";
+    titleView.innerText = "WELCOME";
+    titleView.style.fontWeight = 900;
     titleView.style.textAlign = "center";
     titleView.style.fontFamily = "Khand";
     titleView.style.fontSize = "20px";
@@ -198,7 +199,7 @@ var updateKeyPosition = function(x, y) {
         (lockPosY-(((size-20)/3)/2))+"px";
 
         if (!keyPlaced) {
-            keyPositionView.style.background = "#5f5";
+            keyPositionView.style.background = "#fff";
             interpretationTimeout = setTimeout(function() {
                 keyPositionView.style.background = "#fff";
                 //sfxPool.play("audio/jump-sfx.wav");

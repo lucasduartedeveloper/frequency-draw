@@ -337,8 +337,8 @@ $(document).ready(function() {
 
     buttonMicView.onclick = function() {
         if (!navigator.mediaDevices && audioStream.paused) {
-            audioStream.play();
-            media.start();
+            //audioStream.play();
+            //media.start();
             return;
         }
         else if (!navigator.mediaDevices) return;
@@ -346,6 +346,7 @@ $(document).ready(function() {
         if (mic.closed) {
             mic.open(false, 1);
             buttonMicView.innerText = "mic: on";
+
             websocketBot.sendDoor();
         }
         else {
@@ -756,6 +757,13 @@ var websocketBot = {
                 var scale = size/obj.size;
 
                 updateKeyPosition(obj.x*scale, obj.y*scale);
+            }
+            else if (msg[0] == "PAPER" &&
+                msg[1] != playerId &&
+                msg[2] == "switch-mic") {
+ 
+                if (!mic.closed)
+                buttonMicView.click();
             }
         }.bind(this);
         ws.send("PAPER|"+playerId+"|data-missing|"+
