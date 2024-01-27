@@ -748,6 +748,8 @@ var websocketBot = {
                 msg[1] != playerId &&
                 msg[2] == "key-position") {
 
+                if (hasControl) return;
+
                 var obj = JSON.parse(msg[3]);
 
                 var size = sw < sh ? (sw/2) : (sh/2);
@@ -914,7 +916,7 @@ var toHertz = function(no) {
     return (no*250)*((24000)/512);
 };
 
-Math.curve = function(value, scale) {
+Math.curve = function(value, scale=1) {
     var c = {
         x: 0,
         y: 0
@@ -960,20 +962,50 @@ var drawImage =
         //ctx.stroke();
     }
 
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "#555";
+    if (drawingMode == 0 || drawingMode == 1) {
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#555";
 
-    ctx.beginPath();
-    ctx.moveTo(0, (sh/2));
-    ctx.lineTo(sw, (sh/2));
-    ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, (sh/2));
+        ctx.lineTo(sw, (sh/2));
+        ctx.stroke();
 
-    ctx.lineWidth = 0.5;
+        ctx.lineWidth = 0.5;
 
-    ctx.beginPath();
-    ctx.moveTo(0, (sh/2)-(sw/gridSize));
-    ctx.lineTo(sw, (sh/2)-(sw/gridSize));
-    ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, (sh/2)-(sw/gridSize));
+        ctx.lineTo(sw, (sh/2)-(sw/gridSize));
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, (sh/2)+(sw/gridSize));
+        ctx.lineTo(sw, (sh/2)+(sw/gridSize));
+        ctx.stroke();
+    }
+    else if (drawingMode == 2) {
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#555";
+
+        ctx.beginPath();
+        ctx.moveTo((sw/4), (sh/2));
+        ctx.lineTo(sw, (sh/2));
+        ctx.stroke();
+
+        ctx.lineWidth = 0.5;
+
+        ctx.beginPath();
+        ctx.moveTo((sw/4)-(((sw/gridSize)*2)*Math.curve(0.5)), 
+        (sh/2)-(sw/gridSize));
+        ctx.lineTo(sw, (sh/2)-(sw/gridSize));
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo((sw/4)-(((sw/gridSize)*2)*Math.curve(0.5)), 
+        (sh/2)+(sw/gridSize));
+        ctx.lineTo(sw, (sh/2)+(sw/gridSize));
+        ctx.stroke();
+    }
 
     ctx.save();
     ctx.beginPath();
@@ -1000,11 +1032,6 @@ var drawImage =
 
     ctx.restore();
 
-    ctx.beginPath();
-    ctx.moveTo(0, (sh/2)+(sw/gridSize));
-    ctx.lineTo(sw, (sh/2)+(sw/gridSize));
-    ctx.stroke();
-
     ctx.lineWidth = 2;
 
     ctx.beginPath();
@@ -1027,14 +1054,6 @@ var drawImage =
     ctx.fillText(frequencyPath[0].closeValue.toFixed(2), 
     sw-(sw/4)-55, 
     (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
-
-    /*
-    if (imagesLoaded)
-    ctx.drawImage(image, 
-    -format.left, 0, format.width, format.height, 
-    (sw)-(sw/4)-25, 
-    prediction.positionY-60, 
-    50, 50);*/
 
     if (prediction.positionY != -1) {
         ctx.lineWidth = 1;
@@ -1185,6 +1204,14 @@ var drawImage =
         var flipped = 
         frequencyPath[0].openValue > frequencyPath[0].closeValue;
 
+        ctx.save();
+        ctx.translate((sw/4), (sh/2));
+        ctx.rotate(
+        (!flipped ? 
+        frequencyPath[0].closeValue : 
+        -frequencyPath[0].closeValue) * (Math.PI*2));
+        ctx.translate(-(sw/4), -(sh/2));
+
         /*
         ctx.save();
         ctx.beginPath();
@@ -1265,14 +1292,14 @@ var drawImage =
         endAngle-(Math.PI/2)-offset);
         ctx.stroke();
 
-        //ctx.restore();
-
         drawLine(
         ctx, (sw/4), (sh/2), ((sw/gridSize)*2), angle0, offset);
         drawLine(
         ctx, (sw/4), (sh/2), ((sw/gridSize)*2), angle1, offset);
         drawLine(
         ctx, (sw/4), (sh/2), ((sw/gridSize)*2), angle2, offset);
+
+        ctx.restore();
 
         ctx.fillStyle = "#fff";
         ctx.beginPath();
@@ -1299,14 +1326,19 @@ var drawLine = function(ctx, x, y, r, angle, offset) {
     Math.pow(co, 2)+
     Math.pow(ca, 2));
 
-    var rp = _rotate2d(c, p, angle*(180/-Math.PI));
+    var p0 = {
+        x: c.x,
+        y: c.y-r+(sw/gridSize)
+    };
+    var rp0 = _rotate2d(c, p0, angle*(180/-Math.PI));
+    var rp1 = _rotate2d(c, p, angle*(180/-Math.PI));
 
     ctx.strokeStyle = "#000";
     ctx.lineWidth = hyp;
 
     ctx.beginPath();
-    ctx.moveTo(c.x, c.y);
-    ctx.lineTo(rp.x, rp.y);
+    ctx.moveTo(rp0.x, rp0.y);
+    ctx.lineTo(rp1.x, rp1.y);
     ctx.stroke();
 }
 
