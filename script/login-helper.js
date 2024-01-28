@@ -14,6 +14,30 @@ var createLogin = function() {
 
     var size = sw < sh ? (sw/2) : (sh/2);
 
+    gameLoop = false;
+    gameLoopView = document.createElement("span");
+    gameLoopView.style.position = "absolute";
+    gameLoopView.style.userSelect = "none";
+    gameLoopView.style.color = "#000";
+    gameLoopView.innerText = "LOOP: "+
+    (gameLoop ? "TRUE" : "FALSE");
+    gameLoopView.style.fontWeight = 900;
+    gameLoopView.style.textAlign = "center";
+    gameLoopView.style.fontFamily = "Khand";
+    gameLoopView.style.fontSize = "20px";
+    gameLoopView.style.left = ((sw/2)-150)+"px";
+    gameLoopView.style.top = ((sh/2)-(size/2)-105)+"px";
+    gameLoopView.style.width = (300)+"px";
+    gameLoopView.style.height = (25)+"px";
+    gameLoopView.style.zIndex = "50";
+    document.body.appendChild(gameLoopView);
+
+    gameLoopView.onclick = function() {
+        gameLoop = !gameLoop;
+        gameLoopView.innerText = "LOOP: "+
+        (gameLoop ? "TRUE" : "FALSE");
+    };
+
     resistance = 1;
     titleView = document.createElement("span");
     titleView.style.position = "absolute";
@@ -162,6 +186,12 @@ var showLogin = function() {
 };
 
 var hideLogin = function() {
+    if (gameLoop) {
+        keyPositionView.style.background = "#f55";
+        showLogin();
+        return;
+    }
+
     loginBackgroundView.style.display = "none";
     titleView.style.display = "none";
     loginContainerView.style.display = "none";
