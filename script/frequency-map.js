@@ -48,6 +48,8 @@ $(document).ready(function() {
 
     tileSize = (sw/7);
 
+    document.body.style.overflowX = "scroll";
+
     pictureView = document.createElement("canvas");
     pictureView.style.position = "absolute";
     pictureView.style.background = "#fff";
@@ -67,36 +69,20 @@ $(document).ready(function() {
             oscillator.start();
             oscillatorStarted = true;
         }
-        frequencyDirection = 1;
     };
 
     pictureView.ontouchend= function() {
         userInteracted = true;
-        frequencyDirection = -1;
+        if (userInteracted && oscillatorStarted)
+        frequencyDirection = 1;
     }
 
-    var c0 = { x: 0, y: 0 };
-    var c1 = { x: 0, y: 0 };
-
-    var p0 = { x: c0.x, y: c0.y+0.5 };
-    var p1 = { x: c1.x, y: c1.y-0.5 };
-
-    frequencyPath = [];
-    frequencyPath.push({ x: -0.5, y: 0.5 });
-    for (var n = 0; n < 10; n++) {
-        frequencyPath.push({ x: -0.5+((0.5/10))*n, y: 0.5 });
-    }
-    for (var n = 0; n < 10; n++) {
-        var rp = _rotate2d(c0, p0, n*(180/10));
-        frequencyPath.push(rp);
-    }
-    for (var n = 0; n < 10; n++) {
-        var rp = _rotate2d(c1, p1, n*(180/10));
-        frequencyPath.push(rp);
-    }
+    frequencyPath = [
+        0, 50, 100, 50, 0, 50, 100, 50, 0
+    ];
 
     oscillator = createOscillator();
-    oscillator.frequency.value = 100;
+    oscillator.frequency.value = 0;
 
     drawImage();
     animate();
@@ -119,7 +105,7 @@ Math.curve = function(value, scale=1) {
     return rp.y*scale;
 };
 
-var frequencyDirection = 0;
+var frequencyDirection = 0
 var frequencyNo = 0;
 var lap = 0;
 
@@ -140,7 +126,7 @@ var animate = function() {
         frequencyNo += frequencyDirection;
 
         if (frequencyNo > (frequencyPath.length-1)) {
-             frequencyNo = 10;
+             frequencyNo = 0
              lap += 1;
         }
 
@@ -149,9 +135,7 @@ var animate = function() {
              lap = 0;
         }
 
-        oscillator.frequency.value = 
-        (100+(lap*100)) - (frequencyPath[frequencyNo].y*200);
-
+        oscillator.frequency.value = frequencyPath[frequencyNo];
         drawImage();
     }
     renderTime = new Date().getTime();
@@ -198,25 +182,29 @@ var drawImage =
     ctx.lineTo((sw/2), (sh/2)+(sw/2));
     ctx.stroke();
 
-    ctx.beginPath();
-    ctx.moveTo(
-    (sw/2)+(frequencyPath[0].x*(sw/2)), 
-    (sh/2)+(frequencyPath[0].y*(sw/2)));
-    for (var n = 1; n < frequencyPath.length; n++) {
+    ctx.save();
+    ctx.translate(-frequencyNo*10, 0);
+
+    for (var n = 0; n < frequencyPath.length; n++) {
+        ctx.beginPath();
+        ctx.moveTo(
+        (sw/2)+(n*10), 
+        (sh/2)+((0.5+((1/1000)*frequencyPath[n]))*(sw/2)));
         ctx.lineTo(
-        (sw/2)+(frequencyPath[n].x*(sw/2)), 
-        (sh/2)+(frequencyPath[n].y*(sw/2)));
+        (sw/2)+((n+1)*10), 
+        (sh/2)+((0.5+((1/1000)*frequencyPath[n]))*(sw/2)));
+        ctx.stroke();
     }
-    ctx.stroke();
+
+    ctx.restore();
 
     ctx.beginPath();
     ctx.arc(
-    (sw/2)+(frequencyPath[frequencyNo].x*(sw/2)), 
-    (sh/2)+(frequencyPath[frequencyNo].y*(sw/2)), 
-    10, 0, (Math.PI*2));
+    (sw/2), 
+    (sh/2)+
+    ((0.5+((1/1000)*frequencyPath[frequencyNo]))*(sw/2)),
+    5, 0, (Math.PI*2));
     ctx.fill();
-
-    ctx.restore();
 };
 
 var getSquare = function(item) {
