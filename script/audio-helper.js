@@ -148,11 +148,49 @@ var createOscillator = function() {
     var audioCtx = 
     new(window.AudioContext || window. webkitAudioContext)();
 
+    var mediaStreamDestination = 
+    audioCtx.createMediaStreamDestination();
+    var recorder = 
+    new MediaRecorder(mediaStreamDestination.stream);
+
+    // Store the chunks of audio data in an array.
+    var chunks = [];
+    recorder.addEventListener("start", function(event) {
+        if (source !== null) {
+            URL.revokeObjectURL(source);
+        }
+        chunks.length = 0;
+    });
+
+    recorder.addEventListener("dataavailable", function(event) {
+        var { data } = event;
+        chunks.push(data);
+    });
+
+    recorder.addEventListener("stop", function(event) {
+        var blob = new Blob(chunks, { "type": "audio/aac" });
+        source = URL.createObjectURL(blob);
+
+        var a = document.createElement("a");
+        a.style.display = "none";
+        a.href = source;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 100);
+    });
+
     // create Oscillator node
     var oscillator = audioCtx.createOscillator();
 
+    oscillator.recorder = recorder;
+
     var volume = audioCtx.createGain();
     volume.connect(audioCtx.destination);
+    volume.connect(mediaStreamDestination);
     volume.gain.value = 0.1;
 
     oscillator.type = "square"; //"sine";

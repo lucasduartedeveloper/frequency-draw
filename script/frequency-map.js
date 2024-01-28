@@ -62,6 +62,34 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
+    var startX = 0;
+    var startY = 0;
+    var moveX = 0;
+    var moveY = 0;
+
+    userInteracted = false;
+    oscillatorStarted = false;
+    pictureView.ontouchstart = function(e) {
+        if (userInteracted && !oscillatorStarted) {
+            oscillator.start();
+            oscillatorStarted = true;
+        }
+
+        var value = 0.5+((1/(sw/2))*((sh/2)-e.touches[0].clientY));
+        frequencyPath[frequencyNo] = value*500;
+        oscillator.frequency.value = frequencyPath[frequencyNo];
+    };
+
+    pictureView.ontouchmove = function(e) {
+        var value = 0.5+((1/(sw/2))*((sh/2)-e.touches[0].clientY));
+        frequencyPath[frequencyNo] = value*500;
+        oscillator.frequency.value = frequencyPath[frequencyNo];
+    };
+
+    pictureView.ontouchend= function() {
+        userInteracted = true;
+    }
+
     bpm = 180;
     bpmView = document.createElement("span");
     bpmView.style.position = "absolute";
@@ -94,6 +122,11 @@ $(document).ready(function() {
         frequencyDirection = frequencyDirection == 0 ? 1 : 0;
         playView.innerText = frequencyDirection == 1 ? 
         "stop" : "play";
+
+        if (frequencyDirection == 1)
+        oscillator.recorder.start();
+        else
+        oscillator.recorder.stop();
     };
 
     previousView = document.createElement("button");
@@ -183,20 +216,7 @@ $(document).ready(function() {
         }
     }
 
-    userInteracted = false;
-    oscillatorStarted = false;
-    pictureView.ontouchstart = function() {
-        if (userInteracted && !oscillatorStarted) {
-            oscillator.start();
-            oscillatorStarted = true;
-        }
-    };
-
-    pictureView.ontouchend= function() {
-        userInteracted = true;
-    }
-
-    frequencyPath = [];
+    frequencyPath = [ 0 ];
 
     /*
         32, 36, 41, 43, 0, 43, 0, 43, 
