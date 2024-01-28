@@ -75,8 +75,11 @@ $(document).ready(function() {
         frequencyDirection = -1;
     }
 
-    var c = { x: 0, y: 0 };
-    var p = { x: c.x, y: c.y+0.5 };
+    var c0 = { x: 0, y: 0 };
+    var c1 = { x: 0, y: 0 };
+
+    var p0 = { x: c0.x, y: c0.y+0.5 };
+    var p1 = { x: c1.x, y: c1.y-0.5 };
 
     frequencyPath = [];
     frequencyPath.push({ x: -0.5, y: 0.5 });
@@ -84,13 +87,13 @@ $(document).ready(function() {
         frequencyPath.push({ x: -0.5+((0.5/10))*n, y: 0.5 });
     }
     for (var n = 0; n < 10; n++) {
-        var rp = _rotate2d(c, p, n*(180/10));
+        var rp = _rotate2d(c0, p0, n*(180/10));
         frequencyPath.push(rp);
     }
     for (var n = 0; n < 10; n++) {
-        frequencyPath.push({ x: -((0.5/10))*n, y: -0.5 });
+        var rp = _rotate2d(c1, p1, n*(180/10));
+        frequencyPath.push(rp);
     }
-    frequencyPath.push({ x: -0.5, y: -0.5 });
 
     oscillator = createOscillator();
     oscillator.frequency.value = 100;
@@ -118,6 +121,7 @@ Math.curve = function(value, scale=1) {
 
 var frequencyDirection = 0;
 var frequencyNo = 0;
+var lap = 0;
 
 var updateImage = true;
 
@@ -135,14 +139,18 @@ var animate = function() {
 
         frequencyNo += frequencyDirection;
 
-        if (frequencyNo > (frequencyPath.length-1))
-        frequencyNo = (frequencyPath.length-1);
+        if (frequencyNo > (frequencyPath.length-1)) {
+             frequencyNo = 10;
+             lap += 1;
+        }
 
-        if (frequencyNo < 0)
-        frequencyNo = 0;
+        if (frequencyNo < 0) {
+             frequencyNo = 0;
+             lap = 0;
+        }
 
         oscillator.frequency.value = 
-        100 - (frequencyPath[frequencyNo].y*200);
+        (100+(lap*100)) - (frequencyPath[frequencyNo].y*200);
 
         drawImage();
     }
