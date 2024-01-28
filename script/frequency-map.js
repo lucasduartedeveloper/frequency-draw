@@ -68,39 +68,37 @@ $(document).ready(function() {
     var moveY = 0;
 
     userInteracted = false;
-    oscillatorStarted = false;
     pictureView.ontouchstart = function(e) {
-        if (userInteracted && !oscillatorStarted) {
-            oscillator.start();
-            oscillatorStarted = true;
-        }
 
-        var value = 0.5+((1/(sw/2))*((sh/2)-e.touches[0].clientY));
+        var value = 0.5+((1/(sw/2))*(e.touches[0].clientX-(sw/2)));
         value = value < 0 ? 0 : value;
+        value = value > 1 ? 1 : value;
+        //console.log(value);
 
-        frequencyPath[frequencyNo] = value*500;
-        oscillator.frequency.value = frequencyPath[frequencyNo];
+        frequency = value*500;
+        oscillator.frequency.value = frequency;
     };
 
     pictureView.ontouchmove = function(e) {
-        var value = 0.5+((1/(sw/2))*((sh/2)-e.touches[0].clientY));
+        var value = 0.5+((1/(sw/2))*(e.touches[0].clientX-(sw/2)));
         value = value < 0 ? 0 : value;
+        value = value > 1 ? 1 : value;
 
-        frequencyPath[frequencyNo] = value*500;
-        oscillator.frequency.value = frequencyPath[frequencyNo];
+        frequency = value*500;
+        oscillator.frequency.value = frequency;
     };
 
     pictureView.ontouchend= function() {
         userInteracted = true;
     }
 
-    bpm = 180;
     bpmView = document.createElement("span");
     bpmView.style.position = "absolute";
+    bpmView.style.userSelect = "none";
     bpmView.style.color = "#fff";
     bpmView.style.fontFamily = "Khand";
     bpmView.style.textAlign = "center";
-    bpmView.innerText = bpm+" bpm";
+    bpmView.innerText = invadersDefeated+" defeated";
     bpmView.style.left = ((sw/2)-50)+"px";
     bpmView.style.top = ((sh/2)-(sw/2)-50)+"px";
     bpmView.style.width = (100)+"px";
@@ -122,115 +120,18 @@ $(document).ready(function() {
     playView.style.zIndex = "15";
     document.body.appendChild(playView);
 
+    gameStarted = false;
     playView.onclick = function() {
-        frequencyDirection = frequencyDirection == 0 ? 1 : 0;
-        playView.innerText = frequencyDirection == 1 ? 
-        "stop" : "play";
-
-        if (frequencyDirection == 1)
-        oscillator.recorder.start();
-        else
-        oscillator.recorder.stop();
+        oscillator.start();
+        invaderOscillator.start();
+        gameStarted = true;
     };
-
-    previousView = document.createElement("button");
-    previousView.style.position = "absolute";
-    previousView.style.color = "#000";
-    previousView.style.fontFamily = "Khand";
-    previousView.style.textAlign = "center";
-    previousView.innerText = "<<";
-    previousView.style.left = ((sw/2)-(sw/4)-25)+"px";
-    previousView.style.top = ((sh/2)-(sw/2)-50)+"px";
-    previousView.style.width = (50)+"px";
-    previousView.style.height = (25)+"px";
-    previousView.style.zIndex = "15";
-    document.body.appendChild(previousView);
-
-    previousView.onclick = function() {
-        var value = (frequencyNo-1);
-        value = value < 0 ? 0 : value;
-
-        frequencyNo = value;
-        oscillator.frequency.value = frequencyPath[frequencyNo];
-    };
-
-    nextView = document.createElement("button");
-    nextView.style.position = "absolute";
-    nextView.style.color = "#000";
-    nextView.style.fontFamily = "Khand";
-    nextView.style.textAlign = "center";
-    nextView.innerText = ">>";
-    nextView.style.left = ((sw/2)+(sw/4)-25)+"px";
-    nextView.style.top = ((sh/2)-(sw/2)-50)+"px";
-    nextView.style.width = (50)+"px";
-    nextView.style.height = (25)+"px";
-    nextView.style.zIndex = "15";
-    document.body.appendChild(nextView);
-
-    nextView.onclick = function() {
-        var value = (frequencyNo+1);
-        value = value > (frequencyPath.length-1) ? 
-        (frequencyPath.length-1) : value;
-
-        frequencyNo = value;
-        oscillator.frequency.value = frequencyPath[frequencyNo];
-    };
-
-    var notes = [ 0, "+", "duplicate" ];
-    for (var n = 0; n < 3; n++) { 
-        noteView = document.createElement("button");
-        noteView.style.position = "absolute";
-        noteView.style.color = "#000";
-        noteView.style.fontFamily = "Khand";
-        noteView.style.textAlign = "center";
-        noteView.style.fontSize = "10px";
-        noteView.innerText = notes[n];
-        noteView.style.left = ((sw/2)+((-1.5+n)*((sw/2)/3)))+"px";
-        noteView.style.top = ((sh/2)+(sw/2)+25)+"px";
-        noteView.style.width = ((sw/2)/3)+"px";
-        noteView.style.height = (25)+"px";
-        noteView.style.zIndex = "15";
-        document.body.appendChild(noteView);
-
-        noteView.no = n;
-
-        noteView.onclick = function() {
-            if (notes[this.no] == 0) {
-                frequencyPath[frequencyNo] = 0;
-                oscillator.frequency.value = 0;
-            }
-            else if (notes[this.no] == "+") {
-                var value = 
-                prompt("Input frequency:", 
-                frequencyPath[frequencyNo]);
-
-                value = parseFloat(value);
-
-                frequencyPath.push(value);
-                frequencyNo = (frequencyPath.length-1);
-                oscillator.frequency.value = value;
-            }
-            else if (notes[this.no] == "duplicate") {
-                value = frequencyPath[frequencyNo];
-
-                frequencyPath.push(value);
-                frequencyNo = (frequencyPath.length-1);
-                oscillator.frequency.value = value;
-            }
-        }
-    }
-
-    frequencyPath = [ 0 ];
-
-    /*
-        32, 36, 41, 43, 0, 43, 0, 43, 
-        32, 36, 32, 36, 0, 36, 0, 36,
-        32, 49, 43, 41, 0, 41, 0, 41,
-        32, 43, 41, 36, 32, 36, 32, 36
-    ];*/
 
     oscillator = createOscillator();
     oscillator.frequency.value = 0;
+
+    invaderOscillator = createOscillator();
+    invaderOscillator.frequency.value = 0;
 
     drawImage();
     animate();
@@ -253,6 +154,26 @@ Math.curve = function(value, scale=1) {
     return rp.y*scale;
 };
 
+var frequency = 0;
+
+var invadersDefeated = 0;
+var invaderArr = [];
+
+var createInvader = function() {
+    var rnd = Math.random();
+    var posX = (sw/2)+((rnd-0.5)*(sw/2));
+
+    var obj = {
+        dead: false,
+        x: posX,
+        y: (sh/2)-(sw/4)
+    };
+
+    invaderOscillator.frequency.value = rnd*500;
+
+    invaderArr.push(obj);
+};
+
 var frequencyDirection = 0
 var frequencyNo = 0;
 var lap = 0;
@@ -267,25 +188,10 @@ var animationSpeed = 0;
 var animate = function() {
     elapsedTime = new Date().getTime()-renderTime;
     if (!backgroundMode) {
-        if ((new Date().getTime() - updateTime) > (60000/bpm)) {
+        if ((new Date().getTime() - updateTime) > 1000) {
             updateTime = new Date().getTime();
-
-            frequencyNo += frequencyDirection;
-
-            if (frequencyNo > (frequencyPath.length-1)) {
-                frequencyNo = 0
-                lap += 1;
-            }
-
-            if (frequencyNo < 0) {
-                frequencyNo = 0;
-                 lap = 0;
-            }
-
-            if (frequencyDirection == 1)
-            oscillator.frequency.value = frequencyPath[frequencyNo];
-            drawImage();
         }
+        drawImage();
     }
     renderTime = new Date().getTime();
     requestAnimationFrame(animate);
@@ -322,38 +228,71 @@ var drawImage =
         //ctx.stroke();
     }
 
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 0.5;
     ctx.strokeStyle = "#fff";
     ctx.fillStyle = "#fff";
 
     ctx.beginPath();
-    ctx.moveTo((sw/2), (sh/2)-(sw/2));
-    ctx.lineTo((sw/2), (sh/2)+(sw/2));
+    ctx.moveTo(0, (sh/2));
+    ctx.lineTo(sw, (sh/2));
     ctx.stroke();
 
-    ctx.save();
-    ctx.translate(-frequencyNo*10, 0);
+    ctx.lineWidth = 1;
 
-    for (var n = 0; n < frequencyPath.length; n++) {
-        ctx.beginPath();
-        ctx.moveTo(
-        (sw/2)+(n*10), 
-        (sh/2)+((0.5-((1/500)*frequencyPath[n]))*(sw/2)));
-        ctx.lineTo(
-        (sw/2)+((n+1)*10), 
-        (sh/2)+((0.5-((1/500)*frequencyPath[n]))*(sw/2)));
-        ctx.stroke();
-    }
-
-    ctx.restore();
+    ctx.beginPath();
+    ctx.moveTo(
+    (sw/2)+((((1/500)*frequency)-0.5)*(sw/2)),
+    (sh/2));
+    ctx.lineTo(
+    (sw/2)+((((1/500)*frequency)-0.5)*(sw/2)),
+    (sh/2)-10);
+    ctx.stroke();
 
     ctx.beginPath();
     ctx.arc(
-    (sw/2), 
-    (sh/2)+
-    ((0.5-((1/500)*frequencyPath[frequencyNo]))*(sw/2)),
+    (sw/2)+
+    ((((1/500)*frequency)-0.5)*(sw/2)),
+    (sh/2),
     2.5, 0, (Math.PI*2));
     ctx.fill();
+
+    for (var n = 0; n < invaderArr.length; n++) {
+        ctx.beginPath();
+        ctx.rect(
+        invaderArr[n].x-5, invaderArr[n].y-5,
+        10, 10);
+         ctx.fill();
+
+        var diff = (1/500)*
+        Math.abs(frequency -
+        invaderOscillator.frequency.value);
+
+        if (diff < 0.1) {
+            invaderArr[n].dead = true;
+            invaderOscillator.frequency.value = 0;
+            invadersDefeated += 1;
+            bpmView.innerText = invadersDefeated+" defeated";
+        }
+ 
+        invaderArr[n].y += 1;
+
+        if ((invaderArr[n].y + 5) > (sh/2)) {
+            invaderArr[n].y = (sh/2)-5;
+
+            /*
+            invaderArr[n].dead = true;
+            invaderOscillator.stop();
+            invadersDefeated = 0;
+            bpmView.innerText = invadersDefeated+" defeated";*/
+        }
+    }
+
+    invaderArr = invaderArr.filter((o) => {
+        return !o.dead;
+    });
+
+    if (gameStarted && invaderArr.length == 0)
+    createInvader();
 };
 
 var getSquare = function(item) {
