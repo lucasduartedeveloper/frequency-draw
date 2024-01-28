@@ -76,12 +76,16 @@ $(document).ready(function() {
         }
 
         var value = 0.5+((1/(sw/2))*((sh/2)-e.touches[0].clientY));
+        value = value < 0 ? 0 : value;
+
         frequencyPath[frequencyNo] = value*500;
         oscillator.frequency.value = frequencyPath[frequencyNo];
     };
 
     pictureView.ontouchmove = function(e) {
         var value = 0.5+((1/(sw/2))*((sh/2)-e.touches[0].clientY));
+        value = value < 0 ? 0 : value;
+
         frequencyPath[frequencyNo] = value*500;
         oscillator.frequency.value = frequencyPath[frequencyNo];
     };
