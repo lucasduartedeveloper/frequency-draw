@@ -83,7 +83,7 @@ $(document).ready(function() {
     playView.style.textAlign = "center";
     playView.innerText = frequencyDirection == 1 ? 
     "stop" : "play";
-    playView.style.left = ((sw/2)+(sw/4)-25)+"px";
+    playView.style.left = ((sw/2)+(sw/4)+30)+"px";
     playView.style.top = ((sh/2)-(sw/2)-50)+"px";
     playView.style.width = (50)+"px";
     playView.style.height = (25)+"px";
@@ -94,6 +94,48 @@ $(document).ready(function() {
         frequencyDirection = frequencyDirection == 0 ? 1 : 0;
         playView.innerText = frequencyDirection == 1 ? 
         "stop" : "play";
+    };
+
+    previousView = document.createElement("button");
+    previousView.style.position = "absolute";
+    previousView.style.color = "#000";
+    previousView.style.fontFamily = "Khand";
+    previousView.style.textAlign = "center";
+    previousView.innerText = "<<";
+    previousView.style.left = ((sw/2)-(sw/4)-25)+"px";
+    previousView.style.top = ((sh/2)-(sw/2)-50)+"px";
+    previousView.style.width = (50)+"px";
+    previousView.style.height = (25)+"px";
+    previousView.style.zIndex = "15";
+    document.body.appendChild(previousView);
+
+    previousView.onclick = function() {
+        var value = (frequencyNo-1);
+        value = value < 0 ? 0 : value;
+
+        frequencyNo = value;
+    };
+
+    nextView = document.createElement("button");
+    nextView.style.position = "absolute";
+    nextView.style.color = "#000";
+    nextView.style.fontFamily = "Khand";
+    nextView.style.textAlign = "center";
+    nextView.innerText = ">>";
+    nextView.style.left = ((sw/2)+(sw/4)-25)+"px";
+    nextView.style.top = ((sh/2)-(sw/2)-50)+"px";
+    nextView.style.width = (50)+"px";
+    nextView.style.height = (25)+"px";
+    nextView.style.zIndex = "15";
+    document.body.appendChild(nextView);
+
+    nextView.onclick = function() {
+        var value = (frequencyNo+1);
+
+        if (value > (frequencyPath.length-1))
+        frequencyPath.push(0);
+
+        frequencyNo = value;
     };
 
     var notes0 = [ 0, 32, 34, 36, 38, 41, 43, 46, 49, 52, 55, 58, 61 ];
@@ -115,7 +157,7 @@ $(document).ready(function() {
         noteView.no = n;
 
         noteView.onclick = function() {
-            frequencyPath.push(notes0[this.no]);
+            frequencyPath[frequencyNo] = notes0[this.no];
             oscillator.frequency.value = notes0[this.no];
         }
     }
@@ -139,7 +181,7 @@ $(document).ready(function() {
         noteView.no = n;
 
         noteView.onclick = function() {
-            frequencyPath.push(notes1[this.no]);
+            frequencyPath[frequencyNo] = notes1[this.no];
             oscillator.frequency.value = notes1[this.no];
         }
     }
@@ -164,7 +206,7 @@ $(document).ready(function() {
         noteView.no = n;
 
         noteView.onclick = function() {
-            frequencyPath.push(notes2[this.no]);
+            frequencyPath[frequencyNo] = notes2[this.no];
             oscillator.frequency.value = notes2[this.no];
         }
     }
