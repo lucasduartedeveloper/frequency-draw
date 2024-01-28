@@ -98,10 +98,10 @@ $(document).ready(function() {
     bpmView.style.color = "#fff";
     bpmView.style.fontFamily = "Khand";
     bpmView.style.textAlign = "center";
-    bpmView.innerText = invadersDefeated+" defeated";
-    bpmView.style.left = ((sw/2)-50)+"px";
+    bpmView.innerText = "";
+    bpmView.style.left = ((sw/2)-75)+"px";
     bpmView.style.top = ((sh/2)-(sw/2)-50)+"px";
-    bpmView.style.width = (100)+"px";
+    bpmView.style.width = (150)+"px";
     bpmView.style.height = (25)+"px";
     bpmView.style.zIndex = "15";
     document.body.appendChild(bpmView);
@@ -166,7 +166,7 @@ var createInvader = function() {
     var obj = {
         dead: false,
         x: posX,
-        y: (sh/2)-(sw/4)
+        y: (sh/2)-(sw/4)+5
     };
 
     invaderOscillator.frequency.value = rnd*500;
@@ -237,16 +237,24 @@ var drawImage =
     ctx.lineTo(sw, (sh/2));
     ctx.stroke();
 
+    ctx.beginPath();
+    ctx.moveTo(0, (sh/2)-(sw/4));
+    ctx.lineTo(sw, (sh/2)-(sw/4));
+    ctx.stroke();
+
     ctx.lineWidth = 1;
 
     ctx.beginPath();
     ctx.moveTo(
-    (sw/2)+((((1/500)*frequency)-0.5)*(sw/2)),
+    (sw/2)+((((1/500)*frequency)-0.5)*(sw/2))-5,
     (sh/2));
     ctx.lineTo(
     (sw/2)+((((1/500)*frequency)-0.5)*(sw/2)),
     (sh/2)-10);
-    ctx.stroke();
+    ctx.lineTo(
+    (sw/2)+((((1/500)*frequency)-0.5)*(sw/2)+5),
+    (sh/2));
+    ctx.fill();
 
     ctx.beginPath();
     ctx.arc(
@@ -254,37 +262,36 @@ var drawImage =
     ((((1/500)*frequency)-0.5)*(sw/2)),
     (sh/2),
     2.5, 0, (Math.PI*2));
-    ctx.fill();
+    //ctx.fill();
 
     for (var n = 0; n < invaderArr.length; n++) {
         ctx.beginPath();
         ctx.rect(
         invaderArr[n].x-5, invaderArr[n].y-5,
         10, 10);
-         ctx.fill();
+        //ctx.fill();
 
-        var diff = (1/500)*
-        Math.abs(frequency -
-        invaderOscillator.frequency.value);
+        ctx.beginPath();
+        ctx.moveTo(
+        (sw/2)+((((1/500)*frequency)-0.5)*(sw/2))-5,
+        (sh/2)-(sw/4));
+        ctx.lineTo(
+        (sw/2)+((((1/500)*frequency)-0.5)*(sw/2)),
+        (sh/2)-(sw/4)+10);
+        ctx.lineTo(
+        (sw/2)+((((1/500)*frequency)-0.5)*(sw/2)+5),
+        (sh/2)-(sw/4));
+        ctx.fill();
 
-        if (diff < 0.1) {
-            invaderArr[n].dead = true;
-            invaderOscillator.frequency.value = 0;
-            invadersDefeated += 1;
-            bpmView.innerText = invadersDefeated+" defeated";
-        }
- 
-        invaderArr[n].y += 1;
+        invaderArr[n].x = 
+        (sw/2)+((((1/500)*frequency)-0.5)*(sw/2));
 
-        if ((invaderArr[n].y + 5) > (sh/2)) {
-            invaderArr[n].y = (sh/2)-5;
+        invaderOscillator.frequency.value = 
+        500+frequency;
 
-            /*
-            invaderArr[n].dead = true;
-            invaderOscillator.stop();
-            invadersDefeated = 0;
-            bpmView.innerText = invadersDefeated+" defeated";*/
-        }
+        bpmView.innerText = 
+        frequency.toFixed(2)+" Hz - "+
+        invaderOscillator.frequency.value.toFixed(2)+" Hz";
     }
 
     invaderArr = invaderArr.filter((o) => {
