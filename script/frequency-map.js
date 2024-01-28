@@ -62,6 +62,113 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
+    bpm = 180;
+    bpmView = document.createElement("span");
+    bpmView.style.position = "absolute";
+    bpmView.style.color = "#fff";
+    bpmView.style.fontFamily = "Khand";
+    bpmView.style.textAlign = "center";
+    bpmView.innerText = bpm+" bpm";
+    bpmView.style.left = ((sw/2)-50)+"px";
+    bpmView.style.top = ((sh/2)-(sw/2)-50)+"px";
+    bpmView.style.width = (100)+"px";
+    bpmView.style.height = (25)+"px";
+    bpmView.style.zIndex = "15";
+    document.body.appendChild(bpmView);
+
+    playView = document.createElement("button");
+    playView.style.position = "absolute";
+    playView.style.color = "#000";
+    playView.style.fontFamily = "Khand";
+    playView.style.textAlign = "center";
+    playView.innerText = frequencyDirection == 1 ? 
+    "stop" : "play";
+    playView.style.left = ((sw/2)+(sw/4)-25)+"px";
+    playView.style.top = ((sh/2)-(sw/2)-50)+"px";
+    playView.style.width = (50)+"px";
+    playView.style.height = (25)+"px";
+    playView.style.zIndex = "15";
+    document.body.appendChild(playView);
+
+    playView.onclick = function() {
+        frequencyDirection = frequencyDirection == 0 ? 1 : 0;
+        playView.innerText = frequencyDirection == 1 ? 
+        "stop" : "play";
+    };
+
+    var notes0 = [ 0, 32, 34, 36, 38, 41, 43, 46, 49, 52, 55, 58, 61 ];
+    for (var n = 0; n < 13; n++) {
+        var noteView = document.createElement("button");
+        noteView.style.position = "absolute";
+        noteView.style.color = "#000";
+        noteView.style.fontFamily = "Khand";
+        noteView.style.textAlign = "center";
+        noteView.style.fontSize = "10px";
+        noteView.innerText = notes0[n];
+        noteView.style.left = ((sw/2)+((-6.5+n)*((sw-20)/13)))+"px";
+        noteView.style.top = ((sh/2)+(sw/2)+25)+"px";
+        noteView.style.width = ((sw-20)/13)+"px";
+        noteView.style.height = (25)+"px";
+        noteView.style.zIndex = "15";
+        document.body.appendChild(noteView);
+
+        noteView.no = n;
+
+        noteView.onclick = function() {
+            frequencyPath.push(notes0[this.no]);
+            oscillator.frequency.value = notes0[this.no];
+        }
+    }
+
+    var notes1 = [ 65, 69, 73, 77, 82, 87, 92, 98, 104, 110, 116, 123 ];
+    for (var n = 0; n < 12; n++) {
+        var noteView = document.createElement("button");
+        noteView.style.position = "absolute";
+        noteView.style.color = "#000";
+        noteView.style.fontFamily = "Khand";
+        noteView.style.textAlign = "center";
+        noteView.style.fontSize = "10px";
+        noteView.innerText = notes1[n];
+        noteView.style.left = ((sw/2)+((-6+n)*((sw-20)/12)))+"px";
+        noteView.style.top = ((sh/2)+(sw/2)+55)+"px";
+        noteView.style.width = ((sw-20)/12)+"px";
+        noteView.style.height = (25)+"px";
+        noteView.style.zIndex = "15";
+        document.body.appendChild(noteView);
+
+        noteView.no = n;
+
+        noteView.onclick = function() {
+            frequencyPath.push(notes1[this.no]);
+            oscillator.frequency.value = notes1[this.no];
+        }
+    }
+
+    var notes2 = 
+    [ 130, 138, 146, 155, 164, 174, 185, 196, 208, 220, 233, 246 ];
+    for (var n = 0; n < 12; n++) {
+        var noteView = document.createElement("button");
+        noteView.style.position = "absolute";
+        noteView.style.color = "#000";
+        noteView.style.fontFamily = "Khand";
+        noteView.style.textAlign = "center";
+        noteView.style.fontSize = "10px";
+        noteView.innerText = notes2[n];
+        noteView.style.left = ((sw/2)+((-6+n)*((sw-20)/12)))+"px";
+        noteView.style.top = ((sh/2)+(sw/2)+85)+"px";
+        noteView.style.width = ((sw-20)/12)+"px";
+        noteView.style.height = (25)+"px";
+        noteView.style.zIndex = "15";
+        document.body.appendChild(noteView);
+
+        noteView.no = n;
+
+        noteView.onclick = function() {
+            frequencyPath.push(notes2[this.no]);
+            oscillator.frequency.value = notes2[this.no];
+        }
+    }
+
     userInteracted = false;
     oscillatorStarted = false;
     pictureView.ontouchstart = function() {
@@ -73,13 +180,16 @@ $(document).ready(function() {
 
     pictureView.ontouchend= function() {
         userInteracted = true;
-        if (userInteracted && oscillatorStarted)
-        frequencyDirection = 1;
     }
 
-    frequencyPath = [
-        0, 50, 100, 50, 0, 50, 100, 50, 0
-    ];
+    frequencyPath = [];
+
+    /*
+        32, 36, 41, 43, 0, 43, 0, 43, 
+        32, 36, 32, 36, 0, 36, 0, 36,
+        32, 49, 43, 41, 0, 41, 0, 41,
+        32, 43, 41, 36, 32, 36, 32, 36
+    ];*/
 
     oscillator = createOscillator();
     oscillator.frequency.value = 0;
@@ -119,24 +229,25 @@ var animationSpeed = 0;
 var animate = function() {
     elapsedTime = new Date().getTime()-renderTime;
     if (!backgroundMode) {
-        if ((new Date().getTime() - updateTime) > 1000) {
+        if ((new Date().getTime() - updateTime) > (60000/bpm)) {
             updateTime = new Date().getTime();
+
+            frequencyNo += frequencyDirection;
+
+            if (frequencyNo > (frequencyPath.length-1)) {
+                frequencyNo = 0
+                lap += 1;
+            }
+
+            if (frequencyNo < 0) {
+                frequencyNo = 0;
+                 lap = 0;
+            }
+
+            if (frequencyDirection == 1)
+            oscillator.frequency.value = frequencyPath[frequencyNo];
+            drawImage();
         }
-
-        frequencyNo += frequencyDirection;
-
-        if (frequencyNo > (frequencyPath.length-1)) {
-             frequencyNo = 0
-             lap += 1;
-        }
-
-        if (frequencyNo < 0) {
-             frequencyNo = 0;
-             lap = 0;
-        }
-
-        oscillator.frequency.value = frequencyPath[frequencyNo];
-        drawImage();
     }
     renderTime = new Date().getTime();
     requestAnimationFrame(animate);
@@ -189,10 +300,10 @@ var drawImage =
         ctx.beginPath();
         ctx.moveTo(
         (sw/2)+(n*10), 
-        (sh/2)+((0.5+((1/1000)*frequencyPath[n]))*(sw/2)));
+        (sh/2)+((0.5-((1/500)*frequencyPath[n]))*(sw/2)));
         ctx.lineTo(
         (sw/2)+((n+1)*10), 
-        (sh/2)+((0.5+((1/1000)*frequencyPath[n]))*(sw/2)));
+        (sh/2)+((0.5-((1/500)*frequencyPath[n]))*(sw/2)));
         ctx.stroke();
     }
 
@@ -202,8 +313,8 @@ var drawImage =
     ctx.arc(
     (sw/2), 
     (sh/2)+
-    ((0.5+((1/1000)*frequencyPath[frequencyNo]))*(sw/2)),
-    5, 0, (Math.PI*2));
+    ((0.5-((1/500)*frequencyPath[frequencyNo]))*(sw/2)),
+    2.5, 0, (Math.PI*2));
     ctx.fill();
 };
 
