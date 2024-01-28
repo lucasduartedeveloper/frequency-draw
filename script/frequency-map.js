@@ -114,6 +114,7 @@ $(document).ready(function() {
         value = value < 0 ? 0 : value;
 
         frequencyNo = value;
+        oscillator.frequency.value = frequencyPath[frequencyNo];
     };
 
     nextView = document.createElement("button");
@@ -131,25 +132,25 @@ $(document).ready(function() {
 
     nextView.onclick = function() {
         var value = (frequencyNo+1);
-
-        if (value > (frequencyPath.length-1))
-        frequencyPath.push(0);
+        value = value > (frequencyPath.length-1) ? 
+        (frequencyPath.length-1) : value;
 
         frequencyNo = value;
+        oscillator.frequency.value = frequencyPath[frequencyNo];
     };
 
-    var notes0 = [ 0, 32, 34, 36, 38, 41, 43, 46, 49, 52, 55, 58, 61 ];
-    for (var n = 0; n < 13; n++) {
-        var noteView = document.createElement("button");
+    var notes = [ 0, "+", "duplicate" ];
+    for (var n = 0; n < 3; n++) { 
+        noteView = document.createElement("button");
         noteView.style.position = "absolute";
         noteView.style.color = "#000";
         noteView.style.fontFamily = "Khand";
         noteView.style.textAlign = "center";
         noteView.style.fontSize = "10px";
-        noteView.innerText = notes0[n];
-        noteView.style.left = ((sw/2)+((-6.5+n)*((sw-20)/13)))+"px";
+        noteView.innerText = notes[n];
+        noteView.style.left = ((sw/2)+((-1.5+n)*((sw/2)/3)))+"px";
         noteView.style.top = ((sh/2)+(sw/2)+25)+"px";
-        noteView.style.width = ((sw-20)/13)+"px";
+        noteView.style.width = ((sw/2)/3)+"px";
         noteView.style.height = (25)+"px";
         noteView.style.zIndex = "15";
         document.body.appendChild(noteView);
@@ -157,57 +158,28 @@ $(document).ready(function() {
         noteView.no = n;
 
         noteView.onclick = function() {
-            frequencyPath[frequencyNo] = notes0[this.no];
-            oscillator.frequency.value = notes0[this.no];
-        }
-    }
+            if (notes[this.no] == 0) {
+                frequencyPath[frequencyNo] = 0;
+                oscillator.frequency.value = 0;
+            }
+            else if (notes[this.no] == "+") {
+                var value = 
+                prompt("Input frequency:", 
+                frequencyPath[frequencyNo]);
 
-    var notes1 = [ 65, 69, 73, 77, 82, 87, 92, 98, 104, 110, 116, 123 ];
-    for (var n = 0; n < 12; n++) {
-        var noteView = document.createElement("button");
-        noteView.style.position = "absolute";
-        noteView.style.color = "#000";
-        noteView.style.fontFamily = "Khand";
-        noteView.style.textAlign = "center";
-        noteView.style.fontSize = "10px";
-        noteView.innerText = notes1[n];
-        noteView.style.left = ((sw/2)+((-6+n)*((sw-20)/12)))+"px";
-        noteView.style.top = ((sh/2)+(sw/2)+55)+"px";
-        noteView.style.width = ((sw-20)/12)+"px";
-        noteView.style.height = (25)+"px";
-        noteView.style.zIndex = "15";
-        document.body.appendChild(noteView);
+                value = parseFloat(value);
 
-        noteView.no = n;
+                frequencyPath.push(value);
+                frequencyNo = (frequencyPath.length-1);
+                oscillator.frequency.value = value;
+            }
+            else if (notes[this.no] == "duplicate") {
+                value = frequencyPath[frequencyNo];
 
-        noteView.onclick = function() {
-            frequencyPath[frequencyNo] = notes1[this.no];
-            oscillator.frequency.value = notes1[this.no];
-        }
-    }
-
-    var notes2 = 
-    [ 130, 138, 146, 155, 164, 174, 185, 196, 208, 220, 233, 246 ];
-    for (var n = 0; n < 12; n++) {
-        var noteView = document.createElement("button");
-        noteView.style.position = "absolute";
-        noteView.style.color = "#000";
-        noteView.style.fontFamily = "Khand";
-        noteView.style.textAlign = "center";
-        noteView.style.fontSize = "10px";
-        noteView.innerText = notes2[n];
-        noteView.style.left = ((sw/2)+((-6+n)*((sw-20)/12)))+"px";
-        noteView.style.top = ((sh/2)+(sw/2)+85)+"px";
-        noteView.style.width = ((sw-20)/12)+"px";
-        noteView.style.height = (25)+"px";
-        noteView.style.zIndex = "15";
-        document.body.appendChild(noteView);
-
-        noteView.no = n;
-
-        noteView.onclick = function() {
-            frequencyPath[frequencyNo] = notes2[this.no];
-            oscillator.frequency.value = notes2[this.no];
+                frequencyPath.push(value);
+                frequencyNo = (frequencyPath.length-1);
+                oscillator.frequency.value = value;
+            }
         }
     }
 
