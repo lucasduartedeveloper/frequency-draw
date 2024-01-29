@@ -455,16 +455,13 @@ var drawPathArr = function(freqArray) {
 
     for (var n = 0; n < pathArr.length; n++) {
         var path = pathArr[n];
-        for (var k = 1; k < path.length; k++) {
-            var size = Math.curve((1-((1/path.length)*k)), 1)*
-            ((sw/2)/sectionCount);
-            ctx.lineWidth = size;
 
-            ctx.beginPath();
-            ctx.moveTo(path[k-1].x, path[k-1].y);
+        ctx.beginPath();
+        ctx.moveTo(path[0].x, path[0].y);
+        for (var k = 1; k < path.length; k++) {
             ctx.lineTo(path[k].x, path[k].y);
-            ctx.stroke();
         }
+        ctx.stroke();
     }
 
     ctx.fillStyle = "#5f5";
