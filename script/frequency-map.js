@@ -150,7 +150,7 @@ var animate = function() {
         }
 
         oscillator.frequency.value = 
-        (100+(lap*100)) - (frequencyPath[frequencyNo].y*200);
+        (100 - (frequencyPath[frequencyNo].y*200));
 
         drawImage();
     }
@@ -215,6 +215,24 @@ var drawImage =
     (sh/2)+(frequencyPath[frequencyNo].y*(sw/2)), 
     10, 0, (Math.PI*2));
     ctx.fill();
+
+    if (lap > 0) {
+        ctx.beginPath();
+        ctx.arc(
+        (sw/2)+(frequencyPath[0].x*(sw/2))-30, 
+        (sh/2)+(frequencyPath[0].y*(sw/2)), 
+        10, 0, (Math.PI*2));
+        ctx.fill();
+    }
+
+    if (lap > 1) {
+        ctx.beginPath();
+        ctx.arc(
+        (sw/2)+(frequencyPath[0].x*(sw/2))-60, 
+        (sh/2)+(frequencyPath[0].y*(sw/2)), 
+        10, 0, (Math.PI*2));
+        ctx.fill();
+    }
 
     ctx.restore();
 };
