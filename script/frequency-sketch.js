@@ -230,7 +230,9 @@ $(document).ready(function() {
                 var path = pathArr[n];
                 for (var k = 0; k < path.length; k++) {
                     if (distance+k == currentPosition) {
-                        oscillator0.frequency.value = path[k].frequency;
+                        oscillator0.frequency.value = 
+                        sectionCount == 0 ? 0 : 
+                        path[k].frequency;
                         found = true;
                         break;
                     }
@@ -286,6 +288,7 @@ $(document).ready(function() {
 
         var value = ((1/250)*reachedFreq);
         drawDetailLevel(1+Math.floor(value*9), value*50);
+        console.log(value);
 
         totalSquares = (sectionCount*sectionCount);
     };
