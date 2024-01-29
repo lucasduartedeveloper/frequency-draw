@@ -58,7 +58,7 @@ $(document).ready(function() {
     pictureViewZoom.style.width = (sw)+"px";
     pictureViewZoom.style.height = (sh)+"px";
     pictureViewZoom.style.zIndex = "15";
-    document.body.appendChild(pictureViewZoom);
+    //document.body.appendChild(pictureViewZoom);
 
     pictureView = document.createElement("canvas");
     pictureView.style.position = "absolute";
@@ -84,7 +84,6 @@ $(document).ready(function() {
     pictureView.ontouchstart = function(e) {
         var detail_x = (1/sw)*e.touches[0].clientX;
         var detail_y = (1-((1/sh)*e.touches[0].clientY));
-        console.log(detail_x, detail_y);
         drawDetailLevel(
             Math.floor(detail_x*30),
             Math.floor(detail_y*50)
@@ -205,19 +204,20 @@ $(document).ready(function() {
     buttonPlaySquareView.style.fontFamily = "Khand";
     buttonPlaySquareView.style.fontSize = "15px";
     buttonPlaySquareView.style.left = (10)+"px";
-    buttonPlaySquareView.style.top = (sh-35)+"px";
+    buttonPlaySquareView.style.top = (sh-60)+"px";
     buttonPlaySquareView.style.width = (100)+"px";
-    buttonPlaySquareView.style.height = (25)+"px";
+    buttonPlaySquareView.style.height = (50)+"px";
     buttonPlaySquareView.style.border = "1px solid white";
     buttonPlaySquareView.style.borderRadius = "25px";
     buttonPlaySquareView.style.zIndex = "15";
     document.body.appendChild(buttonPlaySquareView);
 
+    totalSquares = (sectionCount*sectionCount);
     currentPosition = 0;
-    var playSquareInterval = 0;
+    playSquareInterval = 0;
     buttonPlaySquareView.onclick = function() {
         if (currentPosition > 0) {
-             currentPosition = 0;
+             //currentPosition = 0;
              oscillator0.frequency.value = 0;
              clearInterval(playSquareInterval);
              return;
@@ -240,7 +240,9 @@ $(document).ready(function() {
             }
 
             if (!found) currentPosition = 0;
-            else currentPosition += 1;
+            else if (currentPosition < (totalSquares-1)) 
+            currentPosition += 1;
+            else currentPosition = 0;
         }, 1000/60);
     };
 
@@ -252,9 +254,9 @@ $(document).ready(function() {
     buttonOscillatorView.style.fontFamily = "Khand";
     buttonOscillatorView.style.fontSize = "15px";
     buttonOscillatorView.style.left = (120)+"px";
-    buttonOscillatorView.style.top = (sh-35)+"px";
+    buttonOscillatorView.style.top = (sh-60)+"px";
     buttonOscillatorView.style.width = (100)+"px";
-    buttonOscillatorView.style.height = (25)+"px";
+    buttonOscillatorView.style.height = (50)+"px";
     buttonOscillatorView.style.border = "1px solid white";
     buttonOscillatorView.style.borderRadius = "25px";
     buttonOscillatorView.style.zIndex = "15";
@@ -267,6 +269,28 @@ $(document).ready(function() {
             oscillatorStarted = true;
             buttonOscillatorView.innerText = "on";
         }
+
+        if (!navigator.mediaDevices) return;
+
+        if (mic.closed) {
+            mic.open(false, 1);
+        }
+    };
+
+    mic = new EasyMicrophone();
+    mic.onsuccess = function() { 
+        console.log("mic open");
+    };
+    mic.onupdate = function(freqArray, reachedFreq, avgValue) {
+        micAvgValue = avgValue;
+
+        var value = ((1/250)*reachedFreq);
+        drawDetailLevel(1+Math.floor(value*9), value*50);
+
+        totalSquares = (sectionCount*sectionCount);
+    };
+    mic.onclose = function() { 
+        console.log("mic closed");
     };
 
     drawImage();
@@ -275,6 +299,7 @@ $(document).ready(function() {
 
 var sectionCount = 0;
 var drawDetailLevel = function(numSections, sectionLength) {
+    sectionLength = numSections;
     sectionCount = numSections;
 
     pathArr = [];
@@ -396,6 +421,18 @@ var drawImage =
         (sh/2)+(size/2));
         ctx.stroke();
     }
+
+    ctx.fillStyle = "#55f";
+
+    var x = (currentPosition%sectionCount);
+    var y = Math.floor(currentPosition/sectionCount);
+    //var itemSize = (size/sectionCount);
+
+    ctx.beginPath();
+    ctx.rect((sw/2)-(size/2)+(x*(size/sectionCount)), 
+    (sh/2)-(size/2)+(y*(size/sectionCount)), 
+    (size/sectionCount), (size/sectionCount));
+    ctx.fill();
 
     drawPathArr();
 
