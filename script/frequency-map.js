@@ -173,6 +173,7 @@ var animate = function() {
     requestAnimationFrame(animate);
 };
 
+var distance = 0;
 var drawImage = 
     function(angle=0, color="#000", gridColor="#333") {
     var ctx = pictureView.getContext("2d");
@@ -224,6 +225,7 @@ var drawImage =
     }
     ctx.stroke();
 
+    distance = lap < 10 ? 0 : (distance+1);
     var posX = 
     (sw/2)+(frequencyPath[frequencyNo].x*(sw/2)) + 
     ((((sw/2) - 
@@ -231,16 +233,23 @@ var drawImage =
     var posY = 
     (sh/2)+(frequencyPath[frequencyNo].y*(sw/2)) + 
     (((((sh/2)+(sw/2)) - 
-    ((sh/2)+(frequencyPath[frequencyNo].y*(sw/2))))/10)*lap);
+    ((sh/2)+(frequencyPath[frequencyNo].y*(sw/2))))/10)*lap)-
+    distance;
 
     ctx.beginPath();
-    /*"
     ctx.arc(
     (sw/2)+(frequencyPath[frequencyNo].x*(sw/2)), 
     (sh/2)+(frequencyPath[frequencyNo].y*(sw/2)), 
-    10, 0, (Math.PI*2));*/
-    ctx.arc(posX, posY, 10, 0, (Math.PI*2));
+    10, 0, (Math.PI*2));
+    //ctx.arc(posX, posY, 10*(1-(1/10)*lap), 0, (Math.PI*2));
     ctx.fill();
+
+    /*
+    var scale = 0.5+,((0.5/10)*lap);
+    ctx.beginPath();
+    ctx.rect(posX-(scale*5), posY-(scale*10), 
+    scale*10, scale*20);
+    ctx.fill();*/
 
     if (lap > 0) {
         ctx.beginPath();
