@@ -75,25 +75,7 @@ $(document).ready(function() {
         frequencyDirection = -1;
     }
 
-    var c0 = { x: 0, y: 0 };
-    var c1 = { x: 0, y: 0 };
-
-    var p0 = { x: c0.x, y: c0.y+0.5 };
-    var p1 = { x: c1.x, y: c1.y-0.5 };
-
-    frequencyPath = [];
-    frequencyPath.push({ x: -0.5, y: 0.5 });
-    for (var n = 0; n < 10; n++) {
-        frequencyPath.push({ x: -0.5+((0.5/10))*n, y: 0.5 });
-    }
-    for (var n = 0; n < 10; n++) {
-        var rp = _rotate2d(c0, p0, n*(180/10));
-        frequencyPath.push(rp);
-    }
-    for (var n = 0; n < 10; n++) {
-        var rp = _rotate2d(c1, p1, n*(180/10));
-        frequencyPath.push(rp);
-    }
+    drawAcc(60, effectRatio);
 
     oscillator = createOscillator();
     oscillator.frequency.value = 100;
@@ -101,6 +83,34 @@ $(document).ready(function() {
     drawImage();
     animate();
 });
+
+var drawAcc = function(length = 15, effect = 0.01) {
+    var c0 = { x: 0, y: 0 };
+    var c1 = { x: 0, y: 0 };
+
+    var p0 = { x: c0.x, y: c0.y+0.5 };
+    var p1 = { x: c1.x, y: c1.y-0.5 };
+
+    var size = Math.floor(length/3);
+
+    frequencyPath = [];
+    frequencyPath.push({ x: -0.5, y: 0.5 });
+    for (var n = 0; n < size; n++) {
+        frequencyPath.push({ x: -0.5+((0.5/size))*n, y: 0.5 });
+    }
+    for (var n = 0; n < size; n++) {
+        var pe = { ...p0 };
+        pe.y += (-(effect/2)+(Math.random()*effect));
+        var rp = _rotate2d(c0, pe, n*(180/size));
+        frequencyPath.push(rp);
+    }
+    for (var n = 0; n < size; n++) {
+        var pe = { ...p1 };
+        pe.y += (-(effect/2)+(Math.random()*effect));
+        var rp = _rotate2d(c1, pe, n*(180/size));
+        frequencyPath.push(rp);
+    }
+};
 
 var toHertz = function(no) {
     return (no*250)*((24000)/512);
@@ -130,6 +140,8 @@ var renderTime = 0;
 var elapsedTime = 0;
 var animationSpeed = 0;
 
+var effectRatio = 0.1;
+
 var animate = function() {
     elapsedTime = new Date().getTime()-renderTime;
     if (!backgroundMode) {
@@ -137,20 +149,23 @@ var animate = function() {
             updateTime = new Date().getTime();
         }
 
-        frequencyNo += frequencyDirection;
+        frequencyNo += frequencyDirection*(lap+1);
 
         if (frequencyNo > (frequencyPath.length-1)) {
-             frequencyNo = 10;
-             lap += 1;
+             frequencyNo = 20;
+             if (lap < 10) lap += 1;
+             drawAcc(60, (effectRatio/lap));
         }
 
         if (frequencyNo < 0) {
              frequencyNo = 0;
              lap = 0;
+             drawAcc(60, effectRatio);
         }
 
         oscillator.frequency.value = 
-        (100 - (frequencyPath[frequencyNo].y*200));
+        (50+(lap*5) - 
+        (frequencyPath[frequencyNo].y*10));
 
         drawImage();
     }
@@ -209,11 +224,22 @@ var drawImage =
     }
     ctx.stroke();
 
+    var posX = 
+    (sw/2)+(frequencyPath[frequencyNo].x*(sw/2)) + 
+    ((((sw/2) - 
+    ((sw/2)+(frequencyPath[frequencyNo].x*(sw/2))))/10)*lap);
+    var posY = 
+    (sh/2)+(frequencyPath[frequencyNo].y*(sw/2)) + 
+    (((((sh/2)+(sw/2)) - 
+    ((sh/2)+(frequencyPath[frequencyNo].y*(sw/2))))/10)*lap);
+
     ctx.beginPath();
+    /*"
     ctx.arc(
     (sw/2)+(frequencyPath[frequencyNo].x*(sw/2)), 
     (sh/2)+(frequencyPath[frequencyNo].y*(sw/2)), 
-    10, 0, (Math.PI*2));
+    10, 0, (Math.PI*2));*/
+    ctx.arc(posX, posY, 10, 0, (Math.PI*2));
     ctx.fill();
 
     if (lap > 0) {

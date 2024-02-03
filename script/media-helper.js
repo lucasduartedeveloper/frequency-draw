@@ -23,6 +23,7 @@ class MediaAnalyser {
         }.bind(this);
 
         this.audio.onpause = function() {
+            this.closed = true;
             this.onstop();
         }.bind(this);
 

@@ -296,9 +296,85 @@ $(document).ready(function() {
         console.log("mic closed");
     };
 
+    buttonPreviousView = document.createElement("button");
+    buttonPreviousView.style.position = "absolute";
+    buttonPreviousView.style.background = "#000";
+    buttonPreviousView.style.color = "#fff";
+    buttonPreviousView.innerText = "previous";
+    buttonPreviousView.style.fontFamily = "Khand";
+    buttonPreviousView.style.fontSize = "15px";
+    buttonPreviousView.style.left = (10)+"px";
+    buttonPreviousView.style.top = (sh-120)+"px";
+    buttonPreviousView.style.width = (100)+"px";
+    buttonPreviousView.style.height = (50)+"px";
+    buttonPreviousView.style.border = "1px solid white";
+    buttonPreviousView.style.borderRadius = "25px";
+    buttonPreviousView.style.zIndex = "15";
+    document.body.appendChild(buttonPreviousView);
+
+    buttonPreviousView.onclick = function() {
+        var value = (sectionCount-1) > 0 ? (sectionCount-1) : 0;
+        sectionCount = value;
+
+        if (sectionCount > 0)
+        drawDetailLevel(sectionCount, sectionCount);
+    };
+
+    buttonNextView = document.createElement("button");
+    buttonNextView.style.position = "absolute";
+    buttonNextView.style.background = "#000";
+    buttonNextView.style.color = "#fff";
+    buttonNextView.innerText = "next";
+    buttonNextView.style.fontFamily = "Khand";
+    buttonNextView.style.fontSize = "15px";
+    buttonNextView.style.left = (sw-110)+"px";
+    buttonNextView.style.top = (sh-120)+"px";
+    buttonNextView.style.width = (100)+"px";
+    buttonNextView.style.height = (50)+"px";
+    buttonNextView.style.border = "1px solid white";
+    buttonNextView.style.borderRadius = "25px";
+    buttonNextView.style.zIndex = "15";
+    document.body.appendChild(buttonNextView);
+
+    buttonNextView.onclick = function() {
+        var value = (sectionCount+1);
+        sectionCount = value;
+
+        if (sectionCount > 0)
+        drawDetailLevel(sectionCount, sectionCount);
+    };
+
+    loadImages();
+
     drawImage();
     animate();
 });
+
+var img_list = [
+    "img/picture-1.png"
+];
+
+var imagesLoaded = false;
+var loadImages = function(callback) {
+    var count = 0;
+    for (var n = 0; n < img_list.length; n++) {
+        var img = document.createElement("img");
+        img.n = n;
+        img.onload = function() {
+            count += 1;
+            console.log("loading ("+count+"/"+img_list.length+")");
+            img_list[this.n] = this;
+            if (count == img_list.length) {
+                imagesLoaded = true;
+                //callback();
+            }
+        };
+        var rnd = Math.random();
+        img.src = img_list[n].includes("img") ? 
+        img_list[n]+"?f="+rnd : 
+        img_list[n];
+    }
+};
 
 var sectionCount = 0;
 var drawDetailLevel = function(numSections, sectionLength) {
@@ -316,7 +392,7 @@ var drawDetailLevel = function(numSections, sectionLength) {
        for (var k = 0; k < sectionLength; k++) {
             var p = {
                  x: c.x,
-                 y: c.y-(sw/4)+(sw/8)-(k*((sw/8)/sectionLength))
+                 y: c.y-(sw/2)+(sw/4)-(k*((sw/4)/sectionLength))
             };
             var rp = _rotate2d(c,p, n*((360)/numSections));
             rp.frequency = (n*50)+50+((k-5)*(100/sectionLength));
@@ -398,7 +474,7 @@ var drawImage =
 
     ctx.restore();
 
-    var size = (sw/4)/Math.sqrt(2);
+    var size = (sw/2)/Math.sqrt(2);
 
     ctx.lineWidth = 1;
     ctx.strokeStyle = "#55f";
@@ -427,15 +503,43 @@ var drawImage =
 
     ctx.fillStyle = "#55f";
 
+    var resolutionCanvas = document.createElement("canvas");
+    resolutionCanvas.width = sectionCount;
+    resolutionCanvas.height = sectionCount;
+
+    var resolutionCtx = resolutionCanvas.getContext("2d");
+    resolutionCtx.imageSmoothingEnabled = false;
+
+    if (imagesLoaded) {
+        var image = {
+            width: img_list[0].naturalWidth,
+            height: img_list[0].naturalHeight
+        };
+        var frame = {
+            width: getSquare(img_list[0]),
+            height: getSquare(img_list[0])
+        };
+        var format = fitImageCover(image, frame);
+        resolutionCtx.drawImage(img_list[0], 
+        -format.left, -format.top, frame.width, frame.height,
+        0, 0, sectionCount, sectionCount);
+    }
+
+    if (sectionCount > 0)
+    ctx.drawImage(resolutionCanvas, 
+    (sw/2)-(size/2), (sh/2)-(size/2), 
+    size, size);
+
     var x = (currentPosition%sectionCount);
     var y = Math.floor(currentPosition/sectionCount);
     //var itemSize = (size/sectionCount);
 
+    /*
     ctx.beginPath();
     ctx.rect((sw/2)-(size/2)+(x*(size/sectionCount)), 
     (sh/2)-(size/2)+(y*(size/sectionCount)), 
     (size/sectionCount), (size/sectionCount));
-    ctx.fill();
+    ctx.fill();*/
 
     drawPathArr();
 
@@ -494,6 +598,42 @@ var getSquare = function(item) {
     item.naturalHeight : item.height;
 
     return width < height ? width : height;
+};
+
+var fitImageCover = function(img, frame) {
+    var obj = {
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0
+    };
+
+    var left, top, width, height;
+
+    var img_aspectRatio = img.width/img.height;
+    var frame_aspectRatio = frame.width/frame.height;
+
+    if (frame_aspectRatio > img_aspectRatio) {
+        width = frame.width;
+        height = (img.height/img.width)*frame.width;
+
+        left = 0;
+        top = -(height-frame.height)/2;
+    }
+    else {
+        height = frame.height;
+        width = (img.width/img.height)*frame.height;
+
+        top = 0;
+        left = -(width-frame.width)/2;
+    }
+
+    obj.left = left;
+    obj.top = top;
+    obj.width = width;
+    obj.height = height;
+
+    return obj;
 };
 
 var visibilityChange;
