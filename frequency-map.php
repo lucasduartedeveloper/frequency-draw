@@ -30,7 +30,7 @@ $script = [
     5 => "script/audio-helper.js",
     6 => "script/math-helper.js",
     7 => "script/login-helper.js",
-    8 => "script/frequency-map.js"
+    8 => "script/frequency-tube.js"
 ];
 
 $module = [];
