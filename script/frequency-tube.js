@@ -82,8 +82,7 @@ $(document).ready(function() {
         (1/sw)*(e.touches[0].clientY-((sh/2)-(sw/2)));
         no = Math.round((1-no)*10);
 
-        oscillator.volume.gain.value = 
-        ((no+1)/10) < micAvgValue ? 0.1 : 0;
+        frequencyNo = no;
         oscillator.frequency.value = frequencyArr[no];
     }
 
@@ -144,6 +143,9 @@ var animate = function() {
         if ((new Date().getTime() - updateTime) > 1000) {
             updateTime = new Date().getTime();
         }
+
+        oscillator.volume.gain.value = 
+        ((frequencyNo+1)/10) < micAvgValue ? 0.1 : 0;
 
         drawImage();
     }
