@@ -61,7 +61,9 @@ $(document).ready(function() {
     document.body.appendChild(pictureView);
 
     frequencyArr = 
-    [ 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650 ];
+    [ 246.94, 
+      261.63, 293.66, 329.63, 349.23, 392, 440, 493.88, 523.25, 
+      587.33 ];
     frequencyNo = 0;
 
     var startX = 0;
