@@ -94,6 +94,7 @@ $(document).ready(function() {
     oscillator = createOscillator();
     oscillator.frequency.value = 100;
 
+    micReachedValue = 0;
     micAvgValue = 1;
     micReachedFreq = 0;
 
@@ -104,6 +105,9 @@ $(document).ready(function() {
     mic.onupdate = function(freqArray, reachedFreq, avgValue) {
         micAvgValue = avgValue;
 
+        if (micAvgValue > micReachedValue)
+        micReachedValue = micAvgValue;
+
         if (micReachedFreq > reachedFreq)
         micReachedFreq = reachedFreq;
 
@@ -111,6 +115,34 @@ $(document).ready(function() {
     };
     mic.onclose = function() { 
         console.log("mic closed");
+    };
+
+    motionPath = [ 
+        { x: 0, y: 0, z: 0 }
+    ];
+
+    lastMotionTime = 0;
+    motion = true;
+    gyroUpdated = function(e) {
+        var currentTime = new Date().getTime();
+
+        var accX = (1/9.8)*e.accX;
+        var accY = (1/9.8)*e.accY;
+        var accZ = (1/9.8)*e.accZ;
+
+        motionPath[0].x = accX;
+        motionPath[0].y = accY;
+        motionPath[0].z = accZ;
+
+        if (currentTime - lastMotionTime > (1000/30)) {
+            var obj = { x: accX, y: accY, z: accZ };
+
+            if (motionPath.length >= (30*60))
+            motionPath.splice((motionPath.length-2), 1);
+
+            motionPath.splice(0, 0, obj);
+            lastMotionTime = currentTime;
+        }
     };
 
     drawImage();
@@ -206,6 +238,27 @@ var drawImage =
             (sw/4), (sw/10));
             ctx.fill();
         }
+    }
+
+    if (motionPath.length > 0) {
+        var limit = motionPath.length > (sw/2) ? 
+        (sw/2) : motionPath.length;
+
+        ctx.beginPath();
+        ctx.moveTo((sw/2), 50+(motionPath[0].y*25));
+        for (var n = 1; n < limit; n++) {
+            ctx.lineTo((sw/2)-n, 50+(motionPath[n].y*25));
+            ctx.stroke();
+        }
+
+        var reachedValue = micReachedValue > 0.1 ? 
+        (Math.floor(micReachedValue*10)-1) : 0;
+
+        ctx.beginPath();
+        ctx.arc((sw/2)+(sw/4)+(sw/8), (sh/2)+(sw/2)-(sw/20)
+        -(reachedValue*(sw/10)), 
+        5, 0, (Math.PI*2));
+        ctx.fill();
     }
 
     ctx.restore();
