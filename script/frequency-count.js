@@ -270,9 +270,9 @@ var drawImage =
     ctx.strokeStyle = "#fff";
 
     ctx.beginPath();
-    ctx.moveTo((sw/2), (sh/2)+100+(frequencyPath[0]*25));
+    ctx.moveTo((sw/2), (sh/2)+150+(frequencyPath[0]*25));
     for (var n = 1; n < frequencyPath.length; n++) {
-        ctx.lineTo((sw/2)-n, (sh/2)+100+(frequencyPath[n]*25));
+        ctx.lineTo((sw/2)-n, (sh/2)+150+(frequencyPath[n]*25));
     }
     ctx.stroke();
 
