@@ -193,6 +193,7 @@ var hideLogin = function() {
     }
 
     loginBackgroundView.style.display = "none";
+    gameLoopView.style.display = "none";
     titleView.style.display = "none";
     loginContainerView.style.display = "none";
     keyPositionView.style.display = "none";

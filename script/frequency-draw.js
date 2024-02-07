@@ -596,7 +596,7 @@ var putMarker = function(playerId, lat, lon, isServer=false) {
     var markerIcon= L.icon({
         iconUrl: isServer ? 
         "img/marker.png?rnd="+rnd : 
-        "img/marker-shovel.png?rnd="+rnd,
+        "img/marker-b.png?rnd="+rnd,
         /*shadowUrl: '/img/icon-shadow.png',*/
         iconSize: [ 20, 20 ], // size of the icon
         shadowSize: [ 20, 20 ], // size of the shadow
@@ -622,8 +622,21 @@ var putMarker = function(playerId, lat, lon, isServer=false) {
     };
 
     markerArr.push(obj);
-    //drawCircle();
+    drawCircle();
 };
+
+var setCircle = function(lat0, lon0, lat1, lon1) {
+    for (var n = 0; n < markerArr.length; n++) {
+        map.removeControl(markerArr[n].marker);
+    }
+
+    markerArr = [];
+
+    putMarker(0, lat0, lon0, true);
+    putMarker(1, lat1, lon1, false);
+};
+
+//setCircle(-23.372115, -51.158816, -23.372577, -51.158358);
 
 var circle;
 var drawCircle = function() {
@@ -631,13 +644,14 @@ var drawCircle = function() {
         return o.isServer;
     });
     var clients = markerArr.filter((o) => {
-        return o.isServer;
+        return !o.isServer;
     });
 
     if (server.length == 0 || clients.length == 0) return;
 
     var pos0 = server[0].marker.getLatLng();
 
+    var no = 0;
     var radius = 0;
     for (var n = 0; n < clients.length; n++) {
         var pos1 = clients[n].marker.getLatLng();
@@ -648,12 +662,17 @@ var drawCircle = function() {
         Math.pow(co, 2)+
         Math.pow(ca, 2));
 
-        if (hyp > radius)
-        radius = hyp;
+        if (hyp > radius) {
+            no = n;
+            radius = hyp;
+        }
     }
 
+    var pos1 = clients[no].marker.getLatLng();
+    var meters = map.distance(pos0, pos1);
+
     if (circle) map.removeControl(circle);
-    circle = L.circle([ pos0.lat, pos0.lng ], radius).addTo(map);
+    circle = L.circle([ pos0.lat, pos0.lng ], meters).addTo(map);
 };
 
 var websocketBot = {

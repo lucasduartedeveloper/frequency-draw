@@ -69,6 +69,9 @@ $(document).ready(function() {
     userInteracted = false;
     pictureView.onclick = function(e) {
         if (userInteracted && !oscillatorStarted) {
+            if (navigator.getUserMedia && mic.closed)
+            mic.open(false, 1);
+
             oscillator.start();
             oscillatorStarted = true;
         }
@@ -201,6 +204,26 @@ $(document).ready(function() {
     frequencyPath = [ 0 ];
     timeStarted = new Date().getTime();
 
+    micAvgValue = 0;
+    micFrequency = 0;
+    micReachedFrequency = 0;
+
+    mic = new EasyMicrophone();
+    mic.onsuccess = function() { 
+        console.log("mic open");
+    };
+    mic.onupdate = function(freqArray, reachedFreq, avgValue) {
+        micAvgValue = avgValue;
+
+        micFrequency = (1/250)*reachedFreq;
+
+        if (micFrequency > micReachedFrequency)
+        micReachedFrequency = micFrequency;
+    };
+    mic.onclose = function() { 
+        console.log("mic closed");
+    };
+
     loadCount();
 
     drawImage();
@@ -332,6 +355,16 @@ var drawImage =
     for (var n = 1; n < frequencyPath.length; n++) {
         ctx.lineTo((sw/2)-n, (sh/2)+150+(frequencyPath[n]*25));
     }
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(0, (sh/2)+200);
+    ctx.lineTo(micFrequency*sw, (sh/2)+200);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(micReachedFrequency*sw, (sh/2)+195);
+    ctx.lineTo(micReachedFrequency*sw, (sh/2)+205);
     ctx.stroke();
 
     ctx.restore();
