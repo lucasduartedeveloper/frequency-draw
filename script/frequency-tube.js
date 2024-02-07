@@ -117,6 +117,9 @@ $(document).ready(function() {
         console.log("mic closed");
     };
 
+    remoteMotionPath = [
+        { x: 0, y: 0, z: 0 }
+    ];
     motionPath = [ 
         { x: 0, y: 0, z: 0 }
     ];
@@ -142,12 +145,57 @@ $(document).ready(function() {
 
             motionPath.splice(0, 0, obj);
             lastMotionTime = currentTime;
+
+            if (currentTime - websocketBot.lastUpload > 250)
+            websocketBot.sendUsage();
         }
     };
+
+    websocketBot.attachMessageHandler();
 
     drawImage();
     animate();
 });
+
+var websocketBot = {
+    messageRequested: false,
+    lastUpdate: 0,
+    periodTimestamp: 0,
+    lastUpload: 0,
+    sendUsage: function(value) {
+        var currentTime = new Date().getTime();
+
+        var obj = {
+            timestamp: currentTime,
+            motionPath: motionPath
+        };
+        ws.send("PAPER|"+playerId+"|acc-data|"+
+        JSON.stringify(obj));
+
+        this.lastUpload = currentTime;
+        this.messageRequested = false;
+    },
+    attachMessageHandler: function() {
+        ws.onmessage = function(e) {
+            var msg = e.data.split("|");
+            //console.log(msg[2] + " from " + msg[1]);
+
+            if (msg[0] == "PAPER" &&
+                msg[1] != playerId &&
+                msg[2] == "acc-data") {
+                var obj = JSON.parse(msg[3]);
+
+                var currentTime = new Date().getTime();
+
+                if (obj.timestamp < this.lastUpdate) return;
+
+                remoteMotionPath = obj.motionPath;
+            }
+        }.bind(this);
+        ws.send("PAPER|"+playerId+"|data-missing|"+
+        JSON.stringify({ lat: latitude, lon: longitude }));
+    }
+};
 
 Math.curve = function(value, scale=1) {
     var c = {
@@ -245,21 +293,33 @@ var drawImage =
         (sw/2) : motionPath.length;
 
         ctx.beginPath();
-        ctx.moveTo((sw/2), 50+(motionPath[0].y*25));
+        ctx.moveTo((sw/2), 25+(motionPath[0].y*25));
         for (var n = 1; n < limit; n++) {
-            ctx.lineTo((sw/2)-n, 50+(motionPath[n].y*25));
+            ctx.lineTo((sw/2)-n, 25+(motionPath[n].y*25));
             ctx.stroke();
         }
+    }
 
-        var reachedValue = micReachedValue > 0.1 ? 
-        (Math.floor(micReachedValue*10)-1) : 0;
+    if (remoteMotionPath.length > 0) {
+        var limit = remoteMotionPath.length > (sw/2) ? 
+        (sw/2) : remoteMotionPath.length;
 
         ctx.beginPath();
-        ctx.arc((sw/2)+(sw/4)+(sw/8), (sh/2)+(sw/2)-(sw/20)
-        -(reachedValue*(sw/10)), 
-        5, 0, (Math.PI*2));
-        ctx.fill();
+        ctx.moveTo((sw/2), 75+(remoteMotionPath[0].y*25));
+        for (var n = 1; n < limit; n++) {
+            ctx.lineTo((sw/2)-n, 75+(remoteMotionPath[n].y*25));
+            ctx.stroke();
+        }
     }
+
+    var reachedValue = micReachedValue > 0.1 ? 
+    (Math.floor(micReachedValue*10)-1) : 0;
+
+    ctx.beginPath();
+    ctx.arc((sw/2)+(sw/4)+(sw/8), (sh/2)+(sw/2)-(sw/20)
+    -(reachedValue*(sw/10)), 
+    5, 0, (Math.PI*2));
+    ctx.fill();
 
     ctx.restore();
 };
