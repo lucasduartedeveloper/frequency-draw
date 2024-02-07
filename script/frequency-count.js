@@ -60,6 +60,17 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
+    oscillatorStarted = false;
+    userInteracted = false;
+    pictureView.onclick = function() {
+        if (userInteracted && !oscillatorStarted) {
+            oscillator.start();
+            oscillatorStarted = true;
+        }
+        else if (!userInteracted)
+        userInteracted = true;
+    };
+
     previousTimeView = document.createElement("span");
     previousTimeView.style.position = "absolute";
     previousTimeView.style.color = "#55f";
@@ -146,21 +157,29 @@ $(document).ready(function() {
         timeStarted = currentTime;
     };
 
-    timeStarted = new Date().getTime();
-    setInterval(function() {
-        var currentTime = new Date().getTime();
-        var elapsedTime = currentTime - timeStarted;
+    oscillator = createOscillator();
 
-        timerView.innerHTML = 
-        moment(elapsedTime).format(
-        "mm:ss[&nbsp;<span style=\"font-size:15px\">]SSS[</span>]");
-    }, 1);
+    frequencyPath = [ 0 ];
+    timeStarted = new Date().getTime();
 
     loadCount();
 
     drawImage();
     animate();
 });
+
+Math.curve = function(value, scale=1) {
+    var c = {
+        x: 0,
+        y: 0
+    };
+    var p = {
+        x: -1,
+        y: 0
+    };
+    var rp = _rotate2d(c, p, (value*360));
+    return rp.y*scale;
+};
 
 var loadCount = function() {
     var storage = localStorage.getItem("storage");
@@ -211,6 +230,25 @@ var animate = function() {
         if ((new Date().getTime() - updateTime) > 1000) {
             updateTime = new Date().getTime();
         }
+
+        var currentTime = new Date().getTime();
+        var elapsedTime = currentTime - timeStarted;
+
+        timerView.innerHTML = 
+        moment(elapsedTime).format(
+        "mm:ss[&nbsp;<span style=\"font-size:15px\">]SSS[</span>]");
+
+        var value = Math.curve((1/1000)*
+        parseInt(moment(elapsedTime).format("SSS")));
+
+        if (frequencyPath.length == (sw/2))
+        frequencyPath.splice(frequencyPath.length-1, 1);
+
+        frequencyPath.splice(0, 0, value);
+
+        oscillator.frequency.value = 50+(value*50);
+
+        drawImage();
     }
     renderTime = new Date().getTime();
     requestAnimationFrame(animate);
@@ -227,6 +265,16 @@ var drawImage =
     ctx.translate((sw/2), (sh/2));
     ctx.rotate(angle);
     ctx.translate(-(sw/2), -(sh/2));
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#fff";
+
+    ctx.beginPath();
+    ctx.moveTo((sw/2), (sh/2)+100+(frequencyPath[0]*25));
+    for (var n = 1; n < frequencyPath.length; n++) {
+        ctx.lineTo((sw/2)-n, (sh/2)+100+(frequencyPath[n]*25));
+    }
+    ctx.stroke();
 
     ctx.restore();
 };
