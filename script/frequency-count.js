@@ -146,7 +146,7 @@ $(document).ready(function() {
         countView.innerText = count;
 
         var currentTime = new Date().getTime();
-        var elapsedTime = currentTime - timeStarted;
+        var elapsedTime = (currentTime - timeStarted)/timeScale;
 
         previousTimeView.innerHTML = 
         moment(elapsedTime).format(
@@ -224,6 +224,8 @@ var animationSpeed = 0;
 
 var effectRatio = 0.1;
 
+var timeScale = 1;
+
 var animate = function() {
     elapsedTime = new Date().getTime()-renderTime;
     if (!backgroundMode) {
@@ -232,7 +234,7 @@ var animate = function() {
         }
 
         var currentTime = new Date().getTime();
-        var elapsedTime = currentTime - timeStarted;
+        var elapsedTime = (currentTime - timeStarted)*timeScale;
 
         timerView.innerHTML = 
         moment(elapsedTime).format(
@@ -240,11 +242,14 @@ var animate = function() {
 
         var value = Math.curve((1/1000)*
         parseInt(moment(elapsedTime).format("SSS")));
+        value = (1/1000)*
+        parseInt(moment(elapsedTime).format("SSS")) > 0.5 ? 
+        0.5 : -0.5;
 
         if (frequencyPath.length == (sw/2))
         frequencyPath.splice(frequencyPath.length-1, 1);
 
-        frequencyPath.splice(0, 0, value);
+        frequencyPath.splice(0, 0, -value);
 
         oscillator.frequency.value = 50+(value*50);
 
