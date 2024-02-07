@@ -48,6 +48,11 @@ $(document).ready(function() {
 
     tileSize = (sw/7);
 
+    var fontFile = new FontFace("DS Digital", "url(font/digital-7.ttf)");
+    document.fonts.add(fontFile);
+
+    var fontFamily = "DS Digital";
+
     pictureView = document.createElement("canvas");
     pictureView.style.position = "absolute";
     //pictureView.style.background = "#fff";
@@ -62,7 +67,7 @@ $(document).ready(function() {
 
     oscillatorStarted = false;
     userInteracted = false;
-    pictureView.onclick = function() {
+    pictureView.onclick = function(e) {
         if (userInteracted && !oscillatorStarted) {
             oscillator.start();
             oscillatorStarted = true;
@@ -71,9 +76,18 @@ $(document).ready(function() {
         userInteracted = true;
     };
 
+    pictureView.ontouchstart = function(e) {
+        timeScale = (3/sw)*e.touches[0].clientX;
+    };
+
+    pictureView.ontouchmove = function(e) {
+        timeScale = (3/sw)*e.touches[0].clientX;
+    };
+
     previousTimeView = document.createElement("span");
     previousTimeView.style.position = "absolute";
     previousTimeView.style.color = "#55f";
+    previousTimeView.style.fontFamily = fontFamily;
     previousTimeView.innerHTML = 
     moment(0).format(
     "mm:ss[&nbsp;<span style=\"font-size:15px\">]SSS[</span>]");
@@ -94,6 +108,7 @@ $(document).ready(function() {
     timerView = document.createElement("span");
     timerView.style.position = "absolute";
     timerView.style.color = "#fff";
+    timerView.style.fontFamily = fontFamily;
     timerView.innerHTML = 
     moment(0).format(
     "mm:ss[&nbsp;<span style=\"font-size:15px\">]SSS[</span>]");
@@ -111,6 +126,7 @@ $(document).ready(function() {
     countView = document.createElement("span");
     countView.style.position = "absolute";
     countView.style.color = "#fff";
+    countView.style.fontFamily = fontFamily;
     countView.innerText = count;
     countView.style.fontSize = (50)+"px";
     countView.style.textAlign = "center";
@@ -130,6 +146,7 @@ $(document).ready(function() {
     directionView = document.createElement("span");
     directionView.style.position = "absolute";
     directionView.style.color = "#5f5";
+    directionView.style.fontFamily = fontFamily;
     directionView.innerText = direction;
     directionView.style.fontSize = (50)+"px";
     directionView.style.textAlign = "center";
@@ -177,7 +194,7 @@ Math.curve = function(value, scale=1) {
         x: -1,
         y: 0
     };
-    var rp = _rotate2d(c, p, (value*360));
+    var rp = _rotate2d(c, p, (value*180));
     return rp.y*scale;
 };
 
@@ -242,9 +259,11 @@ var animate = function() {
 
         var value = Math.curve((1/1000)*
         parseInt(moment(elapsedTime).format("SSS")));
+
+        /*
         value = (1/1000)*
         parseInt(moment(elapsedTime).format("SSS")) > 0.5 ? 
-        0.5 : -0.5;
+        0.5 : -0.5;*/
 
         if (frequencyPath.length == (sw/2))
         frequencyPath.splice(frequencyPath.length-1, 1);
@@ -271,7 +290,7 @@ var drawImage =
     ctx.rotate(angle);
     ctx.translate(-(sw/2), -(sh/2));
 
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2;
     ctx.strokeStyle = "#fff";
 
     ctx.beginPath();
