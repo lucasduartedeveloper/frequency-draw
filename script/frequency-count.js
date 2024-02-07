@@ -84,6 +84,23 @@ $(document).ready(function() {
         timeScale = (3/sw)*e.touches[0].clientX;
     };
 
+    beforePreviousTimeView = document.createElement("span");
+    beforePreviousTimeView.style.position = "absolute";
+    beforePreviousTimeView.style.color = "#95f";
+    beforePreviousTimeView.style.fontFamily = fontFamily;
+    beforePreviousTimeView.innerHTML = 
+    moment(0).format(
+    "mm:ss[&nbsp;<span style=\"font-size:15px\">]SSS[</span>]");
+    beforePreviousTimeView.style.fontSize = (25)+"px";
+    beforePreviousTimeView.style.textAlign = "center";
+    beforePreviousTimeView.style.lineHeight = (25)+"px";
+    beforePreviousTimeView.style.left = ((sw/2)-50)+"px";
+    beforePreviousTimeView.style.top = ((sh/2)-200)+"px";
+    beforePreviousTimeView.style.width = (100)+"px";
+    beforePreviousTimeView.style.height = (25)+"px";
+    beforePreviousTimeView.style.zIndex = "15";
+    document.body.appendChild(beforePreviousTimeView);
+
     previousTimeView = document.createElement("span");
     previousTimeView.style.position = "absolute";
     previousTimeView.style.color = "#55f";
@@ -142,7 +159,7 @@ $(document).ready(function() {
         document.body.requestFullscreen();
     };
 
-    direction = -50
+    direction = -50;
     directionView = document.createElement("span");
     directionView.style.position = "absolute";
     directionView.style.color = "#5f5";
@@ -165,11 +182,16 @@ $(document).ready(function() {
         var currentTime = new Date().getTime();
         var elapsedTime = (currentTime - timeStarted)/timeScale;
 
+        beforePreviousTimeView.innerHTML = 
+        moment(previousTime).format(
+        "mm:ss[&nbsp;<span style=\"font-size:15px\">]SSS[</span>]");
+
         previousTimeView.innerHTML = 
         moment(elapsedTime).format(
         "mm:ss[&nbsp;<span style=\"font-size:15px\">]SSS[</span>]");
 
         saveCount(elapsedTime);
+        previousTime = elapsedTime;
 
         timeStarted = currentTime;
     };
@@ -184,6 +206,8 @@ $(document).ready(function() {
     drawImage();
     animate();
 });
+
+previousTime = 0;
 
 Math.curve = function(value, scale=1) {
     var c = {
@@ -206,6 +230,10 @@ var loadCount = function() {
     count = obj.count;
     countView.innerText = count;
 
+    beforePreviousTimeView.innerHTML = 
+    moment(obj.beforePreviousTime).format(
+    "mm:ss[&nbsp;<span style=\"font-size:15px\">]SSS[</span>]");
+
     previousTimeView.innerHTML = 
     moment(obj.previousTime).format(
     "mm:ss[&nbsp;<span style=\"font-size:15px\">]SSS[</span>]");
@@ -214,6 +242,7 @@ var loadCount = function() {
 var saveCount  = function(elapsedTime) {
     var obj = {
         timestamp: new Date().getTime(),
+        beforePreviousTime: previousTime,
         previousTime: elapsedTime,
         count: count
     };
@@ -225,6 +254,11 @@ var clearCount = function() {
     countView.innerText = count;
 
     timeStarted = new Date().getTime();
+
+    beforePreviousTimeView.innerHTML = 
+    moment(0).format(
+    "mm:ss[&nbsp;<span style=\"font-size:15px\">]SSS[</span>]");
+
     previousTimeView.innerHTML = 
     moment(0).format(
     "mm:ss[&nbsp;<span style=\"font-size:15px\">]SSS[</span>]");
