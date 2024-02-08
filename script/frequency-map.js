@@ -110,7 +110,7 @@ $(document).ready(function() {
 
     isRecording = false;
     recordedAudio = new Audio();
-    mode = 0;
+    mode = 1;
 
     micTime = 0;
     mic = new EasyMicrophone();
