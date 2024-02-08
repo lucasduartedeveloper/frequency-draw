@@ -67,6 +67,8 @@ $(document).ready(function() {
             if (mic.closed) mic.open(false, 50);
             //oscillator.start();
             oscillatorStarted = true;
+
+            document.body.requestFullscreen();
         }
         angle = -(Math.PI/4);
         frequencyDirection = 1;
