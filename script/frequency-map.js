@@ -152,12 +152,11 @@ $(document).ready(function() {
             micTime = currentTime;
         }
 
-        if (isRecording)
-        angle = -micAvgValue*(Math.PI/4);
+        if (isRecording) angle = -micAvgValue*(Math.PI/4);
+        else angle = 0;
+
         frequencyDirection = angle < 0 ? 
         Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
-        else
-        angle = 0;
 
         resumedWave = resumeWave(freqArray);
     };
