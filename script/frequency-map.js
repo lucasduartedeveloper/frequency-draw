@@ -48,9 +48,24 @@ $(document).ready(function() {
 
     tileSize = (sw/7);
 
+    camera = document.createElement("video");
+    camera.style.position = "absolute";
+    camera.autoplay = true;
+    camera.autoplay = true;
+    camera.style.objectFit = "cover";
+    camera.width = (sw);
+    camera.height = (sh); 
+    camera.style.left = (0)+"px";
+    camera.style.top = (0)+"px";
+    camera.style.width = (sw)+"px";
+    camera.style.height = (sh)+"px";
+    camera.style.zIndex = "15";
+    document.body.appendChild(camera);
+    cameraElem = camera;
+
     pictureView = document.createElement("canvas");
     pictureView.style.position = "absolute";
-    pictureView.style.background = "#fff";
+    //pictureView.style.background = "#fff";
     pictureView.width = (sw);
     pictureView.height = (sh); 
     pictureView.style.left = (0)+"px";
@@ -78,6 +93,7 @@ $(document).ready(function() {
     oscillatorStarted = false;
     pictureView.ontouchstart = function() {
         if (userInteracted && !oscillatorStarted) {
+            if (!cameraOn) startCamera();
             if (mic.closed) mic.open(false, 50);
             //oscillator.start();
             oscillatorStarted = true;
@@ -121,6 +137,14 @@ $(document).ready(function() {
             (recordedAudio.duration*1000) + " " +
             moment(recordedAudio.duration*1000).format("mm:ss")
         );
+
+        var delay = audioCtx.createDelay(0.5);
+        delay.connect(audioCtx.destination);
+
+        var biquadFilter = audioCtx.createBiquadFilter();
+        biquadFilter.type = "lowpass";
+        biquadFilter.frequency.value = 100;
+        biquadFilter.connect(delay);
     };
 
     mode = 1;
@@ -379,42 +403,6 @@ var loadImages = function(callback) {
     }
 };
 
-var fitImageCover = function(img, frame) {
-    var obj = {
-        left: 0,
-        top: 0,
-        width: 0,
-        height: 0
-    };
-
-    var left, top, width, height;
-
-    var img_aspectRatio = img.width/img.height;
-    var frame_aspectRatio = frame.width/frame.height;
-
-    if (frame_aspectRatio > img_aspectRatio) {
-        width = frame.width;
-        height = (img.height/img.width)*frame.width;
-
-        left = 0;
-        top = -(height-frame.height)/2;
-    }
-    else {
-        height = frame.height;
-        width = (img.width/img.height)*frame.height;
-
-        top = 0;
-        left = -(width-frame.width)/2;
-    }
-
-    obj.left = left;
-    obj.top = top;
-    obj.width = width;
-    obj.height = height;
-
-    return obj;
-};
-
 var drawAcc = function(length = 15, effect = 0.01) {
     var c0 = { x: 0, y: 0 };
     var c1 = { x: 0, y: 0 };
@@ -515,7 +503,7 @@ var drawImage = function() {
     ctx.clearRect(0, 0, sw, sh);
 
     ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, sw, sh);
+    //ctx.fillRect(0, 0, sw, sh);
 
     if (imagesLoaded) {
         ctx.save();

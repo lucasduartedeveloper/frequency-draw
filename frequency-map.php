@@ -23,14 +23,15 @@ $thirdpart_script = [
 
 $script = [
     0 => "script/websocket.js",
-    1 => "script/gyro-helper.js",
-    2 => "script/geo-location.js",
-    3 => "script/media-helper.js",
-    4 => "script/mic-helper.js",
-    5 => "script/audio-helper.js",
-    6 => "script/math-helper.js",
-    7 => "script/login-helper.js",
-    8 => "script/frequency-map.js"
+    1 => "script/camera-helper.js",
+    2 => "script/gyro-helper.js",
+    3 => "script/geo-location.js",
+    4 => "script/media-helper.js",
+    5 => "script/mic-helper.js",
+    6 => "script/audio-helper.js",
+    7 => "script/math-helper.js",
+    8 => "script/login-helper.js",
+    9 => "script/frequency-map.js"
 ];
 
 $module = [];
