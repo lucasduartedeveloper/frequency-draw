@@ -132,8 +132,10 @@ $(document).ready(function() {
         var currentTime = new Date().getTime();
         if (isRecording && currentTime - micTime > 1000) {
             mic.stopRecording(function(url) {
-                isRecording = false;
+
                 mode = 1;
+                isRecording = false;
+
                 console.log("recording stopped");
                 recordedAudio.src = url;
                 recordedAudio.play();
@@ -141,8 +143,10 @@ $(document).ready(function() {
         }
         else if (!isRecording && 
             recordedAudio.paused && micAvgValue > 0.1) {
-            isRecording = true;
+
             mode = 0;
+            isRecording = true;
+
             //console.clear();
             console.log("started recording");
             mic.record();
@@ -153,7 +157,10 @@ $(document).ready(function() {
         }
 
         if (isRecording) angle = -micAvgValue*(Math.PI/4);
-        else angle = 0;
+        else {
+            angle = 0;
+            frequencyNo = 0;
+        }
 
         frequencyDirection = angle < 0 ? 
         Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
