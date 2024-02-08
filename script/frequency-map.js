@@ -93,7 +93,7 @@ $(document).ready(function() {
     oscillatorStarted = false;
     pictureView.ontouchstart = function() {
         if (userInteracted && !oscillatorStarted) {
-            if (!cameraOn) startCamera();
+            //if (!cameraOn) startCamera();
             if (mic.closed) mic.open(false, 50);
             //oscillator.start();
             oscillatorStarted = true;
@@ -132,11 +132,21 @@ $(document).ready(function() {
     recordingAvgValue = 0;
 
     recordedAudio = new Audio();
+    //recordedAudio.volume = 0;
+
+    effectLayer = new Audio();
+
     recordedAudio.oncanplay = function() {
         console.log("recording duration: "+
             (recordedAudio.duration*1000) + " " +
             moment(recordedAudio.duration*1000).format("mm:ss")
         );
+
+        var audioCtx = 
+        new(window.AudioContext || window. webkitAudioContext)();
+
+        var source = 
+        audioCtx.createMediaElementSource(recordedAudio);
 
         var delay = audioCtx.createDelay(0.5);
         delay.connect(audioCtx.destination);
@@ -145,6 +155,8 @@ $(document).ready(function() {
         biquadFilter.type = "lowpass";
         biquadFilter.frequency.value = 100;
         biquadFilter.connect(delay);
+
+        source.connect(biquadFilter);
     };
 
     mode = 1;
