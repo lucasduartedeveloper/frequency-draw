@@ -65,7 +65,7 @@ $(document).ready(function() {
     pictureView.ontouchstart = function() {
         if (userInteracted && !oscillatorStarted) {
             if (mic.closed) mic.open(false, 50);
-            oscillator.start();
+            //oscillator.start();
             oscillatorStarted = true;
         }
         angle = -(Math.PI/4);
@@ -249,7 +249,7 @@ var getColor = function(brightness, toString, opacity=1) {
 };
 
 var img_list = [
-    "img/picture-2.png"
+    "img/picture-3.png"
 ];
 
 var imagesLoaded = false;
@@ -443,7 +443,7 @@ var drawImage = function() {
     ctx.beginPath();
     ctx.moveTo((sw/2), (sh/2)-(sw/2));
     ctx.lineTo((sw/2), (sh/2)-(sw/4));
-    ctx.stroke();
+    //ctx.stroke();
 
     ctx.beginPath();
     ctx.moveTo((sw/2), (sh/2)+(sw/4));
@@ -459,7 +459,7 @@ var drawImage = function() {
         (sw/2)+(frequencyPath[n].x*(sw/2)), 
         (sh/2)+(frequencyPath[n].y*(sw/2)));
     }
-    ctx.stroke();
+    //ctx.stroke();
 
     distance = lap < 10 ? 0 : (distance+1);
     var posX = 
@@ -493,7 +493,7 @@ var drawImage = function() {
         (sw/2)+(frequencyPath[0].x*(sw/2))-30, 
         (sh/2)+(frequencyPath[0].y*(sw/2)), 
         10, 0, (Math.PI*2));
-        ctx.fill();
+        //ctx.fill();
     }
 
     if (lap > 1) {
@@ -502,7 +502,7 @@ var drawImage = function() {
         (sw/2)+(frequencyPath[0].x*(sw/2))-60, 
         (sh/2)+(frequencyPath[0].y*(sw/2)), 
         10, 0, (Math.PI*2));
-        ctx.fill();
+        //ctx.fill();
     }
 
     ctx.save();
@@ -513,11 +513,11 @@ var drawImage = function() {
     ctx.beginPath();
     ctx.moveTo((sw/2), (sh/2)-(sw/4));
     ctx.lineTo((sw/2), (sh/2)+(sw/4));
-    ctx.stroke();
+    //ctx.stroke();
 
     ctx.restore();
 
-    drawAB_rounded(resumedWave);
+    //drawAB_rounded(resumedWave);
 };
 
 var getSquare = function(item) {
