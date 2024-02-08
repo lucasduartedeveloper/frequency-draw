@@ -117,8 +117,6 @@ $(document).ready(function() {
 
     recordedAudio = new Audio();
     recordedAudio.oncanplay = function() {
-        frequencyNo = 0;
-
         console.log("recording duration: "+
             (recordedAudio.duration*1000) + " " +
             moment(recordedAudio.duration*1000).format("mm:ss")
@@ -169,6 +167,10 @@ $(document).ready(function() {
             angle = -micAvgValue*(Math.PI/4);
             frequencyDirection = angle < 0 ? 
             Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
+        }
+        else {
+            frequencyNo = 0;
+            angle = 0;
         }
 
         resumedWave = resumeWave(freqArray);
