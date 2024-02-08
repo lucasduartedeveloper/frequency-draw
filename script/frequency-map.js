@@ -72,7 +72,7 @@ $(document).ready(function() {
     titleView.style.width = (150)+"px";
     titleView.style.height = (25)+"px";
     titleView.style.zIndex = "15";
-    document.body.appendChild(titleView);
+    //document.body.appendChild(titleView);
 
     userInteracted = false;
     oscillatorStarted = false;
@@ -111,16 +111,38 @@ $(document).ready(function() {
     }
 
     isRecording = false;
+
+    media = 0;
+    recordingAvgValue = 0;
+
     recordedAudio = new Audio();
     recordedAudio.oncanplay = function() {
+        frequencyNo = 0;
+
+        if (!media) {
+            media = new MediaAnalyser(recordedAudio);
+            media.onupdate = function(freqArray, reachedFreq, avgValue) {
+                recordingAvgValue = avgValue;
+                //console.log(recordingAvgValue);
+
+                if (!isRecording) {
+                    angle = -recordingAvgValue*(Math.PI/4);
+                    frequencyDirection = angle < 0 ? 
+                    Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
+                }
+            };
+            media.start();
+        }
+
         console.log("recording duration: "+
             (recordedAudio.duration*1000) + " " +
             moment(recordedAudio.duration*1000).format("mm:ss")
         );
     };
-    mode = 1;
 
+    mode = 1;
     micTime = 0;
+
     mic = new EasyMicrophone();
     mic.onsuccess = function() { 
         console.log("mic open");
@@ -158,14 +180,11 @@ $(document).ready(function() {
             micTime = currentTime;
         }
 
-        if (isRecording) angle = -micAvgValue*(Math.PI/4);
-        else {
-            angle = 0;
-            frequencyNo = 0;
+        if (isRecording) { 
+            angle = -micAvgValue*(Math.PI/4);
+            frequencyDirection = angle < 0 ? 
+            Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
         }
-
-        frequencyDirection = angle < 0 ? 
-        Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
 
         resumedWave = resumeWave(freqArray);
     };

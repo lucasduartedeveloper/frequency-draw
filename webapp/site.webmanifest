@@ -1,6 +1,6 @@
 {
-    "name": "黒澤",
-    "short_name": "黒澤",
+    "name": "OPEN WIND VANE",
+    "short_name": "WIND VANE",
     "icons": [
         {
             "src": "android-chrome-192x192.png",
@@ -9,7 +9,7 @@
         },
         {
             "src": "android-chrome-384x384.png",
-            "sizes": "384x384",
+            "sizes": "512x512",
             "type": "image/png"
         }
     ],

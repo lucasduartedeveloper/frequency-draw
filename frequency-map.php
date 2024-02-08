@@ -48,11 +48,11 @@ echo "<!-- ".$rnd." -->";
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
-<link rel="apple-touch-icon" sizes="76x76" href="webapp/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="webapp/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="webapp/favicon-16x16.png">
-<link rel="manifest" href="webapp/site.webmanifest?v=0">
-<link rel="mask-icon" href="webapp/safari-pinned-tab.svg" color="#2f2e40">
+<link rel="apple-touch-icon" sizes="76x76" href="webapp/apple-touch-icon.png?rnd=<?php echo $rnd ?>" >
+<link rel="icon" type="image/png" sizes="32x32" href="webapp/favicon-32x32.png?rnd=<?php echo $rnd ?>">
+<link rel="icon" type="image/png" sizes="16x16" href="webapp/favicon-16x16.png?rnd=<?php echo $rnd ?>">
+<link rel="manifest" href="webapp/site.webmanifest?rnd=<?php echo $rnd ?>">
+<link rel="mask-icon" href="webapp/safari-pinned-tab.svg?rnd=<?php echo $rnd ?>" color="#2f2e40">
 <meta name="msapplication-TileColor" content="#2f2e40">
 <meta name="theme-color" content="#2f2e40">
 
