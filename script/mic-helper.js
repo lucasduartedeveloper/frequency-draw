@@ -33,6 +33,7 @@ class EasyMicrophone {
         this.frequencyLength = 0;
 
         // recording setup
+        this.recordingCallback = function() { };
         this.recordingQueue = [];
         this.audio = new Audio();
         this.mediaRecorder = 0;
@@ -117,7 +118,7 @@ class EasyMicrophone {
         this.onclose();
     }
 
-    record(callback) {
+    record() {
         this.mediaRecorder = 
         new MediaRecorder(this.audioStream.mediaStream);
 
@@ -133,10 +134,18 @@ class EasyMicrophone {
                 { type: "audio/webm;codecs=opus" }));
 
             this.audioBlob = [];
-            callback(url);
+            this.recordingCallback(url);
         }.bind(this);
 
         this.mediaRecorder.start();
+    }
+
+    stopRecording(callback) {
+        this.recordingCallback = callback;
+
+        if(this.mediaRecorder) {
+            this.mediaRecorder.stop();
+        }
     }
 
     animate() {

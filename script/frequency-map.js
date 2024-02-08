@@ -80,7 +80,7 @@ $(document).ready(function() {
             //oscillator.start();
             oscillatorStarted = true;
 
-            document.body.requestFullscreen();
+            //document.body.requestFullscreen();
         }
         angle = -(Math.PI/4);
         frequencyDirection = 1;
@@ -108,6 +108,11 @@ $(document).ready(function() {
         Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
     }
 
+    isRecording = false;
+    recordedAudio = new Audio();
+    mode = 0;
+
+    micTime = 0;
     mic = new EasyMicrophone();
     mic.onsuccess = function() { 
         console.log("mic open");
@@ -115,8 +120,32 @@ $(document).ready(function() {
         //mic.audio.play();
     };
     mic.onupdate = function(freqArray, reachedFreq, avgValue) {
+        if (recordedAudio.paused)
         micAvgValue = avgValue;
 
+        var currentTime = new Date().getTime();
+        if (isRecording && currentTime - micTime > 5000) {
+            mic.stopRecording(function(url) {
+                isRecording = false;
+                mode = 1;
+                console.log("recording stopped");
+                recordedAudio.src = url;
+                recordedAudio.play();
+            });
+        }
+        else if (!isRecording && 
+            recordedAudio.paused && micAvgValue > 0.1) {
+            isRecording = true;
+            mode = 0;
+            console.log("started recording");
+            mic.record();
+            micTime = currentTime;
+        }
+        else if (micAvgValue > 0.1) {
+            micTime = currentTime;
+        }
+
+        if (recordedAudio.paused)
         angle = -micAvgValue*(Math.PI/4);
         frequencyDirection = angle < 0 ? 
         Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
@@ -124,8 +153,7 @@ $(document).ready(function() {
         resumedWave = resumeWave(freqArray);
     };
     mic.onclose = function() { 
-        if (recordingEnabled)
-        mic.download();
+        console.log("mic closed");
     };
     var ab = new Array(50);
     for (var n = 0; n < 50; n++) {
@@ -160,6 +188,45 @@ var resumeWave = function(freqArray) {
     //console.log(resumedArray);
 
     return resumedArray;
+};
+
+var drawAB = 
+function(freqArray=false, avgValue=0) {
+    var canvas = pictureView;
+    var ctx = canvas.getContext("2d");
+
+    var offset = 0;
+    var polygon = [];
+
+    // create waveform A
+    if (freqArray) 
+    offset = (canvas.width/freqArray.length)/2;
+    if (freqArray) 
+    for (var n = 0; n < freqArray.length; n++) {
+        var obj = {
+            x: (n*(canvas.width/freqArray.length)),
+            y0: (sh/2)+(sw/2)+25+
+            (-freqArray[n]*25),
+            y1: (sh/2)+(sw/2)+25+
+            (freqArray[n]*25)
+        };
+        polygon.push(obj);
+    }
+
+    // draw waveform A
+    ctx.strokeStyle = "#fff";
+
+    if (freqArray) {
+        ctx.lineWidth = (canvas.width/freqArray.length)-2;
+        //ctx.clearRect(0, 0, canvas.width, 100);
+    }
+    if (freqArray)
+    for (var n = 0; n < polygon.length; n++) {
+        ctx.beginPath();
+        ctx.moveTo(polygon[n].x, polygon[n].y0-1);
+        ctx.lineTo(polygon[n].x, polygon[n].y1+1);
+        ctx.stroke();
+    }
 };
 
 var drawAB_rounded = 
@@ -263,6 +330,7 @@ var getColor = function(brightness, toString, opacity=1) {
 };
 
 var img_list = [
+    "img/picture-4.png",
     "img/picture-3.png"
 ];
 
@@ -433,8 +501,8 @@ var drawImage = function() {
         ctx.translate(-(sw/2), -(sh/2));
 
         var size = {
-            width: img_list[0].naturalWidth,
-            height: img_list[0].naturalHeight
+            width: img_list[mode].naturalWidth,
+            height: img_list[mode].naturalHeight
         };
         var frame = {
             width: getSquare(size),
@@ -442,7 +510,7 @@ var drawImage = function() {
         };
         var format = fitImageCover(size, frame);
 
-        ctx.drawImage(img_list[0], 
+        ctx.drawImage(img_list[mode], 
         -format.left, -format.top, frame.width, frame.height, 
         (sw/2)-(sw/4), (sh/2)-(sw/4), 
         (sw/2), (sw/2));
@@ -531,7 +599,7 @@ var drawImage = function() {
 
     ctx.restore();
 
-    //drawAB_rounded(resumedWave);
+    //drawAB(resumedWave);
 };
 
 var getSquare = function(item) {
