@@ -53,6 +53,7 @@ class EasyMicrophone {
 
         // configuration
         this.audioContent = new AudioContext();
+
         this.curve = curve;
         this.clipArray = clipArray;
 
@@ -60,6 +61,17 @@ class EasyMicrophone {
             // configuration
             scope.audioStream = 
             scope.audioContent.createMediaStreamSource(stream);
+
+            scope.delay = scope.audioContent.createDelay(5);
+            scope.delay.connect(scope.audioContent.destination);
+
+            scope.biquadFilter = scope.audioContent.createBiquadFilter();
+            scope.biquadFilter.type = "lowpass";
+            scope.biquadFilter.frequency.value = 100;
+            scope.biquadFilter.connect(scope.delay);
+
+            scope.audioStream.connect(scope.biquadFilter);
+
             scope.analyser = scope.audioContent.createAnalyser();
             scope.audioStream.connect(scope.analyser);
             //scope.analyser.minDecibels = -200;

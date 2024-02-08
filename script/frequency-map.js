@@ -64,6 +64,7 @@ $(document).ready(function() {
     oscillatorStarted = false;
     pictureView.ontouchstart = function() {
         if (userInteracted && !oscillatorStarted) {
+            if (mic.closed) mic.open(false, 50);
             oscillator.start();
             oscillatorStarted = true;
         }
@@ -83,7 +84,7 @@ $(document).ready(function() {
     oscillator.volume.gain.value = 1;
     oscillator.frequency.value = 5;
 
-    motion = true;
+    motion = false;
     gyroUpdated = function(e) {
         var co = e.accY;
         var ca = e.accX > e.accZ ? e.accX : e.accZ;
@@ -93,11 +94,157 @@ $(document).ready(function() {
         Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
     }
 
+    mic = new EasyMicrophone();
+    mic.onsuccess = function() { 
+        console.log("mic open");
+        //mic.audio.srcObject = mic.audioStream.mediaStream;
+        //mic.audio.play();
+    };
+    mic.onupdate = function(freqArray, reachedFreq, avgValue) {
+        micAvgValue = avgValue;
+
+        angle = -micAvgValue*(Math.PI/4);
+        frequencyDirection = angle < 0 ? 
+        Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
+
+        resumedWave = resumeWave(freqArray);
+    };
+    mic.onclose = function() { 
+        if (recordingEnabled)
+        mic.download();
+    };
+    var ab = new Array(50);
+    for (var n = 0; n < 50; n++) {
+        ab[n] = 0;
+    }
+    resumedWave = ab;
+
     loadImages();
 
     drawImage();
     animate();
 });
+
+var resumeWave = function(freqArray) {
+    var blocks = 50;
+    var blockSize = Math.floor(freqArray.length / blocks);
+
+    var resumedArray = [];
+    var sum = 0;
+    for (var n = 0; n < blocks; n++) {
+        sum = 0;
+        for (var k = 0; k < blockSize; k++) {
+            var m = (n * blockSize) + k;
+             if ((m+1) <= freqArray.length) {
+                 sum += freqArray[m];
+             }
+        }
+
+        resumedArray.push(sum/blockSize);
+    }
+    //console.log(blockSize);
+    //console.log(resumedArray);
+
+    return resumedArray;
+};
+
+var drawAB_rounded = 
+function(freqArray=false, avgValue=0) {
+    var canvas = pictureView;
+    var ctx = canvas.getContext("2d");
+
+    var offset = 0;
+    var polygon = [];
+
+    // create waveform A
+    if (freqArray) 
+    for (var n = 0; n < freqArray.length; n++) {
+        var c = { 
+            x: (sw/2),
+            y: (sh/2)
+        };
+        var p0 = { 
+            x: (sw/2),
+            y: (sh/2)-(sw/4)
+        };
+        var p1 = { 
+            x: (sw/2),
+            y: (sh/2)-(sw/4)-(freqArray[n]*25)
+        };
+
+        var rp0 = _rotate2d(c, p0, (n*(360/freqArray.length)));
+        var rp1 = _rotate2d(c, p1, (n*(360/freqArray.length)));
+
+        var obj = {
+            x0: rp0.x,
+            y0: rp0.y,
+            x1: rp1.x,
+            y1: rp1.y,
+            value: freqArray[n]
+        };
+        polygon.push(obj);
+
+        //updatePhiSegmentState(n, freqArray);
+    }
+
+    // draw waveform A
+    ctx.lineWidth = 3;
+
+    if (freqArray) {
+        ctx.beginPath();
+        ctx.moveTo(polygon[0].x1, polygon[0].y1);
+    }
+    if (freqArray)
+    for (var n = 1; n < polygon.length; n++) {
+        ctx.strokeStyle = 
+        getColor((1/(polygon.length-1))*n, true, 
+        (1-polygon[n].value));
+
+        ctx.beginPath();
+        ctx.moveTo(polygon[n-1].x1, polygon[n-1].y1);
+        ctx.lineTo(polygon[n].x1, polygon[n].y1);
+        ctx.stroke();
+    }
+
+    ctx.strokeStyle = 
+    getColor(1, true, (1-polygon[0].value));
+
+    ctx.beginPath();
+    ctx.moveTo(
+        polygon[polygon.length-1].x1, 
+        polygon[polygon.length-1].y1);
+    ctx.lineTo(polygon[0].x1, polygon[0].y1);
+    ctx.stroke();
+};
+
+var getColor = function(brightness, toString, opacity=1) {
+    var rgb = [ 128, 0, 255 ];
+    if (brightness < 0.25) {
+        rgb[0] = (1-((1/0.25)*brightness)) * (128);
+        rgb[1] = ((1/0.25)*brightness) * (255);
+    }
+    else if (brightness < 0.50) {
+        rgb = [ 0, 255, 255 ];
+        rgb[2] = (1-((1/0.25)*(brightness-0.25))) * (255);
+    }
+    else if (brightness < 0.75) {
+        rgb = [ 0, 255, 0 ];
+        rgb[0] = ((1/0.25)*(brightness-0.5)) * (255);
+    }
+    else if (brightness <= 1) {
+        rgb = [ 255, 255, 0 ];
+
+        rgb[0] = 255-(((1/0.25)*(brightness-0.75)) * (128));
+        rgb[2] = ((1/0.25)*(brightness-0.75)) * (255);
+
+        rgb[1] = (1-((1/0.25)*(brightness-0.75))) * (255);
+    }
+
+    if (toString)
+    rgb = "rgba("+rgb[0]+","+rgb[1]+","+rgb[2]+","+opacity+")";
+
+    return rgb;
+};
 
 var img_list = [
     "img/picture-2.png"
@@ -367,6 +514,8 @@ var drawImage = function() {
     ctx.stroke();
 
     ctx.restore();
+
+    drawAB_rounded(resumedWave);
 };
 
 var getSquare = function(item) {

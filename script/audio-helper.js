@@ -154,10 +154,13 @@ var createOscillator = function() {
     var volume = audioCtx.createGain();
     volume.gain.value = 0.1;
 
-    biquadFilter = audioCtx.createBiquadFilter();
+    var delay = audioCtx.createDelay(5);
+    delay.connect(audioCtx.destination);
+
+    var biquadFilter = audioCtx.createBiquadFilter();
     biquadFilter.type = "lowpass";
     biquadFilter.frequency.value = 100;
-    biquadFilter.connect(audioCtx.destination);
+    biquadFilter.connect(delay);
 
     volume.connect(biquadFilter);
 
