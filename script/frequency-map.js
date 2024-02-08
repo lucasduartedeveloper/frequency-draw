@@ -60,17 +60,19 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
+    var versionName = "v0.9";
+
     titleView = document.createElement("span");
     titleView.style.position = "absolute";
     titleView.style.color = "#fff";
-    titleView.innerText = "TÍTULO";
+    titleView.innerText = "OPEN WIND VANE\n"+versionName;
     titleView.style.textAlign = "center";
-    titleView.style.left = ((sw/2)-50)+"px";
+    titleView.style.left = ((sw/2)-75)+"px";
     titleView.style.top = ((sh/2)-(sw/2))+"px";
-    titleView.style.width = (100)+"px";
+    titleView.style.width = (150)+"px";
     titleView.style.height = (25)+"px";
     titleView.style.zIndex = "15";
-    //document.body.appendChild(titleView);
+    document.body.appendChild(titleView);
 
     userInteracted = false;
     oscillatorStarted = false;
