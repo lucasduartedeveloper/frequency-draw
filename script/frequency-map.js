@@ -124,7 +124,7 @@ $(document).ready(function() {
         micAvgValue = avgValue;
 
         var currentTime = new Date().getTime();
-        if (isRecording && currentTime - micTime > 5000) {
+        if (isRecording && currentTime - micTime > 1000) {
             mic.stopRecording(function(url) {
                 isRecording = false;
                 mode = 1;
@@ -145,7 +145,7 @@ $(document).ready(function() {
             micTime = currentTime;
         }
 
-        if (recordedAudio.paused)
+        if (isRecording)
         angle = -micAvgValue*(Math.PI/4);
         frequencyDirection = angle < 0 ? 
         Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
