@@ -119,21 +119,6 @@ $(document).ready(function() {
     recordedAudio.oncanplay = function() {
         frequencyNo = 0;
 
-        if (!media) {
-            media = new MediaAnalyser(recordedAudio);
-            media.onupdate = function(freqArray, reachedFreq, avgValue) {
-                recordingAvgValue = avgValue;
-                //console.log(recordingAvgValue);
-
-                if (!isRecording) {
-                    angle = -recordingAvgValue*(Math.PI/4);
-                    frequencyDirection = angle < 0 ? 
-                    Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
-                }
-            };
-            media.start();
-        }
-
         console.log("recording duration: "+
             (recordedAudio.duration*1000) + " " +
             moment(recordedAudio.duration*1000).format("mm:ss")
