@@ -218,9 +218,11 @@ function(freqArray=false, avgValue=0) {
 };
 
 var getColor = function(brightness, toString, opacity=1) {
-    var rgb = [ 128, 0, 255 ];
+    var direction = frequencyDirection > 0 ? 1 : 0;
+    var rgb = [ 0, 0, 255 ];
     if (brightness < 0.25) {
-        rgb[0] = (1-((1/0.25)*brightness)) * (128);
+        rgb[0] = ((1*direction)*((1-((1/0.25)*brightness)) * (128)));
+
         rgb[1] = ((1/0.25)*brightness) * (255);
     }
     else if (brightness < 0.50) {
@@ -234,8 +236,8 @@ var getColor = function(brightness, toString, opacity=1) {
     else if (brightness <= 1) {
         rgb = [ 255, 255, 0 ];
 
-        rgb[0] = 255-(((1/0.25)*(brightness-0.75)) * (128));
-        rgb[2] = ((1/0.25)*(brightness-0.75)) * (255);
+        rgb[0] = 255-((1*direction)*(((1/0.25)*(brightness-0.75)) * (128)));
+        rgb[2] = (1*direction)*(((1/0.25)*(brightness-0.75)) * (255));
 
         rgb[1] = (1-((1/0.25)*(brightness-0.75))) * (255);
     }
