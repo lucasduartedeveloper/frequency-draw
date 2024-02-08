@@ -110,6 +110,12 @@ $(document).ready(function() {
 
     isRecording = false;
     recordedAudio = new Audio();
+    recordedAudio.oncanplay = function() {
+        console.log("recording duration: "+
+            (recordedAudio.duration*1000) + " " +
+            moment(recordedAudio.duration*1000).format("mm:ss")
+        );
+    };
     mode = 1;
 
     micTime = 0;
@@ -137,6 +143,7 @@ $(document).ready(function() {
             recordedAudio.paused && micAvgValue > 0.1) {
             isRecording = true;
             mode = 0;
+            //console.clear();
             console.log("started recording");
             mic.record();
             micTime = currentTime;
@@ -149,6 +156,8 @@ $(document).ready(function() {
         angle = -micAvgValue*(Math.PI/4);
         frequencyDirection = angle < 0 ? 
         Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
+        else
+        angle = 0;
 
         resumedWave = resumeWave(freqArray);
     };
