@@ -67,22 +67,99 @@ $(document).ready(function() {
             oscillator.start();
             oscillatorStarted = true;
         }
+        angle = -(Math.PI/4);
         frequencyDirection = 1;
     };
 
     pictureView.ontouchend= function() {
         userInteracted = true;
+        angle = 0;
         frequencyDirection = -1;
     }
 
     drawAcc(60, effectRatio);
 
     oscillator = createOscillator();
-    oscillator.frequency.value = 100;
+    oscillator.volume.gain.value = 1;
+    oscillator.frequency.value = 5;
+
+    motion = true;
+    gyroUpdated = function(e) {
+        var co = e.accY;
+        var ca = e.accX > e.accZ ? e.accX : e.accZ;
+        angle = -(_angle2d(co, ca)-(Math.PI/2));
+
+        frequencyDirection = angle < 0 ? 
+        Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
+    }
+
+    loadImages();
 
     drawImage();
     animate();
 });
+
+var img_list = [
+    "img/picture-2.png"
+];
+
+var imagesLoaded = false;
+var loadImages = function(callback) {
+    var count = 0;
+    for (var n = 0; n < img_list.length; n++) {
+        var img = document.createElement("img");
+        img.n = n;
+        img.onload = function() {
+            count += 1;
+            console.log("loading ("+count+"/"+img_list.length+")");
+            img_list[this.n] = this;
+            if (count == img_list.length) {
+                imagesLoaded = true;
+                //callback();
+            }
+        };
+        var rnd = Math.random();
+        img.src = img_list[n].includes("img") ? 
+        img_list[n]+"?f="+rnd : 
+        img_list[n];
+    }
+};
+
+var fitImageCover = function(img, frame) {
+    var obj = {
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0
+    };
+
+    var left, top, width, height;
+
+    var img_aspectRatio = img.width/img.height;
+    var frame_aspectRatio = frame.width/frame.height;
+
+    if (frame_aspectRatio > img_aspectRatio) {
+        width = frame.width;
+        height = (img.height/img.width)*frame.width;
+
+        left = 0;
+        top = -(height-frame.height)/2;
+    }
+    else {
+        height = frame.height;
+        width = (img.width/img.height)*frame.height;
+
+        top = 0;
+        left = -(width-frame.width)/2;
+    }
+
+    obj.left = left;
+    obj.top = top;
+    obj.width = width;
+    obj.height = height;
+
+    return obj;
+};
 
 var drawAcc = function(length = 15, effect = 0.01) {
     var c0 = { x: 0, y: 0 };
@@ -96,18 +173,20 @@ var drawAcc = function(length = 15, effect = 0.01) {
     frequencyPath = [];
     frequencyPath.push({ x: -0.5, y: 0.5 });
     for (var n = 0; n < size; n++) {
-        frequencyPath.push({ x: -0.5+((0.5/size))*n, y: 0.5 });
+        frequencyPath.push({ x: -0.5+((0.5/size))*n, y: 0.5, angle: 0 });
     }
     for (var n = 0; n < size; n++) {
         var pe = { ...p0 };
         pe.y += (-(effect/2)+(Math.random()*effect));
         var rp = _rotate2d(c0, pe, n*(180/size));
+        rp.angle = n*(180/size);
         frequencyPath.push(rp);
     }
     for (var n = 0; n < size; n++) {
         var pe = { ...p1 };
         pe.y += (-(effect/2)+(Math.random()*effect));
         var rp = _rotate2d(c1, pe, n*(180/size));
+        rp.angle = 180+(n*(180/size));
         frequencyPath.push(rp);
     }
 };
@@ -140,7 +219,7 @@ var renderTime = 0;
 var elapsedTime = 0;
 var animationSpeed = 0;
 
-var effectRatio = 0.1;
+var effectRatio = 0;
 
 var animate = function() {
     elapsedTime = new Date().getTime()-renderTime;
@@ -149,7 +228,7 @@ var animate = function() {
             updateTime = new Date().getTime();
         }
 
-        frequencyNo += frequencyDirection*(lap+1);
+        frequencyNo += frequencyDirection;
 
         if (frequencyNo > (frequencyPath.length-1)) {
              frequencyNo = 20;
@@ -164,7 +243,7 @@ var animate = function() {
         }
 
         oscillator.frequency.value = 
-        (50+(lap*5) - 
+        (5+(lap*5) - 
         (frequencyPath[frequencyNo].y*10));
 
         drawImage();
@@ -173,36 +252,39 @@ var animate = function() {
     requestAnimationFrame(animate);
 };
 
+var angle = 0;
 var distance = 0;
-var drawImage = 
-    function(angle=0, color="#000", gridColor="#333") {
+
+var drawImage = function() {
     var ctx = pictureView.getContext("2d");
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, sw, sh);
 
-    ctx.save();
-    ctx.translate((sw/2), (sh/2));
-    ctx.rotate(angle);
-    ctx.translate(-(sw/2), -(sh/2));
-
-    ctx.fillStyle = color;
+    ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, sw, sh);
 
-    ctx.strokeStyle = gridColor;
-    ctx.lineWidth = 1;
+    if (imagesLoaded) {
+        ctx.save();
+        ctx.translate((sw/2), (sh/2));
+        ctx.rotate(-frequencyPath[frequencyNo].angle*(Math.PI/180));
+        ctx.translate(-(sw/2), -(sh/2));
 
-    for (var y = 0; y < Math.floor((sh/(sw/gridSize))); y++) {
-        ctx.beginPath();
-        ctx.moveTo(0, y*(sw/gridSize));
-        ctx.lineTo(sw, y*(sw/gridSize));
-        //ctx.stroke();
-    }
+        var size = {
+            width: img_list[0].naturalWidth,
+            height: img_list[0].naturalHeight
+        };
+        var frame = {
+            width: getSquare(size),
+            height: getSquare(size)
+        };
+        var format = fitImageCover(size, frame);
 
-    for (var x = 0; x <= gridSize; x++) {
-        ctx.beginPath();
-        ctx.moveTo(x*(sw/gridSize), 0);
-        ctx.lineTo(x*(sw/gridSize), sh);
-        //ctx.stroke();
+        ctx.drawImage(img_list[0], 
+        -format.left, -format.top, frame.width, frame.height, 
+        (sw/2)-(sw/4), (sh/2)-(sw/4), 
+        (sw/2), (sw/2));
+
+        ctx.restore();
     }
 
     ctx.lineWidth = 1;
@@ -211,6 +293,11 @@ var drawImage =
 
     ctx.beginPath();
     ctx.moveTo((sw/2), (sh/2)-(sw/2));
+    ctx.lineTo((sw/2), (sh/2)-(sw/4));
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo((sw/2), (sh/2)+(sw/4));
     ctx.lineTo((sw/2), (sh/2)+(sw/2));
     ctx.stroke();
 
@@ -268,6 +355,16 @@ var drawImage =
         10, 0, (Math.PI*2));
         ctx.fill();
     }
+
+    ctx.save();
+    ctx.translate((sw/2), (sh/2));
+    ctx.rotate(angle);
+    ctx.translate(-(sw/2), -(sh/2));
+
+    ctx.beginPath();
+    ctx.moveTo((sw/2), (sh/2)-(sw/4));
+    ctx.lineTo((sw/2), (sh/2)+(sw/4));
+    ctx.stroke();
 
     ctx.restore();
 };

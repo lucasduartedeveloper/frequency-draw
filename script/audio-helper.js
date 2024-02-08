@@ -152,8 +152,14 @@ var createOscillator = function() {
     var oscillator = audioCtx.createOscillator();
 
     var volume = audioCtx.createGain();
-    volume.connect(audioCtx.destination);
     volume.gain.value = 0.1;
+
+    biquadFilter = audioCtx.createBiquadFilter();
+    biquadFilter.type = "lowpass";
+    biquadFilter.frequency.value = 100;
+    biquadFilter.connect(audioCtx.destination);
+
+    volume.connect(biquadFilter);
 
     oscillator.type = "square"; //"sine";
     oscillator.frequency.value = 0; // value in hertz

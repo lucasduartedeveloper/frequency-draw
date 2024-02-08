@@ -17,6 +17,7 @@ var createLogin = function() {
     gameLoop = false;
     gameLoopView = document.createElement("span");
     gameLoopView.style.position = "absolute";
+    gameLoopView.style.display = "none";
     gameLoopView.style.userSelect = "none";
     gameLoopView.style.color = "#000";
     gameLoopView.innerText = "LOOP: "+
@@ -125,6 +126,14 @@ var createLogin = function() {
     loginContainerView.onmouseup = 
     loginContainerView_touchend;
 
+    areaPositionView = document.createElement("div");
+    areaPositionView.style.position = "absolute";
+    areaPositionView.style.display = "none";
+    //areaPositionView.style.background = "#000";
+    areaPositionView.style.border = "1px solid #55f";
+    areaPositionView.style.zIndex = "50";
+    loginContainerView.appendChild(areaPositionView);
+
     lockPosX = 
     10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));
     lockPosY = 
@@ -162,12 +171,24 @@ var createLogin = function() {
     //lockPositionView.style.border = "1px solid #000";
     keyPositionView.style.zIndex = "50";
     loginContainerView.appendChild(keyPositionView);
+
+    var left = lockPosX-Math.abs(keyPosX-lockPosX);
+    var top = lockPosY-Math.abs(keyPosY-lockPosY);
+    var width = Math.abs(keyPosX-lockPosX)*2;
+    var height = Math.abs(keyPosY-lockPosY)*2;
+
+    areaPositionView.style.left = (left)+"px"
+    areaPositionView.style.top = (top)+"px";
+    areaPositionView.style.width = (width)+"px";
+    areaPositionView.style.height = (height)+"px";
 };
 
 var showLogin = function() {
     loginBackgroundView.style.display = "initial";
+    gameLoopView.style.display = "initial";
     titleView.style.display = "initial";
     loginContainerView.style.display = "initial";
+    areaPositionView.style.display = "initial";
     keyPositionView.style.display = "initial";
     lockPositionView.style.display = "initial";
 
@@ -196,6 +217,7 @@ var hideLogin = function() {
     gameLoopView.style.display = "none";
     titleView.style.display = "none";
     loginContainerView.style.display = "none";
+    areaPositionView.style.display = "none";
     keyPositionView.style.display = "none";
     lockPositionView.style.display = "none";
 };
@@ -203,6 +225,16 @@ var hideLogin = function() {
 var keyPlaced = false;
 var updateKeyPosition = function(x, y) {
     var size = sw < sh ? (sw/2) : (sh/2);
+
+    var left = lockPosX-Math.abs(x-lockPosX);
+    var top = lockPosY-Math.abs(y-lockPosY);
+    var width = Math.abs(x-lockPosX)*2;
+    var height = Math.abs(y-lockPosY)*2;
+
+    areaPositionView.style.left = (left)+"px"
+    areaPositionView.style.top = (top)+"px";
+    areaPositionView.style.width = (width)+"px";
+    areaPositionView.style.height = (height)+"px";
 
     var co = Math.abs(x-lockPosX);
     var ca = Math.abs(y-lockPosY);

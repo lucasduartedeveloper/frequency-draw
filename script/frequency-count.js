@@ -53,6 +53,16 @@ $(document).ready(function() {
 
     var fontFamily = "DS Digital";
 
+    checkboxView = document.createElement("div");
+    checkboxView.style.position = "absolute";
+    checkboxView.style.left = ((sw/2)-150)+"px";
+    checkboxView.style.top = ((sh/2)-187.5)+"px";
+    checkboxView.style.width = (50)+"px";
+    checkboxView.style.height = (50)+"px";
+    checkboxView.style.border = "2px solid #fff";
+    checkboxView.style.zIndex = "15";
+    document.body.appendChild(checkboxView);
+
     pictureView = document.createElement("canvas");
     pictureView.style.position = "absolute";
     //pictureView.style.background = "#fff";
