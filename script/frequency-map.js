@@ -51,7 +51,6 @@ $(document).ready(function() {
     camera = document.createElement("video");
     camera.style.position = "absolute";
     camera.autoplay = true;
-    camera.autoplay = true;
     camera.style.objectFit = "cover";
     camera.width = (sw);
     camera.height = (sh); 
@@ -75,6 +74,77 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
+    userInteracted = false;
+    oscillatorStarted = false;
+
+    position = {
+        x: (sw/2),
+        y: (sh/2)
+    };
+
+    var selected = false;
+    var startX = 0;
+    var startY = 0;
+    var diffX = 0;
+    var diffY = 0;
+
+    pictureView.ontouchstart = function(e) {
+        if (userInteracted && !oscillatorStarted) {
+            //if (!cameraOn) startCamera();
+            if (navigator.getUserMedia && mic.closed) mic.open(false, 50);
+            //oscillator.start();
+            oscillatorStarted = true;
+
+            //document.body.requestFullscreen();
+        }
+        angle = -(Math.PI/4);
+        frequencyDirection = 1;
+
+        if (e.touches.length < 2) return;
+
+        posX0 = e.touches[0].clientX;
+        posY0 = e.touches[0].clientY;
+
+        posX1 = e.touches[1].clientX;
+        posY1 = e.touches[1].clientY;
+
+        startX = posX0+((posX1-posX0)/2);
+        startY = posY0+((posY1-posY0)/2);
+
+        diffX = startX-position.x;
+        diffY = startY-position.y;
+
+        if (startX > (position.x - (25)) && startX < (position.x + (25)) && 
+            startY > (position.y - (25)) && startY < (position.y + (25))) {
+            selected = true;
+        }
+        else selected = false;
+
+        console.log(startX, startY, position, selected);
+    };
+
+    pictureView.ontouchmove = function(e) {
+        if (e.touches.length < 2 || !selected) return;
+
+        posX0 = e.touches[0].clientX;
+        posY0 = e.touches[0].clientY;
+
+        posX1 = e.touches[1].clientX;
+        posY1 = e.touches[1].clientY;
+
+        moveX = posX0+((posX1-posX0)/2);
+        moveY = posY0+((posY1-posY0)/2);
+
+        position.x = moveX-diffX;
+        position.y = moveY-diffY;
+    };
+
+    pictureView.ontouchend = function() {
+        userInteracted = true;
+        angle = 0;
+        frequencyDirection = -1;
+    };
+
     var versionName = "v0.9";
 
     titleView = document.createElement("span");
@@ -89,27 +159,6 @@ $(document).ready(function() {
     titleView.style.height = (25)+"px";
     titleView.style.zIndex = "15";
     document.body.appendChild(titleView);
-
-    userInteracted = false;
-    oscillatorStarted = false;
-    pictureView.ontouchstart = function() {
-        if (userInteracted && !oscillatorStarted) {
-            //if (!cameraOn) startCamera();
-            if (mic.closed) mic.open(false, 50);
-            //oscillator.start();
-            oscillatorStarted = true;
-
-            //document.body.requestFullscreen();
-        }
-        angle = -(Math.PI/4);
-        frequencyDirection = 1;
-    };
-
-    pictureView.ontouchend= function() {
-        userInteracted = true;
-        angle = 0;
-        frequencyDirection = -1;
-    }
 
     drawAcc(60, effectRatio);
 
@@ -341,16 +390,16 @@ function(freqArray=false, avgValue=0, offset=0) {
     if (freqArray) 
     for (var n = 0; n < freqArray.length; n++) {
         var c = { 
-            x: (sw/2),
-            y: (sh/2)
+            x: position.x,
+            y: position.y
         };
         var p0 = { 
-            x: (sw/2),
-            y: (sh/2)-(sw/16)
+            x: position.x,
+            y: position.y-(sw/16)
         };
         var p1 = { 
-            x: (sw/2),
-            y: (sh/2)-(sw/16)-offset-(freqArray[n]*25)
+            x: position.x,
+            y: position.y-(sw/16)-offset-(freqArray[n]*25)
         };
 
         var rp0 = _rotate2d(c, p0, (n*(360/freqArray.length)));
@@ -367,6 +416,19 @@ function(freqArray=false, avgValue=0, offset=0) {
 
         //updatePhiSegmentState(n, freqArray);
     }
+
+    ctx.fillStyle = "#000";
+
+    if (freqArray) {
+        ctx.beginPath();
+        ctx.moveTo(polygon[0].x1, polygon[0].y1);
+    }
+    if (freqArray)
+    for (var n = 1; n < polygon.length; n++) {
+        ctx.lineTo(polygon[n].x1, polygon[n].y1);
+    }
+    ctx.lineTo(polygon[0].x1, polygon[0].y1);
+    ctx.fill();
 
     // draw waveform A
     ctx.lineWidth = 3;
@@ -600,7 +662,7 @@ var drawImage = function() {
 
     ctx.beginPath();
     ctx.rect((sw/2)+30, (sh/2)+(sw/2)-45, 50, 50);
-    ctx.fill();
+    //ctx.fill();
     //ctx.stroke();
 
     ctx.lineWidth = 1;
