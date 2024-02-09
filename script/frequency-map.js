@@ -251,8 +251,8 @@ $(document).ready(function() {
     mic.onclose = function() { 
         console.log("mic closed");
     };
-    var ab = new Array(10);
-    for (var n = 0; n < 10; n++) {
+    var ab = new Array(4);
+    for (var n = 0; n < 4; n++) {
         ab[n] = 0;
     }
     resumedWave = ab;
@@ -269,7 +269,7 @@ var getImage = function() {
 };
 
 var resumeWave = function(freqArray) {
-    var blocks = 10;
+    var blocks = 4;
     var blockSize = Math.floor(freqArray.length / blocks);
 
     var resumedArray = [];
@@ -376,17 +376,16 @@ function(freqArray=false, avgValue=0, offset=0) {
         ctx.moveTo(polygon[0].x1, polygon[0].y1);
     }
     if (freqArray)
-    for (var n = 0; n < polygon.length; n++) {
-        ctx.fillStyle = 
-        //ctx.strokeStyle = 
-        getColor((1/(polygon.length-1))*n, true, 
+    for (var n = 1; n < polygon.length; n++) {
+        ctx.strokeStyle = 
+        getColor((1/(polygon.length-1))*(n-1), true, 
         (1-polygon[n].value));
 
         ctx.beginPath();
-        //ctx.moveTo(polygon[n-1].x1, polygon[n-1].y1);
-        //ctx.lineTo(polygon[n].x1, polygon[n].y1);
-        ctx.arc(polygon[n].x1, polygon[n].y1, 2.5, 0, (Math.PI*2));
-        ctx.fill();
+        ctx.moveTo(polygon[n-1].x1, polygon[n-1].y1);
+        ctx.lineTo(polygon[n].x1, polygon[n].y1);
+        //ctx.arc(polygon[n].x1, polygon[n].y1, 2.5, 0, (Math.PI*2));
+        ctx.stroke();
     }
 
     ctx.strokeStyle = 
@@ -397,7 +396,7 @@ function(freqArray=false, avgValue=0, offset=0) {
         polygon[polygon.length-1].x1, 
         polygon[polygon.length-1].y1);
     ctx.lineTo(polygon[0].x1, polygon[0].y1);
-    //ctx.stroke();
+    ctx.stroke();
 };
 
 var getColor = function(brightness, toString, opacity=1) {
@@ -685,7 +684,14 @@ var drawImage = function() {
 
     ctx.restore();
 
+    ctx.save();
+    ctx.translate((sw/2), (sh/2));
+    ctx.rotate((Math.PI/4));
+    ctx.translate(-(sw/2), -(sh/2));
+
     drawAB_rounded(resumedWave, 0);
+
+    ctx.restore();
 };
 
 var getSquare = function(item) {
