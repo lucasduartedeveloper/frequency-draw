@@ -97,6 +97,10 @@ echo "\n";
      </span>
 </p>
 
+<script src="
+https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js
+"></script>
+
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>

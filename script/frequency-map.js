@@ -118,7 +118,7 @@ $(document).ready(function() {
 
     previousOffset = 0;
 
-    motion = true;
+    motion = false;
     gyroUpdated = function(e) {
         var accX = Math.abs(e.accX);
         var accY = Math.abs(e.accY);
@@ -157,23 +157,33 @@ $(document).ready(function() {
             moment(recordedAudio.duration*1000).format("mm:ss")
         );
 
+        recordedAudio.playbackRate = 2;
+
         var audioCtx = 
         new(window.AudioContext || window. webkitAudioContext)();
 
+        return;
         var source = 
         audioCtx.createMediaElementSource(recordedAudio);
 
+        var pitchShift = new Tone.PitchShift();
+        pitchShift.pitch = 1;
+
+        source.connect(pitchShift);
+        pitchShift.toMaster();
+
+        /*
         var delay = audioCtx.createDelay(0.5);
         delay.connect(audioCtx.destination);
 
         var biquadFilter = audioCtx.createBiquadFilter();
         biquadFilter.type = "lowpass";
-        biquadFilter.frequency.value = 1000;
+        biquadFilter.frequency.value = 100;
         biquadFilter.connect(delay);
 
-        /*
-        As a consequence of calling createMediaElementSource(), audio playback from the HTMLMediaElement will be re-routed into the processing graph of the AudioContext. So playing/pausing the media can still be done through the media element API and the player controls. */
-        source.connect(biquadFilter);
+        // As a consequence of calling createMediaElementSource(), audio playback from the HTMLMediaElement will be re-routed into the processing graph of the AudioContext. So playing/pausing the media can still be done through the media element API and the player controls.
+
+        source.connect(biquadFilter);*/
     };
 
     mode = 1;
@@ -567,6 +577,19 @@ var drawImage = function() {
 
         ctx.restore();
     }
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#fff";
+    ctx.fillStyle = "#000";
+
+    ctx.beginPath();
+    ctx.rect((sw/2)+25, (sh/2)+(sw/2)-50, 50, 50);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.rect((sw/2)+30, (sh/2)+(sw/2)-45, 50, 50);
+    ctx.fill();
+    ctx.stroke();
 
     ctx.lineWidth = 1;
     ctx.strokeStyle = "#fff";
