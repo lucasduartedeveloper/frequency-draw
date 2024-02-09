@@ -82,11 +82,13 @@ $(document).ready(function() {
         y: (sh/2)
     };
 
-    var selected = false;
-    var startX = 0;
-    var startY = 0;
-    var diffX = 0;
-    var diffY = 0;
+    selected = false;
+    startX = (sw/2);
+    startY = (sh/2);
+    diffX = 0;
+    diffY = 0;
+    moveX = (sw/2);
+    moveY = (sh/2);
 
     pictureView.ontouchstart = function(e) {
         if (userInteracted && !oscillatorStarted) {
@@ -120,11 +122,11 @@ $(document).ready(function() {
         }
         else selected = false;
 
-        console.log(startX, startY, position, selected);
+        //console.log(startX, startY, position, selected);
     };
 
     pictureView.ontouchmove = function(e) {
-        if (e.touches.length < 2 || !selected) return;
+        if (e.touches.length < 2) return;
 
         posX0 = e.touches[0].clientX;
         posY0 = e.touches[0].clientY;
@@ -135,8 +137,10 @@ $(document).ready(function() {
         moveX = posX0+((posX1-posX0)/2);
         moveY = posY0+((posY1-posY0)/2);
 
-        position.x = moveX-diffX;
-        position.y = moveY-diffY;
+        if (selected) {
+            position.x = moveX-diffX;
+            position.y = moveY-diffY;
+        }
     };
 
     pictureView.ontouchend = function() {
@@ -747,13 +751,17 @@ var drawImage = function() {
     ctx.restore();
 
     ctx.save();
-    ctx.translate((sw/2), (sh/2));
+    ctx.translate(position.x, position.y);
     ctx.rotate((Math.PI/4));
-    ctx.translate(-(sw/2), -(sh/2));
+    ctx.translate(-position.x, -position.y);
 
     drawAB_rounded(resumedWave, 0);
 
     ctx.restore();
+
+    ctx.beginPath();
+    ctx.arc(moveX, moveY, 2.5, 0, (Math.PI*2));
+    //ctx.fill();
 };
 
 var getSquare = function(item) {
