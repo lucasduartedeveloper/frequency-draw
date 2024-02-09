@@ -116,14 +116,29 @@ $(document).ready(function() {
     oscillator.volume.gain.value = 1;
     oscillator.frequency.value = 5;
 
-    motion = false;
-    gyroUpdated = function(e) {
-        var co = e.accY;
-        var ca = e.accX > e.accZ ? e.accX : e.accZ;
-        angle = -(_angle2d(co, ca)-(Math.PI/2));
+    previousOffset = 0;
 
-        frequencyDirection = angle < 0 ? 
-        Math.ceil((5/(Math.PI/4))*(-angle)) : -1;
+    motion = true;
+    gyroUpdated = function(e) {
+        var accX = Math.abs(e.accX);
+        var accY = Math.abs(e.accY);
+        var accZ = Math.abs(e.accZ);
+
+        var offset = ((accX+accY+accZ)/3);
+        if (Math.abs(offset-previousOffset) > 1) {
+            var image_options = [ 0, 1, 2, 3, 4, 5 ];
+            var mode0 = 
+            image_options .splice(
+            Math.floor(Math.random()*image_options.length), 1);
+            var mode1 = 
+            image_options .splice(
+            Math.floor(Math.random()*image_options.length), 1);
+
+            modeArr[0] = mode0[0];
+            modeArr[1] = mode1[0];
+
+            previousOffset = offset;
+        }
     }
 
     isRecording = false;
@@ -131,7 +146,7 @@ $(document).ready(function() {
     media = 0;
     recordingAvgValue = 0;
 
-    recordedAudio = new Audio();
+    recordedAudio = new Audio("audio/glass-breaking_sfx.wav");
     //recordedAudio.volume = 0;
 
     effectLayer = new Audio();
@@ -153,9 +168,11 @@ $(document).ready(function() {
 
         var biquadFilter = audioCtx.createBiquadFilter();
         biquadFilter.type = "lowpass";
-        biquadFilter.frequency.value = 100;
+        biquadFilter.frequency.value = 1000;
         biquadFilter.connect(delay);
 
+        /*
+        As a consequence of calling createMediaElementSource(), audio playback from the HTMLMediaElement will be re-routed into the processing graph of the AudioContext. So playing/pausing the media can still be done through the media element API and the player controls. */
         source.connect(biquadFilter);
     };
 
@@ -225,6 +242,11 @@ $(document).ready(function() {
     drawImage();
     animate();
 });
+
+var modeArr = [ 0, 1 ];
+var getImage = function() {
+    return img_list[modeArr[mode]];
+};
 
 var resumeWave = function(freqArray) {
     var blocks = 50;
@@ -390,7 +412,11 @@ var getColor = function(brightness, toString, opacity=1) {
 
 var img_list = [
     "img/picture-4.png",
-    "img/picture-3.png"
+    "img/picture-3.png",
+    "img/picture-5.png",
+    "img/picture-6.png",
+    "img/picture-7.png",
+    "img/picture-8.png"
 ];
 
 var imagesLoaded = false;
@@ -523,9 +549,10 @@ var drawImage = function() {
         ctx.rotate(-frequencyPath[frequencyNo].angle*(Math.PI/180));
         ctx.translate(-(sw/2), -(sh/2));
 
+        var image = getImage();
         var size = {
-            width: img_list[mode].naturalWidth,
-            height: img_list[mode].naturalHeight
+            width: image.naturalWidth,
+            height: image.naturalHeight
         };
         var frame = {
             width: getSquare(size),
@@ -533,7 +560,7 @@ var drawImage = function() {
         };
         var format = fitImageCover(size, frame);
 
-        ctx.drawImage(img_list[mode], 
+        ctx.drawImage(image, 
         -format.left, -format.top, frame.width, frame.height, 
         (sw/2)-(sw/4), (sh/2)-(sw/4), 
         (sw/2), (sw/2));
