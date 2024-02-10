@@ -489,11 +489,26 @@ var drawImage = function() {
 
     ctx.lineWidth = 1;
     ctx.strokeStyle = "#fff";
-    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
 
     ctx.beginPath();
     ctx.arc((sw/2), (sh/3)*2, (sw/3)+10, 0, (Math.PI*2));
     ctx.fill();
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#fff";
+    ctx.fillStyle = "rgba(50, 0, 0, 0.7)";
+
+    ctx.beginPath();
+    ctx.rect((sw/2)-(sw/3), 0, (sw/1.5), (sh/3));
+    ctx.fill();
+
+   for (var n = 0; n <= 3; n++) {
+        ctx.beginPath();
+        ctx.moveTo((sw/2)-(sw/3), (n *(sh/10))-(sh/20));
+        ctx.lineTo((sw/2)-(sw/3)+(sw/1.5), (n *(sh/10))-(sh/20));
+        ctx.stroke();
+   }
 
     for (var n = 0; n < 6; n++) {
         var diff = Math.abs((0-stringArr[n].y));
