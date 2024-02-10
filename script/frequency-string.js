@@ -494,6 +494,28 @@ $(document).ready(function() {
         scaleView.innerText = "FRET "+startFret;
     };
 
+    strechSound = false;
+    stretchSoundView = document.createElement("span");
+    stretchSoundView.style.position = "absolute";
+    stretchSoundView.style.userSelect = "none";
+    stretchSoundView.style.color = "#fff";
+    stretchSoundView.innerText = strechSound ? 
+    "STRETCH: ON" : "STRETCH: OFF";
+    stretchSoundView.style.fontSize = (10)+"px";
+    stretchSoundView.style.textAlign = "center";
+    stretchSoundView.style.left = (0)+"px";
+    stretchSoundView.style.top = (0)+"px";
+    stretchSoundView.style.width = (50)+"px";
+    stretchSoundView.style.height = (50)+"px";
+    stretchSoundView.style.zIndex = "15";
+    document.body.appendChild(stretchSoundView);
+
+    stretchSoundView.onclick = function() {
+        strechSound = !strechSound;
+        stretchSoundView.innerText = strechSound ? 
+        "STRETCH: ON" : "STRETCH: OFF";
+    };
+
     loadImages();
 
     drawImage();
@@ -579,7 +601,8 @@ var animate = function() {
                 stringArr[n].impulse = -0.25;
 
                 var radius = (stringArr[n].radius - 0.25) > 0 ? 
-                (stringArr[n].radius - 0.25) : 0;
+                (stringArr[n].radius - 
+                (strechSound ? 0 : 0.25)) : 0;
                 stringArr[n].radius = radius;
             }
 
@@ -588,7 +611,8 @@ var animate = function() {
                 stringArr[n].impulse = 0.25;
 
                 var radius = (stringArr[n].radius - 0.25) > 0 ? 
-                (stringArr[n].radius - 0.25) : 0;
+                (stringArr[n].radius - 
+                (strechSound ? 0 : 0.25)) : 0;
                 stringArr[n].radius = radius;
             }
         }

@@ -74,11 +74,6 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
-    var startX = 0;
-    var startY = 0;
-    var moveX = 0;
-    var moveY = 0;
-
     userInteracted = false;
     oscillatorStarted = false;
 
@@ -426,7 +421,7 @@ function(freqArray=false, avgValue=0, offset=0) {
         //updatePhiSegmentState(n, freqArray);
     }
 
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = "#fff";
 
     if (freqArray) {
         ctx.beginPath();
@@ -456,7 +451,7 @@ function(freqArray=false, avgValue=0, offset=0) {
         ctx.moveTo(polygon[n-1].x1, polygon[n-1].y1);
         ctx.lineTo(polygon[n].x1, polygon[n].y1);
         //ctx.arc(polygon[n].x1, polygon[n].y1, 2.5, 0, (Math.PI*2));
-        ctx.stroke();
+        //ctx.stroke();
     }
 
     ctx.strokeStyle = 
@@ -467,7 +462,7 @@ function(freqArray=false, avgValue=0, offset=0) {
         polygon[polygon.length-1].x1, 
         polygon[polygon.length-1].y1);
     ctx.lineTo(polygon[0].x1, polygon[0].y1);
-    ctx.stroke();
+    //ctx.stroke();
 };
 
 var getColor = function(brightness, toString, opacity=1) {
@@ -537,19 +532,8 @@ var drawAcc = function(length = 15, effect = 0.01) {
     var c0 = { x: 0, y: 0 };
     var c1 = { x: 0, y: 0 };
 
-    playView = document.createElement("button");
-    playView.style.position = "absolute";
-    playView.style.color = "#000";
-    playView.style.fontFamily = "Khand";
-    playView.style.textAlign = "center";
-    playView.innerText = frequencyDirection == 1 ? 
-    "stop" : "play";
-    playView.style.left = ((sw/2)+(sw/4)+30)+"px";
-    playView.style.top = ((sh/2)-(sw/2)-50)+"px";
-    playView.style.width = (50)+"px";
-    playView.style.height = (25)+"px";
-    playView.style.zIndex = "15";
-    document.body.appendChild(playView);
+    var p0 = { x: c0.x, y: c0.y+0.5 };
+    var p1 = { x: c1.x, y: c1.y-0.5 };
 
     var size = Math.floor(length/3);
 
@@ -591,27 +575,7 @@ Math.curve = function(value, scale=1) {
     return rp.y*scale;
 };
 
-var frequency = 0;
-
-var invadersDefeated = 0;
-var invaderArr = [];
-
-var createInvader = function() {
-    var rnd = Math.random();
-    var posX = (sw/2)+((rnd-0.5)*(sw/2));
-
-    var obj = {
-        dead: false,
-        x: posX,
-        y: (sh/2)-(sw/4)+5
-    };
-
-    invaderOscillator.frequency.value = rnd*500;
-
-    invaderArr.push(obj);
-};
-
-var frequencyDirection = 0
+var frequencyDirection = 0;
 var frequencyNo = 0;
 var lap = 0;
 
@@ -705,7 +669,7 @@ var drawImage = function() {
     //ctx.fill();
     //ctx.stroke();
 
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 1;
     ctx.strokeStyle = "#fff";
     ctx.fillStyle = "#fff";
 
@@ -718,13 +682,6 @@ var drawImage = function() {
     ctx.moveTo((sw/2), (sh/2)+(sw/4));
     ctx.lineTo((sw/2), (sh/2)+(sw/2));
     //ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(0, (sh/2)-(sw/4));
-    ctx.lineTo(sw, (sh/2)-(sw/4));
-    ctx.stroke();
-
-    ctx.lineWidth = 1;
 
     ctx.beginPath();
     ctx.moveTo(
