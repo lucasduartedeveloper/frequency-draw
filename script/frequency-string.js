@@ -583,7 +583,8 @@ var drawImage = function() {
         ctx.fillStyle = "rgba(100, 255, 100, 0.5)";
         ctx.beginPath();
         ctx.arc(stringArr[n].x, 
-        (stringArr[n].fy%6)*(sh/10), 10, 0, (Math.PI*2));
+        ((stringArr[n].fy%6)+(stringArr[n].fy > 5 ? 1 : 0))*(sh/10), 10, 
+        0, (Math.PI*2));
         ctx.fill();
 
         ctx.fillStyle = "#000";
@@ -592,7 +593,8 @@ var drawImage = function() {
         ctx.textBaseline = "middle";
 
         ctx.fillText(stringArr[n].fy, 
-        stringArr[n].x, (stringArr[n].fy%6)*(sh/10));
+        stringArr[n].x, 
+        ((stringArr[n].fy%6)+(stringArr[n].fy > 5 ? 1 : 0))*(sh/10));
     }
 
     if (imagesLoaded) {
