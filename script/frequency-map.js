@@ -196,6 +196,25 @@ $(document).ready(function() {
     }
 
     isRecording = false;
+    plabackRate = 0.5;
+
+    plabackRateView = document.createElement("span");
+    plabackRateView.style.position = "absolute";
+    plabackRateView.style.color = "#fff";
+    plabackRateView.innerText = "PLAYBACK "+plabackRate+"x";
+    plabackRateView.style.textAlign = "left";
+    plabackRateView.style.left = (10)+"px";
+    plabackRateView.style.top = (sh-35)+"px";
+    plabackRateView.style.width = (150)+"px";
+    plabackRateView.style.height = (25)+"px";
+    plabackRateView.style.zIndex = "15";
+    document.body.appendChild(plabackRateView);
+
+    plabackRateView.onclick = function() {
+        plabackRate = (plabackRate+0.5) < 2.5 ?
+        (plabackRate+0.5) : 0.5;
+        plabackRateView.innerText = "PLAYBACK "+plabackRate+"x";
+    };
 
     media = 0;
     recordingAvgValue = 0;
@@ -213,7 +232,7 @@ $(document).ready(function() {
             duration + " " + moment(duration).format("mm:ss")
         );
 
-        recordedAudio.playbackRate = 2;
+        recordedAudio.playbackRate = plabackRate;
         recordedAudio.preservesPitch = false;
 
         var audioCtx = 
@@ -300,6 +319,13 @@ $(document).ready(function() {
 
         if (isRecording)
         resumedWave = resumeWave(freqArray);
+        else {
+            var ab = new Array(4);
+            for (var n = 0; n < 4; n++) {
+                ab[n] = 0;
+            }
+            resumedWave = ab;
+        }
     };
     mic.onclose = function() { 
         console.log("mic closed");
