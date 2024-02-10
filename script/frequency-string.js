@@ -166,7 +166,14 @@ $(document).ready(function() {
         [ 87.31, 116.54, 155.56, 207.65, 261.63, 349.23 ],
         [ 92.50, 123.47, 164.81, 220, 277.18, 369.99 ],
         [ 98, 130.81, 174.61, 233.08, 293.66, 392 ],
-        [ 103.83, 138.59, 185, 246.94, 311.13, 415.30 ]
+        [ 103.83, 138.59, 185, 246.94, 311.13, 415.30 ],
+        // 10 -- 
+        [ 138.59, 185, 246.94, 329.63, 415.30, 554.37 ],
+        [ 146.83, 196, 261.63, 349.23, 440, 587.33 ],
+        [ 155.56, 207.65, 277.18, 369.99, 466.16, 622.25 ],
+        [ 164.81, 220, 293.66, 392, 493.88, 659.23 ],
+        [ 174.61, 233.08, 311.13, 415.30, 523.25, 698.46 ],
+        [ 185, 246.94, 329.63, 440, 554.37, 739.99 ]
     ];
 
     oscillator = createOscillator();
@@ -190,6 +197,121 @@ $(document).ready(function() {
         obj.oscillator.frequency.value = 0;
         stringArr.push(obj);
     }
+
+    noteNo = 0;
+    musicArr = [
+        { fy: 12, string: 2 },
+        { fy: 15, string: 4 },
+        { fy: 14, string: 3 },
+        { fy: 12, string: 3 },
+        { fy: 15, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 14, string: 5 },
+        { fy: 14, string: 3 },
+
+        { fy: 12, string: 2 },
+        { fy: 15, string: 4 },
+        { fy: 14, string: 3 },
+        { fy: 12, string: 3 },
+        { fy: 15, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 14, string: 5 },
+        { fy: 14, string: 3 },
+
+        { fy: 12, string: 2 },
+        { fy: 15, string: 4 },
+        { fy: 14, string: 3 },
+        { fy: 12, string: 3 },
+        { fy: 15, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 14, string: 5 },
+        { fy: 14, string: 3 },
+
+        { fy: 12, string: 2 },
+        { fy: 15, string: 4 },
+        { fy: 14, string: 3 },
+        { fy: 12, string: 3 },
+        { fy: 15, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 14, string: 5 },
+        { fy: 14, string: 3 },
+
+        { fy: 14, string: 2 },
+        { fy: 15, string: 4 },
+        { fy: 14, string: 3 },
+        { fy: 12, string: 3 },
+        { fy: 15, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 14, string: 5 },
+        { fy: 14, string: 3 },
+
+        { fy: 14, string: 2 },
+        { fy: 15, string: 4 },
+        { fy: 14, string: 3 },
+        { fy: 12, string: 3 },
+        { fy: 15, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 14, string: 5 },
+        { fy: 14, string: 3 },
+
+        { fy: 12, string: 3 },
+        { fy: 15, string: 4 },
+        { fy: 14, string: 3 },
+        { fy: 12, string: 3 },
+        { fy: 15, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 14, string: 5 },
+        { fy: 14, string: 3 },
+
+        { fy: 12, string: 3 },
+        { fy: 15, string: 4 },
+        { fy: 14, string: 3 },
+        { fy: 12, string: 3 },
+        { fy: 15, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 14, string: 5 },
+        { fy: 14, string: 3 },
+
+        { fy: 12, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 15, string: 4 },
+        { fy: 14, string: 3 },
+        { fy: 12, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 14, string: 5 },
+        { fy: 14, string: 3 },
+
+        { fy: 15, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 14, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: 12, string: 5 },
+        { fy: 14, string: 3 },
+        { fy: [ 14, 15 ], string: [ 3, 4 ] }
+    ];
+
+    setInterval(function() {
+        var obj = musicArr[noteNo];
+        if (typeof(obj.fy) == "number") {
+            stringArr[obj.string].y = 66.5;
+            stringArr[obj.string].fy = obj.fy > 5 ? (obj.fy-5) : obj.fy;
+            stringArr[obj.string].radius = 1;
+            stringArr[obj.string].value = 1;
+            stringArr[obj.string].impulse = 0.05;
+        }
+        else {
+            for (var n = 0; n < obj.fy.length; n++) {
+                stringArr[obj.string[n]].y = 66.5;
+                stringArr[obj.string[n]].fy = obj.fy[n] > 5 ? 
+                (obj.fy[n]-5) : obj.fy[n];
+                stringArr[obj.string[n]].radius = 1;
+                stringArr[obj.string[n]].value = 1;
+                stringArr[obj.string[n]].impulse = 0.05;
+            }
+        }
+
+        noteNo = (noteNo+1) < musicArr.length ? (noteNo+1) : 0;
+    }, 250);
 
     drawImage();
     animate();
@@ -240,8 +362,8 @@ var animate = function() {
                 stringArr[n].value > stringArr[n].radius) {
                 stringArr[n].impulse = -0.25;
 
-                var radius = (stringArr[n].radius - 0.10) > 0 ? 
-                (stringArr[n].radius - 0.10) : 0;
+                var radius = (stringArr[n].radius - 0.25) > 0 ? 
+                (stringArr[n].radius - 0.25) : 0;
                 stringArr[n].radius = radius;
             }
 
@@ -249,8 +371,8 @@ var animate = function() {
                 stringArr[n].value < -stringArr[n].radius) {
                 stringArr[n].impulse = 0.25;
 
-                var radius = (stringArr[n].radius - 0.10) > 0 ? 
-                (stringArr[n].radius - 0.10) : 0;
+                var radius = (stringArr[n].radius - 0.25) > 0 ? 
+                (stringArr[n].radius - 0.25) : 0;
                 stringArr[n].radius = radius;
             }
         }
@@ -284,7 +406,8 @@ var drawImage = function() {
 
     for (var n = 0; n < 6; n++) {
         ctx.beginPath();
-        ctx.arc(stringArr[n].x, stringArr[n].fy*(sh/10), 5, 0, (Math.PI*2));
+        ctx.arc(stringArr[n].x, 
+        (stringArr[n].fy%5)*(sh/10), 5, 0, (Math.PI*2));
         ctx.fill();
 
         var diff = Math.abs((0-stringArr[n].y));
