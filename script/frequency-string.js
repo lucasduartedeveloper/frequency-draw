@@ -357,33 +357,58 @@ $(document).ready(function() {
         { fy: [ 14, 15 ], string: [ 3, 4 ] }
     ];
 
-    /*
-    setInterval(function() {
-        for (var n = 0; n < 6; n++) {
-            stringArr[n].fy = 0;
-        }
+    play2View = document.createElement("span");
+    play2View.style.position = "absolute";
+    play2View.style.userSelect = "none";
+    play2View.style.color = "#fff";
+    play2View.innerText = "PLAY 2";
+    play2View.style.textAlign = "center";
+    play2View.style.left = ((sw/2)+(sw/3)+10)+"px";
+    play2View.style.top = ((sh/2)-(sw/2)+250)+"px";
+    play2View.style.width = (50)+"px";
+    play2View.style.height = (50)+"px";
+    play2View.style.zIndex = "15";
+    document.body.appendChild(play2View);
 
-        var obj = musicArr[noteNo];
-        if (typeof(obj.fy) == "number") {
-            stringArr[obj.string].y = 66.5;
-            stringArr[obj.string].fy = obj.fy > 5 ? (obj.fy-5) : obj.fy;
-            stringArr[obj.string].radius = 1;
-            stringArr[obj.string].value = 1;
-            stringArr[obj.string].impulse = 0.05;
-        }
-        else {
-            for (var n = 0; n < obj.fy.length; n++) {
-                stringArr[obj.string[n]].y = 66.5;
-                stringArr[obj.string[n]].fy = obj.fy[n] > 5 ? 
-                (obj.fy[n]-5) : obj.fy[n];
-                stringArr[obj.string[n]].radius = 1;
-                stringArr[obj.string[n]].value = 1;
-                stringArr[obj.string[n]].impulse = 0.05;
+    play2Interval = 0;
+    play2View.onclick = function() {
+        clearInterval(play2Interval);
+        noteNo = 0;
+
+        play2Interval = setInterval(function() {
+            for (var n = 0; n < 6; n++) {
+                stringArr[n].fy = 0;
             }
-        }
-
-        noteNo = (noteNo+1) < musicArr.length ? (noteNo+1) : 0;
-    }, 250);*/
+    
+            var obj = musicArr[noteNo];
+            if (typeof(obj.fy) == "number") {
+                moveX = stringArr[obj.string].x;
+                moveY = (sh/3)*2;
+                stringArr[obj.string].y = 66.5;
+                stringArr[obj.string].fy = obj.fy > 5 ? (obj.fy-5) : obj.fy;
+                stringArr[obj.string].radius = 1;
+                stringArr[obj.string].value = 1;
+                stringArr[obj.string].impulse = 0.05;
+            }
+            else {
+                var move = 0;
+                for (var n = 0; n < obj.fy.length; n++) {
+                    move += stringArr[obj.string[n]].x;
+                    stringArr[obj.string[n]].y = 66.5;
+                    stringArr[obj.string[n]].fy = obj.fy[n] > 5 ? 
+                    (obj.fy[n]-5) : obj.fy[n];
+                    stringArr[obj.string[n]].radius = 1;
+                    stringArr[obj.string[n]].value = 1;
+                    stringArr[obj.string[n]].impulse = 0.05;
+                }
+                moveX = (move / obj.fy.length);
+                moveY = (sh/3)*2;
+            }
+    
+            noteNo = (noteNo+1) < musicArr.length ? (noteNo+1) : 0;
+            if (noteNo == 0) clearInterval(play2Interval);
+        }, 500);
+    };
 
     loadImages();
 
