@@ -228,13 +228,19 @@ $(document).ready(function() {
     titleView.style.zIndex = "15";
     document.body.appendChild(titleView);
 
-    noteArr = [
+    noteArr = [ 
         [ 82.41, 110, 146.83, 196, 246.94, 329.63 ],
-        [ 87.31, 116.54, 155.56, 207.65, 261.63, 349.23 ],
+        [ 87.31, 116.54, 155.56, 207.65, 261.63, 349.23 ], 
         [ 92.50, 123.47, 164.81, 220, 277.18, 369.99 ],
         [ 98, 130.81, 174.61, 233.08, 293.66, 392 ],
         [ 103.83, 138.59, 185, 246.94, 311.13, 415.30 ],
-        // 10 -- 
+
+        [ 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0 ],
+ 
         [ 138.59, 185, 246.94, 329.63, 415.30, 554.37 ],
         [ 146.83, 196, 261.63, 349.23, 440, 587.33 ],
         [ 155.56, 207.65, 277.18, 369.99, 466.16, 622.25 ],
@@ -353,7 +359,7 @@ $(document).ready(function() {
         { fy: 14, string: 5 },
         { fy: 14, string: 3 },
         { fy: 12, string: 5 },
-        { fy: 14, string: 3 },
+        { fy: 14, string: 3 }, 
         { fy: [ 14, 15 ], string: [ 3, 4 ] }
     ];
 
@@ -379,13 +385,13 @@ $(document).ready(function() {
             for (var n = 0; n < 6; n++) {
                 stringArr[n].fy = 0;
             }
-    
+
             var obj = musicArr[noteNo];
             if (typeof(obj.fy) == "number") {
                 moveX = stringArr[obj.string].x;
                 moveY = (sh/3)*2;
                 stringArr[obj.string].y = 66.5;
-                stringArr[obj.string].fy = obj.fy > 5 ? (obj.fy-5) : obj.fy;
+                stringArr[obj.string].fy = obj.fy;
                 stringArr[obj.string].radius = 1;
                 stringArr[obj.string].value = 1;
                 stringArr[obj.string].impulse = 0.05;
@@ -395,8 +401,7 @@ $(document).ready(function() {
                 for (var n = 0; n < obj.fy.length; n++) {
                     move += stringArr[obj.string[n]].x;
                     stringArr[obj.string[n]].y = 66.5;
-                    stringArr[obj.string[n]].fy = obj.fy[n] > 5 ? 
-                    (obj.fy[n]-5) : obj.fy[n];
+                    stringArr[obj.string[n]].fy = obj.fy[n];
                     stringArr[obj.string[n]].radius = 1;
                     stringArr[obj.string[n]].value = 1;
                     stringArr[obj.string[n]].impulse = 0.05;
@@ -407,7 +412,7 @@ $(document).ready(function() {
     
             noteNo = (noteNo+1) < musicArr.length ? (noteNo+1) : 0;
             if (noteNo == 0) clearInterval(play2Interval);
-        }, 100);
+        }, 500);
     };
 
     loadImages();
@@ -553,14 +558,7 @@ var drawImage = function() {
     ctx.arc((sw/2), (sh/3)*2, (sw/3)+10, 0, (Math.PI*2));
     ctx.fill();
 
-    ctx.fillStyle = "rgba(100, 255, 100, 0.5)";
-
     for (var n = 0; n < 6; n++) {
-        ctx.beginPath();
-        ctx.arc(stringArr[n].x, 
-        (stringArr[n].fy%6)*(sh/10), 5, 0, (Math.PI*2));
-        ctx.fill();
-
         var diff = Math.abs((0-stringArr[n].y));
         diff = diff > 20 ? 20 : diff;
         var x = Math.curve(((1-(1/20)*diff)*
@@ -579,6 +577,22 @@ var drawImage = function() {
             ctx.lineTo(stringArr[n].x+x, k*(sh/100));
         }
         ctx.stroke();
+
+        if (stringArr[n].fy == 0) continue;
+
+        ctx.fillStyle = "rgba(100, 255, 100, 0.5)";
+        ctx.beginPath();
+        ctx.arc(stringArr[n].x, 
+        (stringArr[n].fy%6)*(sh/10), 10, 0, (Math.PI*2));
+        ctx.fill();
+
+        ctx.fillStyle = "#000";
+        ctx.font = (15)+"px sans serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillText(stringArr[n].fy, 
+        stringArr[n].x, (stringArr[n].fy%6)*(sh/10));
     }
 
     if (imagesLoaded) {
