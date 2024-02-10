@@ -291,6 +291,10 @@ $(document).ready(function() {
     ];
 
     setInterval(function() {
+        for (var n = 0; n < 6; n++) {
+            stringArr[n].fy = 0;
+        }
+
         var obj = musicArr[noteNo];
         if (typeof(obj.fy) == "number") {
             stringArr[obj.string].y = 66.5;
@@ -353,7 +357,7 @@ var animate = function() {
         for (var n = 0; n < 6; n++) {
             stringArr[n].oscillator.frequency.value = 
             (stringArr[n].radius != 0 ? 
-            noteArr[stringArr[n].fy][n]+(stringArr[n].value*10) : 0);
+            noteArr[stringArr[n].fy][n]+(stringArr[n].value*5) : 0);
 
             stringArr[n].value = stringArr[n].radius != 0 ?
             (stringArr[n].value + stringArr[n].impulse) : 0;
@@ -407,7 +411,7 @@ var drawImage = function() {
     for (var n = 0; n < 6; n++) {
         ctx.beginPath();
         ctx.arc(stringArr[n].x, 
-        (stringArr[n].fy%5)*(sh/10), 5, 0, (Math.PI*2));
+        (stringArr[n].fy%6)*(sh/10), 5, 0, (Math.PI*2));
         ctx.fill();
 
         var diff = Math.abs((0-stringArr[n].y));
