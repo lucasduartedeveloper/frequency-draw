@@ -82,6 +82,72 @@ $(document).ready(function() {
         stringArr[5].fy = 2;
     };
 
+    chord1View = document.createElement("span");
+    chord1View.style.position = "absolute";
+    chord1View.style.userSelect = "none";
+    chord1View.style.color = "#fff";
+    chord1View.innerText = "C";
+    chord1View.style.textAlign = "center";
+    chord1View.style.left = ((sw/2)+(sw/3)+10)+"px";
+    chord1View.style.top = ((sh/2)-(sw/2)+50)+"px";
+    chord1View.style.width = (50)+"px";
+    chord1View.style.height = (50)+"px";
+    chord1View.style.zIndex = "15";
+    document.body.appendChild(chord1View);
+
+    chord1View.onclick = function() {
+        stringArr[0].fy = 0;
+        stringArr[1].fy = 3;
+        stringArr[2].fy = 2;
+        stringArr[3].fy = 0;
+        stringArr[4].fy = 1;
+        stringArr[5].fy = 0
+    };
+
+    chord2View = document.createElement("span");
+    chord2View.style.position = "absolute";
+    chord2View.style.userSelect = "none";
+    chord2View.style.color = "#fff";
+    chord2View.innerText = "D";
+    chord2View.style.textAlign = "center";
+    chord2View.style.left = ((sw/2)+(sw/3)+10)+"px";
+    chord2View.style.top = ((sh/2)-(sw/2)+100)+"px";
+    chord2View.style.width = (50)+"px";
+    chord2View.style.height = (50)+"px";
+    chord2View.style.zIndex = "15";
+    document.body.appendChild(chord2View);
+
+    chord2View.onclick = function() {
+        stringArr[0].fy = 0;
+        stringArr[1].fy = 0;
+        stringArr[2].fy = 0;
+        stringArr[3].fy = 2;
+        stringArr[4].fy = 3;
+        stringArr[5].fy = 2;
+    };
+
+    sweepView = document.createElement("span");
+    sweepView.style.position = "absolute";
+    sweepView.style.userSelect = "none";
+    sweepView.style.color = "#fff";
+    sweepView.innerText = "PLAY";
+    sweepView.style.textAlign = "center";
+    sweepView.style.left = ((sw/2)+(sw/3)+10)+"px";
+    sweepView.style.top = ((sh/2)-(sw/2)+200)+"px";
+    sweepView.style.width = (50)+"px";
+    sweepView.style.height = (50)+"px";
+    sweepView.style.zIndex = "15";
+    document.body.appendChild(sweepView);
+
+    sweepView.onclick = function() {
+        for (var n = 0; n < 6; n++) {
+            stringArr[n].y = 66.5;
+            stringArr[n].radius = 1;
+            stringArr[n].value = 1;
+            stringArr[n].impulse = 0.05;
+        }
+    };
+
     userInteracted = false;
     oscillatorStarted = false;
 
@@ -317,7 +383,7 @@ $(document).ready(function() {
         }
 
         noteNo = (noteNo+1) < musicArr.length ? (noteNo+1) : 0;
-    }, 500);*/
+    }, 250);*/
 
     drawImage();
     animate();
@@ -389,7 +455,7 @@ var animate = function() {
             }
         }
 
-        //console.log(oscillatorValue, count);
+        console.log((oscillatorValue/count), count);
         oscillator.frequency.value = count > 0 ? 
         (oscillatorValue / count) : 0;
 
@@ -427,8 +493,8 @@ var drawImage = function() {
         ctx.fill();
 
         var diff = Math.abs((0-stringArr[n].y));
-        diff = diff > 10 ? 10 : diff;
-        var x = Math.curve(((1-(1/10)*diff)*
+        diff = diff > 20 ? 20 : diff;
+        var x = Math.curve(((1-(1/20)*diff)*
         Math.abs(stringArr[n].value)), Math.abs(stringArr[n].value))*20;
         x = stringArr[n].value < 0 ? -x : x;
 
@@ -436,8 +502,8 @@ var drawImage = function() {
         ctx.moveTo(stringArr[n].x+x, 0);
         for (var k = 1; k <= 100; k++) {
             var diff = Math.abs((k-stringArr[n].y));
-            diff = diff > 10 ? 10 : diff;
-            var x = Math.curve(((1-(1/10)*diff)*
+            diff = diff > 20 ? 20 : diff;
+            var x = Math.curve(((1-(1/20)*diff)*
             Math.abs(stringArr[n].value)), Math.abs(stringArr[n].value))*20;
             x = stringArr[n].value < 0 ? -x : x;
 
