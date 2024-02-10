@@ -179,7 +179,7 @@ $(document).ready(function() {
         angle = -(Math.PI/4);
         frequencyDirection = 1;
 
-        startX = e.touches[0].clientX;
+        startX = e.touches[0].clientX-10;
         startY = e.touches[0].clientY;
     };
 
@@ -392,7 +392,8 @@ $(document).ready(function() {
 });
 
 var img_list = [
-    "img/box-template-0_texture.png"
+    "img/box-template-0_texture.png",
+    "img/guitar-pick.png"
 ];
 
 var imagesLoaded = false;
@@ -553,6 +554,34 @@ var drawImage = function() {
             ctx.lineTo(stringArr[n].x+x, k*(sh/100));
         }
         ctx.stroke();
+    }
+
+    if (imagesLoaded) {
+        ctx.fillStyle = "#fff";
+
+        ctx.beginPath();
+        ctx.arc((moveX-30), moveY, 12.5, 0, (Math.PI*2));
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate((moveX-25), moveY);
+        ctx.rotate(-(Math.PI/2));
+        ctx.translate(-(moveX-25), -(moveY));
+
+        var size = {
+            width: img_list[1].naturalWidth,
+            height: img_list[1].naturalHeight
+        };
+        var frame = {
+            width: getSquare(size),
+            height: getSquare(size)
+        };
+        var format = fitImageCover(size, frame);
+        ctx.drawImage(img_list[1],
+        -format.left, -format.top, frame.width, frame.height,
+        moveX-50, moveY-25, 50, 50);
+
+        ctx.restore();
     }
 };
 
