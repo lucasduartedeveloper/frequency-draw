@@ -60,6 +60,28 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
+    chord0View = document.createElement("span");
+    chord0View.style.position = "absolute";
+    chord0View.style.userSelect = "none";
+    chord0View.style.color = "#fff";
+    chord0View.innerText = "G";
+    chord0View.style.textAlign = "center";
+    chord0View.style.left = ((sw/2)+(sw/3)+10)+"px";
+    chord0View.style.top = ((sh/2)-(sw/2))+"px";
+    chord0View.style.width = (50)+"px";
+    chord0View.style.height = (50)+"px";
+    chord0View.style.zIndex = "15";
+    document.body.appendChild(chord0View);
+
+    chord0View.onclick = function() {
+        stringArr[0].fy = 2;
+        stringArr[1].fy = 1;
+        stringArr[2].fy = 0;
+        stringArr[3].fy = 0;
+        stringArr[4].fy = 0;
+        stringArr[5].fy = 2;
+    };
+
     userInteracted = false;
     oscillatorStarted = false;
 
@@ -100,7 +122,7 @@ $(document).ready(function() {
 
         for (var n = 0; n < 6; n++) {
             if (moveX < stringArr[n].x && startX > stringArr[n].x) {
-                stringArr[n].fy = Math.floor(((100/sh)*startY));
+                stringArr[n].fy = Math.floor(((10/sh)*startY));
             }
 
             if (startX < stringArr[n].x && moveX > stringArr[n].x) {
@@ -139,7 +161,13 @@ $(document).ready(function() {
     titleView.style.zIndex = "15";
     document.body.appendChild(titleView);
 
-    noteArr = [ 164.81, 220, 261.66, 246.94, 293.66, 329.63 ];
+    noteArr = [
+        [ 82.41, 110, 146.83, 196, 246.94, 329.63 ],
+        [ 87.31, 116.54, 155.56, 207.65, 261.63, 349.23 ],
+        [ 92.50, 123.47, 164.81, 220, 277.18, 369.99 ],
+        [ 98, 130.81, 174.61, 233.08, 293.66, 392 ],
+        [ 103.83, 138.59, 185, 246.94, 311.13, 415.30 ]
+    ];
 
     oscillator = createOscillator();
     oscillator.volume.gain.value = 1;
@@ -151,7 +179,7 @@ $(document).ready(function() {
             sounded: false,
             x: (sw/2)-(sw/3)+(((sw/1.5)/6)/2)+(n*((sw/1.5)/6)),
             y: 50,
-            fy: 10,
+            fy: 1,
             radius: 0,
             value: 0,
             impulse: 0,
@@ -202,7 +230,8 @@ var animate = function() {
 
         for (var n = 0; n < 6; n++) {
             stringArr[n].oscillator.frequency.value = 
-            (stringArr[n].radius != 0 ? noteArr[n]+(stringArr[n].value*10) : 0);
+            (stringArr[n].radius != 0 ? 
+            noteArr[stringArr[n].fy][n]+(stringArr[n].value*10) : 0);
 
             stringArr[n].value = stringArr[n].radius != 0 ?
             (stringArr[n].value + stringArr[n].impulse) : 0;
@@ -249,7 +278,7 @@ var drawImage = function() {
 
     for (var n = 0; n < 6; n++) {
         ctx.beginPath();
-        ctx.arc(stringArr[n].x, stringArr[n].fy*(sh/100), 5, 0, (Math.PI*2));
+        ctx.arc(stringArr[n].x, stringArr[n].fy*(sh/10), 5, 0, (Math.PI*2));
         ctx.fill();
 
         var diff = Math.abs((0-stringArr[n].y));
