@@ -385,9 +385,37 @@ $(document).ready(function() {
         noteNo = (noteNo+1) < musicArr.length ? (noteNo+1) : 0;
     }, 250);*/
 
+    loadImages();
+
     drawImage();
     animate();
 });
+
+var img_list = [
+    "img/box-template-0_texture.png"
+];
+
+var imagesLoaded = false;
+var loadImages = function(callback) {
+    var count = 0;
+    for (var n = 0; n < img_list.length; n++) {
+        var img = document.createElement("img");
+        img.n = n;
+        img.onload = function() {
+            count += 1;
+            console.log("loading ("+count+"/"+img_list.length+")");
+            img_list[this.n] = this;
+            if (count == img_list.length) {
+                imagesLoaded = true;
+                callback();
+            }
+        };
+        var rnd = Math.random();
+        img.src = img_list[n].includes("img") ? 
+        img_list[n]+"?f="+rnd : 
+        img_list[n];
+    }
+};
 
 var toHertz = function(no) {
     return (no*250)*((24000)/512);
@@ -476,9 +504,24 @@ var drawImage = function() {
     ctx.fillStyle = "#335";
     ctx.fillRect(0, 0, sw, sh);
 
+    if (imagesLoaded) {
+        var size = {
+            width: img_list[0].naturalWidth,
+            height: img_list[0].naturalHeight
+        };
+        var frame = {
+            width: (sw/sh)*size.height,
+            height: size.height
+        };
+        var format = fitImageCover(size, frame);
+        ctx.drawImage(img_list[0],
+        -format.left, -format.top, frame.width, frame.height,
+        0, 0, sw, sh);
+    }
+
     ctx.lineWidth = 1;
     ctx.strokeStyle = "#fff";
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
 
     ctx.beginPath();
     ctx.arc((sw/2), (sh/3)*2, (sw/3)+10, 0, (Math.PI*2));
