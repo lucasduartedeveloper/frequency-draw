@@ -103,8 +103,9 @@ $(document).ready(function() {
             //if (!cameraOn) startCamera();
             if (navigator.getUserMedia && mic.closed) mic.open(false, 50);
             for (var n = 0; n < 6; n++) {
-                stringArr[n].oscillator.start();
+                //stringArr[n].oscillator.start();
             }
+            oscillator.start();
             oscillatorStarted = true;
 
             //document.body.requestFullscreen();
@@ -290,6 +291,7 @@ $(document).ready(function() {
         { fy: [ 14, 15 ], string: [ 3, 4 ] }
     ];
 
+    /*
     setInterval(function() {
         for (var n = 0; n < 6; n++) {
             stringArr[n].fy = 0;
@@ -315,7 +317,7 @@ $(document).ready(function() {
         }
 
         noteNo = (noteNo+1) < musicArr.length ? (noteNo+1) : 0;
-    }, 250);
+    }, 500);*/
 
     drawImage();
     animate();
@@ -354,10 +356,16 @@ var animate = function() {
             updateTime = new Date().getTime();
         }
 
+        var oscillatorValue = 0;
+        var count = 0;
+
         for (var n = 0; n < 6; n++) {
-            stringArr[n].oscillator.frequency.value = 
+            var value = 
             (stringArr[n].radius != 0 ? 
             noteArr[stringArr[n].fy][n]+(stringArr[n].value*5) : 0);
+
+            if (value > 0) count += 1;
+            oscillatorValue += value;
 
             stringArr[n].value = stringArr[n].radius != 0 ?
             (stringArr[n].value + stringArr[n].impulse) : 0;
@@ -380,6 +388,10 @@ var animate = function() {
                 stringArr[n].radius = radius;
             }
         }
+
+        //console.log(oscillatorValue, count);
+        oscillator.frequency.value = count > 0 ? 
+        (oscillatorValue / count) : 0;
 
         drawImage();
     }
