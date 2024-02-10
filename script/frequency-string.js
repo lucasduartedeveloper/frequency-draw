@@ -269,11 +269,17 @@ var drawImage = function() {
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, sw, sh);
 
-    ctx.fillStyle = "#000";
-    //ctx.fillRect(0, 0, sw, sh);
+    ctx.fillStyle = "#335";
+    ctx.fillRect(0, 0, sw, sh);
 
     ctx.lineWidth = 1;
     ctx.strokeStyle = "#fff";
+    ctx.fillStyle = "#000";
+
+    ctx.beginPath();
+    ctx.arc((sw/2), (sh/3)*2, (sw/3)+10, 0, (Math.PI*2));
+    ctx.fill();
+
     ctx.fillStyle = "rgba(100, 255, 100, 0.5)";
 
     for (var n = 0; n < 6; n++) {
