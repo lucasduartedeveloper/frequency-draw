@@ -179,7 +179,7 @@ $(document).ready(function() {
         angle = -(Math.PI/4);
         frequencyDirection = 1;
 
-        startX = e.touches[0].clientX-10;
+        startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
     };
 
@@ -188,11 +188,14 @@ $(document).ready(function() {
         moveY = e.touches[0].clientY;
 
         for (var n = 0; n < 6; n++) {
-            if (moveX < stringArr[n].x && startX > stringArr[n].x) {
+            if ((moveY - startY) > (sh/20) && 
+                Math.abs(moveX-stringArr[n].x) < ((sw/3)/6)) {
                 stringArr[n].fy = Math.floor(((10/sh)*startY));
             }
 
-            if (startX < stringArr[n].x && moveX > stringArr[n].x) {
+            if (Math.abs(moveY - startY) < (sh/20) && 
+                (moveX < stringArr[n].x && startX > stringArr[n].x || 
+                startX < stringArr[n].x && moveX > stringArr[n].x)) {
                 if (!stringArr[n].sounded) {
                     stringArr[n].y = Math.floor(((100/sh)*moveY));
                     stringArr[n].radius = 1;
@@ -550,11 +553,18 @@ var drawImage = function() {
     }
 
     if (imagesLoaded) {
+        ctx.strokeStyle = "#fff";
         ctx.fillStyle = "#fff";
 
         ctx.beginPath();
         ctx.arc((moveX-30), moveY, 12.5, 0, (Math.PI*2));
+        if (moveY >= (sh/2))
         ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc((moveX), moveY, 12.5, 0, (Math.PI*2));
+        if (moveY < (sh/2))
+        ctx.stroke();
 
         ctx.save();
         ctx.translate((moveX-25), moveY);
@@ -570,6 +580,8 @@ var drawImage = function() {
             height: getSquare(size)
         };
         var format = fitImageCover(size, frame);
+
+        if (moveY >= (sh/2))
         ctx.drawImage(img_list[1],
         -format.left, -format.top, frame.width, frame.height,
         moveX-50, moveY-25, 50, 50);
