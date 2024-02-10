@@ -407,7 +407,7 @@ $(document).ready(function() {
     
             noteNo = (noteNo+1) < musicArr.length ? (noteNo+1) : 0;
             if (noteNo == 0) clearInterval(play2Interval);
-        }, 500);
+        }, 100);
     };
 
     loadImages();
@@ -492,19 +492,19 @@ var animate = function() {
 
             if (stringArr[n].impulse > 0 && 
                 stringArr[n].value > stringArr[n].radius) {
-                stringArr[n].impulse = -0.25;
+                stringArr[n].impulse = -0.5;
 
-                var radius = (stringArr[n].radius - 0.25) > 0 ? 
-                (stringArr[n].radius - 0.25) : 0;
+                var radius = (stringArr[n].radius - 0.5) > 0 ? 
+                (stringArr[n].radius - 0.5) : 0;
                 stringArr[n].radius = radius;
             }
 
             if (stringArr[n].impulse < 0 && 
                 stringArr[n].value < -stringArr[n].radius) {
-                stringArr[n].impulse = 0.25;
+                stringArr[n].impulse = 0.5;
 
-                var radius = (stringArr[n].radius - 0.25) > 0 ? 
-                (stringArr[n].radius - 0.25) : 0;
+                var radius = (stringArr[n].radius - 0.5) > 0 ? 
+                (stringArr[n].radius - 0.5) : 0;
                 stringArr[n].radius = radius;
             }
         }
@@ -564,7 +564,7 @@ var drawImage = function() {
         var diff = Math.abs((0-stringArr[n].y));
         diff = diff > 20 ? 20 : diff;
         var x = Math.curve(((1-(1/20)*diff)*
-        Math.abs(stringArr[n].value)), Math.abs(stringArr[n].value))*20;
+        Math.abs(stringArr[n].value)), Math.abs(stringArr[n].value))*10;
         x = stringArr[n].value < 0 ? -x : x;
 
         ctx.beginPath();
@@ -573,7 +573,7 @@ var drawImage = function() {
             var diff = Math.abs((k-stringArr[n].y));
             diff = diff > 20 ? 20 : diff;
             var x = Math.curve(((1-(1/20)*diff)*
-            Math.abs(stringArr[n].value)), Math.abs(stringArr[n].value))*20;
+            Math.abs(stringArr[n].value)), Math.abs(stringArr[n].value))*10;
             x = stringArr[n].value < 0 ? -x : x;
 
             ctx.lineTo(stringArr[n].x+x, k*(sh/100));
