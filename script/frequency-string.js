@@ -141,10 +141,14 @@ $(document).ready(function() {
 
     sweepView.onclick = function() {
         for (var n = 0; n < 6; n++) {
+            //if (!stringArr[n].ready) continue;
+
             stringArr[n].y = 66.5;
             stringArr[n].radius = 1;
             stringArr[n].value = 1;
             stringArr[n].impulse = 0.05;
+
+            stringArr[n].ready = false;
         }
     };
 
@@ -164,6 +168,8 @@ $(document).ready(function() {
     moveX = (sw/2);
     moveY = (sh/2);
 
+    startTimestamp = 0;
+
     pictureView.ontouchstart = function(e) {
         if (userInteracted && !oscillatorStarted) {
             //if (!cameraOn) startCamera();
@@ -181,6 +187,8 @@ $(document).ready(function() {
 
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
+
+        startTimestamp = new Date().getTime();
     };
 
     pictureView.ontouchmove = function(e) {
@@ -190,7 +198,7 @@ $(document).ready(function() {
         for (var n = 0; n < 6; n++) {
             if ((moveY - startY) > (sh/20) && 
                 Math.abs(moveX-stringArr[n].x) < ((sw/3)/6)) {
-                stringArr[n].fy = Math.floor(((10/sh)*startY));
+                stringArr[n].fy = startFret+Math.floor(((10/sh)*startY));
             }
 
             if (Math.abs(moveY - startY) < (sh/20) && 
@@ -214,6 +222,28 @@ $(document).ready(function() {
         userInteracted = true;
         angle = 0;
         frequencyDirection = -1;
+
+        var fyArr = [];
+        var musicStringArr = [];
+        for (var n = 0; n < 6; n++) {
+            if (stringArr[n].sounded) {
+                fyArr.push(stringArr[n].fy);
+                musicStringArr.push(n);
+            }
+        };
+
+        if (fyArr.length > 0 && 
+            (recordedMusic.length == 0 || 
+            startTimestamp > 
+            recordedMusic[recordedMusic.length-1].timestamp)) {
+            var obj = {
+                fy: fyArr,
+                string: musicStringArr,
+                timestamp: startTimestamp
+            };
+            recordedMusic.push(obj);
+            recordView.innerText = "RECORD \n"+recordedMusic.length;
+        }
     };
 
     var versionName = "v0.9";
@@ -389,7 +419,9 @@ $(document).ready(function() {
                 stringArr[n].fy = 0;
             }
 
-            var obj = musicArr[noteNo];
+            var obj = recordedMusic.length > 0 ? 
+            recordedMusic[noteNo] : musicArr[noteNo];
+            console.log(obj);
             if (typeof(obj.fy) == "number") {
                 moveX = stringArr[obj.string].x;
                 moveY = (sh/3)*2;
@@ -413,9 +445,53 @@ $(document).ready(function() {
                 moveY = (sh/3)*2;
             }
     
-            noteNo = (noteNo+1) < musicArr.length ? (noteNo+1) : 0;
+            noteNo = (noteNo+1) < 
+            (recordedMusic.length > 0 ? 
+            recordedMusic.length : musicArr.length) ?
+            (noteNo+1) : 0;
             if (noteNo == 0) clearInterval(play2Interval);
         }, 500);
+    };
+
+    recordedMusic = [];
+
+    recordView = document.createElement("span");
+    recordView.style.position = "absolute";
+    recordView.style.userSelect = "none";
+    recordView.style.color = "#fff";
+    recordView.innerText = "RECORD \n"+recordedMusic.length;
+    recordView.style.fontSize = (10)+"px";
+    recordView.style.textAlign = "center";
+    recordView.style.left = ((sw/2)+(sw/3)+10)+"px";
+    recordView.style.top = (50)+"px";
+    recordView.style.width = (50)+"px";
+    recordView.style.height = (50)+"px";
+    recordView.style.zIndex = "15";
+    document.body.appendChild(recordView);
+
+    recordView.onclick = function() {
+        recordedMusic = [];
+        recordView.innerText = "RECORD \n"+recordedMusic.length;
+    };
+
+    startFret = 0;
+    scaleView = document.createElement("span");
+    scaleView.style.position = "absolute";
+    scaleView.style.userSelect = "none";
+    scaleView.style.color = "#fff";
+    scaleView.innerText = "FRET "+startFret;
+    scaleView.style.fontSize = (10)+"px";
+    scaleView.style.textAlign = "center";
+    scaleView.style.left = ((sw/2)+(sw/3)+10)+"px";
+    scaleView.style.top = (0)+"px";
+    scaleView.style.width = (50)+"px";
+    scaleView.style.height = (50)+"px";
+    scaleView.style.zIndex = "15";
+    document.body.appendChild(scaleView);
+
+    scaleView.onclick = function() {
+        startFret = (startFret+5) < 15 ? (startFret+5) : 0;
+        scaleView.innerText = "FRET "+startFret;
     };
 
     loadImages();
@@ -500,19 +576,19 @@ var animate = function() {
 
             if (stringArr[n].impulse > 0 && 
                 stringArr[n].value > stringArr[n].radius) {
-                stringArr[n].impulse = -0.5;
+                stringArr[n].impulse = -0.25;
 
-                var radius = (stringArr[n].radius - 0.5) > 0 ? 
-                (stringArr[n].radius - 0.5) : 0;
+                var radius = (stringArr[n].radius - 0.25) > 0 ? 
+                (stringArr[n].radius - 0.25) : 0;
                 stringArr[n].radius = radius;
             }
 
             if (stringArr[n].impulse < 0 && 
                 stringArr[n].value < -stringArr[n].radius) {
-                stringArr[n].impulse = 0.5;
+                stringArr[n].impulse = 0.25;
 
-                var radius = (stringArr[n].radius - 0.5) > 0 ? 
-                (stringArr[n].radius - 0.5) : 0;
+                var radius = (stringArr[n].radius - 0.25) > 0 ? 
+                (stringArr[n].radius - 0.25) : 0;
                 stringArr[n].radius = radius;
             }
         }
@@ -577,6 +653,8 @@ var drawImage = function() {
    }
 
     for (var n = 0; n < 6; n++) {
+        ctx.strokeStyle = "#fff";
+
         var diff = Math.abs((0-stringArr[n].y));
         diff = diff > 20 ? 20 : diff;
         var x = Math.curve(((1-(1/20)*diff)*
