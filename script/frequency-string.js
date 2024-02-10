@@ -99,6 +99,10 @@ $(document).ready(function() {
         moveY = e.touches[0].clientY;
 
         for (var n = 0; n < 6; n++) {
+            if (moveX < stringArr[n].x && startX > stringArr[n].x) {
+                stringArr[n].fy = Math.floor(((100/sh)*startY));
+            }
+
             if (startX < stringArr[n].x && moveX > stringArr[n].x) {
                 if (!stringArr[n].sounded) {
                     stringArr[n].y = Math.floor(((100/sh)*moveY));
@@ -147,6 +151,7 @@ $(document).ready(function() {
             sounded: false,
             x: (sw/2)-(sw/3)+(((sw/1.5)/6)/2)+(n*((sw/1.5)/6)),
             y: 50,
+            fy: 10,
             radius: 0,
             value: 0,
             impulse: 0,
@@ -240,9 +245,13 @@ var drawImage = function() {
 
     ctx.lineWidth = 1;
     ctx.strokeStyle = "#fff";
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = "rgba(100, 255, 100, 0.5)";
 
     for (var n = 0; n < 6; n++) {
+        ctx.beginPath();
+        ctx.arc(stringArr[n].x, stringArr[n].fy*(sh/100), 5, 0, (Math.PI*2));
+        ctx.fill();
+
         var diff = Math.abs((0-stringArr[n].y));
         diff = diff > 10 ? 10 : diff;
         var x = Math.curve(((1-(1/10)*diff)*
