@@ -23,15 +23,14 @@ $thirdpart_script = [
 
 $script = [
     0 => "script/websocket.js",
-    1 => "script/camera-helper.js",
-    2 => "script/gyro-helper.js",
-    3 => "script/geo-location.js",
-    4 => "script/media-helper.js",
-    5 => "script/mic-helper.js",
-    6 => "script/audio-helper.js",
-    7 => "script/math-helper.js",
-    8 => "script/login-helper.js",
-    9 => "script/frequency-string.js"
+    1 => "script/gyro-helper.js",
+    2 => "script/geo-location.js",
+    3 => "script/media-helper.js",
+    4 => "script/mic-helper.js",
+    5 => "script/audio-helper.js",
+    6 => "script/math-helper.js",
+    7 => "script/login-helper.js",
+    8 => "script/frequency-sketch.js"
 ];
 
 $module = [];
@@ -49,11 +48,11 @@ echo "<!-- ".$rnd." -->";
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
-<link rel="apple-touch-icon" sizes="76x76" href="webapp/apple-touch-icon.png?rnd=<?php echo $rnd ?>" >
-<link rel="icon" type="image/png" sizes="32x32" href="webapp/favicon-32x32.png?rnd=<?php echo $rnd ?>">
-<link rel="icon" type="image/png" sizes="16x16" href="webapp/favicon-16x16.png?rnd=<?php echo $rnd ?>">
-<link rel="manifest" href="webapp/site.webmanifest?rnd=<?php echo $rnd ?>">
-<link rel="mask-icon" href="webapp/safari-pinned-tab.svg?rnd=<?php echo $rnd ?>" color="#2f2e40">
+<link rel="apple-touch-icon" sizes="76x76" href="webapp/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="webapp/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="webapp/favicon-16x16.png">
+<link rel="manifest" href="webapp/site.webmanifest?v=0">
+<link rel="mask-icon" href="webapp/safari-pinned-tab.svg" color="#2f2e40">
 <meta name="msapplication-TileColor" content="#2f2e40">
 <meta name="theme-color" content="#2f2e40">
 
@@ -96,10 +95,6 @@ echo "\n";
      CONNECTING...
      </span>
 </p>
-
-<script src="
-https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js
-"></script>
 
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
