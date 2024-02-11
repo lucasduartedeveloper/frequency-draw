@@ -326,6 +326,11 @@ $(document).ready(function() {
             }
             resumedWave = ab;
         }
+
+        stripeFrame += (micAvgValue*5);
+        if (stripeFrame > (sw/2)) {
+            stripeFrame = stripeFrame-(sw/2);
+        }
     };
     mic.onclose = function() { 
         console.log("mic closed");
@@ -529,7 +534,8 @@ var img_list = [
     "img/picture-5.png",
     "img/picture-6.png",
     "img/picture-7.png",
-    "img/picture-8.png"
+    "img/picture-8.png",
+    "img/stripe-pattern-0.png"
 ];
 
 var imagesLoaded = false;
@@ -643,6 +649,44 @@ var animate = function() {
     }
     renderTime = new Date().getTime();
     requestAnimationFrame(animate);
+};
+
+var stripeFrame = 0;
+var drawStripe = function() {
+    var ctx = pictureView.getContext("2d");
+
+    if (imagesLoaded) {
+        var image = img_list[6]
+        var size = {
+            width: image.naturalWidth,
+            height: image.naturalHeight
+        };
+        var frame = {
+            width: getSquare(size),
+            height: getSquare(size)
+        };
+        var format = fitImageCover(size, frame);
+
+        ctx.drawImage(image, 
+        -format.left, -format.top, frame.width, frame.height, 
+        -stripeFrame, (sh/2)-(sw/4), 
+        (sw/2), (sw/2));
+
+        ctx.drawImage(image, 
+        -format.left, -format.top, frame.width, frame.height, 
+        -stripeFrame+(sw/2), (sh/2)-(sw/4), 
+        (sw/2), (sw/2));
+
+        ctx.drawImage(image, 
+        -format.left, -format.top, frame.width, frame.height, 
+        -stripeFrame+(sw), (sh/2)-(sw/4), 
+        (sw/2), (sw/2));
+    }
+
+    /*
+    stripeFrame += 1;
+    if (stripeFrame > (sw/2)) {
+    stripeFrame = 0;*/
 };
 
 var angle = 0;
@@ -788,6 +832,8 @@ var drawImage = function() {
     ctx.beginPath();
     ctx.arc(moveX, moveY, 2.5, 0, (Math.PI*2));
     //ctx.fill();
+
+    drawStripe();
 };
 
 var getSquare = function(item) {
