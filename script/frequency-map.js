@@ -285,6 +285,7 @@ $(document).ready(function() {
         source.connect(biquadFilter);*/
     };
 
+    micAvgValue = 0;
     mode = 1;
     micTime = 0;
 
@@ -713,6 +714,54 @@ var drawStripe = function() {
     }
 };
 
+var drawStripe2 = function() {
+    var ctx = pictureView.getContext("2d");
+
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "#fff";
+
+    var c = {
+        x: 0,
+        y: 0
+    };
+
+    var pArr = [
+        [ -2, -1.1 ],
+        [ -2, -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3, -1.1 ],
+        [ -2, -1.8, -1.3, -1.1 ],
+        [ -2, -1.8, -1.6, -1.3, -1.1 ],
+        [ -2, -1.8, -1.6, -1.3, -1.1 ],
+        [ -2, -1.8, -1.6, -1.5 , -1.4, -1.3, -1.1 ],
+        [ -2, -1.8, -1.1 ],
+        [ -2, -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3, -1.2, -1.1 ],
+        [ -2, -1.1 ],
+        [ -2, -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3, -1.1 ],
+        [ -2, -1.8, -1.3, -1.1 ],
+        [ -2, -1.8, -1.5, -1.3, -1.1 ],
+        [ -2, -1.8, -1.5, -1.3, -1.1 ],
+        [ -2, -1.8, -1.7, -1.6, -1.5 , -1.3, -1.1 ],
+        [ -2, -1.3, -1.1 ],
+        [ -2, -1.9, -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3, -1.1 ],
+    ];
+
+    var stopCount = 96;
+    for (var n = 0; n <= stopCount; n++) {
+        var no = (n % pArr.length);
+        for (var k = 0; k < pArr[no].length; k++) {
+            var p0 = { x: 0, y: pArr[no][k]+0.1 };
+            var p1 = { x: 0, y: pArr[no][k] };
+
+            var rp0 = _rotate2d(c, p0, -n*(360/stopCount));
+            var rp1 = _rotate2d(c, p1, -n*(360/stopCount));
+
+            ctx.beginPath();
+            ctx.moveTo((sw/2)+(rp0.x*(sw/8)), (sh/2)+(rp0.y*(sw/8)));
+            ctx.lineTo((sw/2)+(rp1.x*(sw/8)), (sh/2)+(rp1.y*(sw/8)));
+            ctx.stroke();
+        }
+    }
+};
+
 var angle = 0;
 var distance = 0;
 
@@ -849,7 +898,7 @@ var drawImage = function() {
     ctx.rotate((Math.PI/4));
     ctx.translate(-position.x, -position.y);
 
-    drawAB_rounded(resumedWave, 0);
+    //drawAB_rounded(resumedWave, 0);
 
     ctx.restore();
 
@@ -857,7 +906,7 @@ var drawImage = function() {
     ctx.arc(moveX, moveY, 2.5, 0, (Math.PI*2));
     //ctx.fill();
 
-    drawStripe();
+    drawStripe2();
 };
 
 var getSquare = function(item) {
