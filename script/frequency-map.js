@@ -746,7 +746,10 @@ var drawStripe2 = function() {
 
     var angle =0;
     var stopCount = 96;
-    for (var n = 0; n <= stopCount; n++) {
+    var stopNo = isRecording ? 
+    Math.floor(micAvgValue*stopCount) : stopCount;
+
+    for (var n = 0; n <= stopNo; n++) {
         var no = (n % pArr.length);
         for (var k = 0; k < pArr[no].length; k++) {
             var p0 = { x: 0, y: pArr[no][k]+0.1 };
@@ -755,7 +758,7 @@ var drawStripe2 = function() {
             var rp0 = _rotate2d(c, p0, -n*(360/stopCount));
             var rp1 = _rotate2d(c, p1, -n*(360/stopCount));
 
-            angle = n*((Math.PI*2)/stopCount);
+            angle = -(Math.PI/2)+(n*((Math.PI*2)/stopCount));
 
             ctx.beginPath();
             ctx.arc((sw/2), (sh/2), Math.abs((p0.y*(sw/8))),
