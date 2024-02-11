@@ -153,9 +153,9 @@ $(document).ready(function() {
 
     titleView = document.createElement("span");
     titleView.style.position = "absolute";
-    //titleView.style.display = "none";
+    titleView.style.display = "none";
     titleView.style.color = "#fff";
-    titleView.innerText = "USAR DE PÉ NO MACIO";
+    titleView.innerText = "TÍTULO";
     titleView.style.textAlign = "center";
     titleView.style.left = ((sw/2)-75)+"px";
     titleView.style.top = ((sh/2)-(sw/2))+"px";
