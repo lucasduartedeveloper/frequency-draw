@@ -154,7 +154,7 @@ $(document).ready(function() {
     titleView = document.createElement("span");
     titleView.style.position = "absolute";
     titleView.style.display = "none";
-    titleView.style.color = "#fff";
+    titleView.style.color = "#000";
     titleView.innerText = "REPLAY";
     titleView.style.textAlign = "center";
     titleView.style.left = ((sw/2)-75)+"px";
@@ -351,10 +351,14 @@ $(document).ready(function() {
             resumedWave = ab;
         }
 
-        stripeFrame += (micAvgValue*25);
-        if (stripeFrame > (sw/2)) {
-            stripeFrame = stripeFrame-(sw/2);
+        if (isRecording) {
+            stripeFrame += (micAvgValue*25);
+            if (stripeFrame > (sw/2)) {
+                stripeFrame = stripeFrame-(sw/2);
+            }
         }
+        else 
+        stripeFrame = 0;
     };
     mic.onclose = function() { 
         console.log("mic closed");
