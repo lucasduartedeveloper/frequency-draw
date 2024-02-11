@@ -201,7 +201,7 @@ $(document).ready(function() {
     playbackRateView = document.createElement("span");
     playbackRateView.style.position = "absolute";
     playbackRateView.style.userSelect = "nnone";
-    playbackRateView.style.color = "#fff";
+    playbackRateView.style.color = "#000";
     playbackRateView.innerText = "PLAYBACK "+playbackRate+"x";
     playbackRateView.style.textAlign = "left";
     playbackRateView.style.left = (10)+"px";
@@ -222,7 +222,7 @@ $(document).ready(function() {
     slideRateView = document.createElement("span");
     slideRateView.style.position = "absolute";
     slideRateView.style.userSelect = "nnone";
-    slideRateView.style.color = "#fff";
+    slideRateView.style.color = "#000";
     slideRateView.innerText = "SLIDE RATE "+slideRate+"x";
     slideRateView.style.textAlign = "left";
     slideRateView.style.left = (160)+"px";
@@ -718,7 +718,7 @@ var drawStripe2 = function() {
     var ctx = pictureView.getContext("2d");
 
     ctx.lineWidth = 5;
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = "#000";
 
     var c = {
         x: 0,
@@ -758,13 +758,19 @@ var drawStripe2 = function() {
             var rp0 = _rotate2d(c, p0, -n*(360/stopCount));
             var rp1 = _rotate2d(c, p1, -n*(360/stopCount));
 
-            angle = -(Math.PI/2)+(n*((Math.PI*2)/stopCount));
+            angle = -(Math.PI/2)+((n-stripeFrame)*((Math.PI*2)/stopCount));
 
             ctx.beginPath();
             ctx.arc((sw/2), (sh/2), Math.abs((p0.y*(sw/8))),
             angle, angle+((Math.PI*2)/stopCount));
             ctx.stroke();
         }
+    }
+
+    if (!navigator.getUserMedia) {
+        stripeFrame += 1*slideRate;
+        if (stripeFrame > (sw/2))
+        stripeFrame = (stripeFrame- (sw/2));
     }
 };
 
@@ -776,8 +782,8 @@ var drawImage = function() {
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, sw, sh);
 
-    ctx.fillStyle = "#000";
-    //ctx.fillRect(0, 0, sw, sh);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, sw, sh);
 
     if (imagesLoaded) {
         ctx.save();
