@@ -153,9 +153,9 @@ $(document).ready(function() {
 
     titleView = document.createElement("span");
     titleView.style.position = "absolute";
-    titleView.style.display = "none";
+    //titleView.style.display = "none";
     titleView.style.color = "#fff";
-    titleView.innerText = "REPLAY";
+    titleView.innerText = "USAR DE PÉ NO MACIO";
     titleView.style.textAlign = "center";
     titleView.style.left = ((sw/2)-75)+"px";
     titleView.style.top = ((sh/2)-(sw/2))+"px";
@@ -196,24 +196,47 @@ $(document).ready(function() {
     }
 
     isRecording = false;
-    plabackRate = 0.5;
+    playbackRate = 0.5;
 
-    plabackRateView = document.createElement("span");
-    plabackRateView.style.position = "absolute";
-    plabackRateView.style.color = "#fff";
-    plabackRateView.innerText = "PLAYBACK "+plabackRate+"x";
-    plabackRateView.style.textAlign = "left";
-    plabackRateView.style.left = (10)+"px";
-    plabackRateView.style.top = (sh-35)+"px";
-    plabackRateView.style.width = (150)+"px";
-    plabackRateView.style.height = (25)+"px";
-    plabackRateView.style.zIndex = "15";
-    document.body.appendChild(plabackRateView);
+    playbackRateView = document.createElement("span");
+    playbackRateView.style.position = "absolute";
+    playbackRateView.style.userSelect = "nnone";
+    playbackRateView.style.color = "#fff";
+    playbackRateView.innerText = "PLAYBACK "+playbackRate+"x";
+    playbackRateView.style.textAlign = "left";
+    playbackRateView.style.left = (10)+"px";
+    playbackRateView.style.top = (sh-35)+"px";
+    playbackRateView.style.width = (150)+"px";
+    playbackRateView.style.height = (25)+"px";
+    playbackRateView.style.zIndex = "15";
+    document.body.appendChild(playbackRateView);
 
-    plabackRateView.onclick = function() {
-        plabackRate = (plabackRate+0.5) < 2.5 ?
-        (plabackRate+0.5) : 0.5;
-        plabackRateView.innerText = "PLAYBACK "+plabackRate+"x";
+    playbackRateView.onclick = function() {
+        //console.log("plabackRateView click");
+        playbackRate = (playbackRate+0.5) < 2.5 ?
+        (playbackRate+0.5) : 0.5;
+        playbackRateView.innerText = "PLAYBACK "+playbackRate+"x";
+    };
+
+    slideRate = 0.5;
+    slideRateView = document.createElement("span");
+    slideRateView.style.position = "absolute";
+    slideRateView.style.userSelect = "nnone";
+    slideRateView.style.color = "#fff";
+    slideRateView.innerText = "SLIDE RATE "+slideRate+"x";
+    slideRateView.style.textAlign = "left";
+    slideRateView.style.left = (160)+"px";
+    slideRateView.style.top = (sh-35)+"px";
+    slideRateView.style.width = (150)+"px";
+    slideRateView.style.height = (25)+"px";
+    slideRateView.style.zIndex = "15";
+    document.body.appendChild(slideRateView);
+
+    slideRateView.onclick = function() {
+        //console.log("plabackRateView click");
+        slideRate = (slideRate+0.5) < 5.5 ?
+        (slideRate+0.5) : 0.5;
+        slideRateView.innerText = "SLIDE RATE "+slideRate+"x";
     };
 
     media = 0;
@@ -232,7 +255,7 @@ $(document).ready(function() {
             duration + " " + moment(duration).format("mm:ss")
         );
 
-        recordedAudio.playbackRate = plabackRate;
+        recordedAudio.playbackRate = playbackRate;
         recordedAudio.preservesPitch = false;
 
         var audioCtx = 
@@ -327,7 +350,7 @@ $(document).ready(function() {
             resumedWave = ab;
         }
 
-        stripeFrame += (micAvgValue*5);
+        stripeFrame += (micAvgValue*25);
         if (stripeFrame > (sw/2)) {
             stripeFrame = stripeFrame-(sw/2);
         }
@@ -683,10 +706,11 @@ var drawStripe = function() {
         (sw/2), (sw/2));
     }
 
-    /*
-    stripeFrame += 1;
-    if (stripeFrame > (sw/2)) {
-    stripeFrame = 0;*/
+    if (!navigator.getUserMedia) {
+        stripeFrame += 1*slideRate;
+        if (stripeFrame > (sw/2))
+        stripeFrame = 0;
+    }
 };
 
 var angle = 0;
