@@ -744,6 +744,7 @@ var drawStripe2 = function() {
         [ -2, -1.9, -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3, -1.1 ],
     ];
 
+    var angle =0;
     var stopCount = 96;
     for (var n = 0; n <= stopCount; n++) {
         var no = (n % pArr.length);
@@ -754,9 +755,11 @@ var drawStripe2 = function() {
             var rp0 = _rotate2d(c, p0, -n*(360/stopCount));
             var rp1 = _rotate2d(c, p1, -n*(360/stopCount));
 
+            angle = n*((Math.PI*2)/stopCount);
+
             ctx.beginPath();
-            ctx.moveTo((sw/2)+(rp0.x*(sw/8)), (sh/2)+(rp0.y*(sw/8)));
-            ctx.lineTo((sw/2)+(rp1.x*(sw/8)), (sh/2)+(rp1.y*(sw/8)));
+            ctx.arc((sw/2), (sh/2), Math.abs((p0.y*(sw/8))),
+            angle, angle+((Math.PI*2)/stopCount));
             ctx.stroke();
         }
     }
