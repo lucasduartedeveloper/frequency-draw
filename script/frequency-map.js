@@ -155,7 +155,7 @@ $(document).ready(function() {
     titleView.style.position = "absolute";
     titleView.style.display = "none";
     titleView.style.color = "#fff";
-    titleView.innerText = "TÍTULO";
+    titleView.innerText = "REPLAY";
     titleView.style.textAlign = "center";
     titleView.style.left = ((sw/2)-75)+"px";
     titleView.style.top = ((sh/2)-(sw/2))+"px";
