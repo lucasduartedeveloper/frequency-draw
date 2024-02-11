@@ -746,8 +746,7 @@ var drawStripe2 = function() {
 
     var angle =0;
     var stopCount = 96;
-    var stopNo = isRecording ? 
-    Math.floor(micAvgValue*stopCount) : stopCount;
+    var stopNo = stopCount;
 
     for (var n = 0; n <= stopNo; n++) {
         var no = (n % pArr.length);
