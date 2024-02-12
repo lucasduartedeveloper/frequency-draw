@@ -74,6 +74,17 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
+    downloadView = document.createElement("canvas");
+    downloadView.style.position = "absolute";
+    //pictureView.style.background = "#fff";
+    downloadView.width = (sw);
+    downloadView.height = (sw); 
+    downloadView.style.left = (0)+"px";
+    downloadView.style.top = (0)+"px";
+    downloadView.style.width = (sw)+"px";
+    downloadView.style.height = (sw)+"px";
+    downloadView.style.zIndex = "15";
+
     userInteracted = false;
     oscillatorStarted = false;
 
@@ -718,35 +729,64 @@ var drawStripe = function() {
     }
 };
 
-var drawStripe2 = function() {
-    var ctx = pictureView.getContext("2d");
+var drawStripe2 = function(canvas, x, y, size, color="#000", mode=0) {
+    var ctx = canvas.getContext("2d");
 
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "#000";
+    ctx.lineWidth = (0.1*size);
+    ctx.strokeStyle = color;
 
     var c = {
         x: 0,
         y: 0
     };
 
-    var pArr = [
-        [ -2, -1.1 ],
-        [ -2, -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3, -1.1 ],
-        [ -2, -1.8, -1.3, -1.1 ],
-        [ -2, -1.8, -1.6, -1.3, -1.1 ],
-        [ -2, -1.8, -1.6, -1.3, -1.1 ],
-        [ -2, -1.8, -1.6, -1.5 , -1.4, -1.3, -1.1 ],
-        [ -2, -1.8, -1.1 ],
-        [ -2, -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3, -1.2, -1.1 ],
-        [ -2, -1.1 ],
-        [ -2, -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3, -1.1 ],
-        [ -2, -1.8, -1.3, -1.1 ],
-        [ -2, -1.8, -1.5, -1.3, -1.1 ],
-        [ -2, -1.8, -1.5, -1.3, -1.1 ],
-        [ -2, -1.8, -1.7, -1.6, -1.5 , -1.3, -1.1 ],
-        [ -2, -1.3, -1.1 ],
-        [ -2, -1.9, -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3, -1.1 ],
+    var pArr0 = [
+        [ -1.1 ],
+        [ -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3, -1.1 ],
+        [ -1.8, -1.3, -1.1 ],
+        [ -1.8, -1.6, -1.3, -1.1 ],
+        [ -1.8, -1.6, -1.3, -1.1 ],
+        [ -1.8, -1.6, -1.5 , -1.4, -1.3, -1.1 ],
+        [ -1.8, -1.1 ],
+        [ -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3, -1.2, -1.1 ],
+        [ -1.1 ],
+        [ -1.1 ],
+        [ -1.1 ],
+        [ -1.1 ],
+        [ -1.1 ],
+        [ -1.1 ],
+        [ -1.1 ],
+        [ -1.1 ]
     ];
+
+    var pArr1 = [
+        [ -2 ],
+        [ -2 ],
+        [ -2 ],
+        [ -2 ],
+        [ -2 ],
+        [ -2 ],
+        [ -2 ],
+        [ -2 ],
+        [ -2 ],
+        [ -2, -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3 ],
+        [ -2, -1.8, -1.3 ],
+        [ -2, -1.8, -1.5, -1.3 ],
+        [ -2, -1.8, -1.5, -1.3 ],
+        [ -2, -1.8, -1.7, -1.6, -1.5 , -1.3 ],
+        [ -2, -1.3 ],
+        [ -2, -1.9, -1.8, -1.7, -1.6, -1.5 , -1.4, -1.3 ]
+    ];
+
+    var pArr = [];
+    for (var n = 0; n < pArr0.length; n++) {
+        if (mode == 0)
+        pArr[n] = [ ...pArr1[n], ...pArr0[n] ];
+        if (mode == 1)
+        pArr[n] = [ ...pArr0[n] ];
+        if (mode == 2)
+        pArr[n] = [ ...pArr1[n] ];
+    }
 
     var angle =0;
     var stopCount = 96;
@@ -761,10 +801,10 @@ var drawStripe2 = function() {
             var rp0 = _rotate2d(c, p0, -n*(360/stopCount));
             var rp1 = _rotate2d(c, p1, -n*(360/stopCount));
 
-            angle = -(Math.PI/2)+((n-stripeFrame)*((Math.PI*2)/stopCount));
+            angle = -(Math.PI/2)+((n)*((Math.PI*2)/stopCount));
 
             ctx.beginPath();
-            ctx.arc((sw/2), (sh/2), Math.abs((p0.y*(sw/8))),
+            ctx.arc(x, y, Math.abs((p0.y*size)),
             angle, angle+((Math.PI*2)/stopCount));
             ctx.stroke();
         }
@@ -775,6 +815,26 @@ var drawStripe2 = function() {
         if (stripeFrame > (sw/2))
         stripeFrame = (stripeFrame- (sw/2));
     }
+};
+
+var download = function(color="#000", mode=0) {
+    var ctx = downloadView.getContext("2d");
+    ctx.clearRect(0, 0, sw, sw);
+
+    drawStripe2(downloadView, (sw/2), (sw/2), (sw/4), color, mode);
+
+    var name = 'download.png';
+    var url = downloadView.toDataURL();
+    var a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 100);
 };
 
 var angle = 0;
@@ -921,7 +981,8 @@ var drawImage = function() {
     ctx.arc(moveX, moveY, 2.5, 0, (Math.PI*2));
     //ctx.fill();
 
-    drawStripe2();
+    //drawStripe2(pictureView, (sw/2), (sh/2), (sw/8));
+    drawStripe();
 };
 
 var getSquare = function(item) {
