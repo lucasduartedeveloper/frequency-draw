@@ -297,6 +297,7 @@ $(document).ready(function() {
     };
 
     micAvgValue = 0;
+    reachedFrequency = 0;
     mode = 1;
     micTime = 0;
 
@@ -309,6 +310,8 @@ $(document).ready(function() {
     mic.onupdate = function(freqArray, reachedFreq, avgValue) {
         if (recordedAudio.paused)
         micAvgValue = avgValue;
+
+        reachedFrequency = (1/250)*reachedFreq;
 
         var currentTime = new Date().getTime();
         if (isRecording && currentTime - micTime > 1000) {
@@ -694,37 +697,55 @@ var stripeFrame = 0;
 var drawStripe = function() {
     var ctx = pictureView.getContext("2d");
 
+    var offset = (reachedFrequency*0.5);
+    var size = recordedAudio.paused ? (1-offset)*(sw/2) : (sw/2);
+
     if (imagesLoaded) {
         var image = img_list[6]
-        var size = {
+        var imageSize = {
             width: image.naturalWidth,
             height: image.naturalHeight
         };
         var frame = {
-            width: getSquare(size),
-            height: getSquare(size)
+            width: getSquare(imageSize),
+            height: getSquare(imageSize)
         };
-        var format = fitImageCover(size, frame);
+        var format = fitImageCover(imageSize, frame);
 
         ctx.drawImage(image, 
         -format.left, -format.top, frame.width, frame.height, 
-        -stripeFrame, (sh/2)-(sw/4), 
-        (sw/2), (sw/2));
+        -stripeFrame-size, (sh/2)-(size/2), 
+        (size), (size));
 
         ctx.drawImage(image, 
         -format.left, -format.top, frame.width, frame.height, 
-        -stripeFrame+(sw/2), (sh/2)-(sw/4), 
-        (sw/2), (sw/2));
+        -stripeFrame, (sh/2)-(size/2), 
+        (size), (size));
 
         ctx.drawImage(image, 
         -format.left, -format.top, frame.width, frame.height, 
-        -stripeFrame+(sw), (sh/2)-(sw/4), 
-        (sw/2), (sw/2));
+        -stripeFrame+(size), (sh/2)-(size/2), 
+        (size), (size));
+
+        ctx.drawImage(image, 
+        -format.left, -format.top, frame.width, frame.height, 
+        -stripeFrame+(size*2), (sh/2)-(size/2), 
+        (size), (size));
+
+        ctx.drawImage(image, 
+        -format.left, -format.top, frame.width, frame.height, 
+        -stripeFrame+(size*3), (sh/2)-(size/2), 
+        (size), (size));
+
+        ctx.drawImage(image, 
+        -format.left, -format.top, frame.width, frame.height, 
+        -stripeFrame+(size*4), (sh/2)-(size/2), 
+        (size), (size));
     }
 
     if (!navigator.getUserMedia) {
         stripeFrame += 1*slideRate;
-        if (stripeFrame > (sw/2))
+        if (stripeFrame > (size))
         stripeFrame = 0;
     }
 };
