@@ -292,6 +292,7 @@ $(document).ready(function() {
 
     micAvgValue = 0;
     reachedFrequency = 0;
+    avgFrequency = 0;
     mode = 1;
     micTime = 0;
 
@@ -306,9 +307,12 @@ $(document).ready(function() {
         micAvgValue = avgValue;
 
         reachedFrequency = (1/250)*reachedFreq;
+        if (reachedFrequency > avgFrequency)
+        avgFrequency = reachedFrequency;
 
         var currentTime = new Date().getTime();
-        if (isRecording && currentTime - micTime > 1000) {
+        if (avgFrequency > 0.35 && 
+            isRecording && currentTime - micTime > 1000) {
             mic.stopRecording(function(url) {
 
                 mode = 1;
