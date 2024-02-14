@@ -175,12 +175,6 @@ $(document).ready(function() {
     titleView.style.zIndex = "15";
     document.body.appendChild(titleView);
 
-    drawAcc(60, effectRatio);
-
-    oscillator = createOscillator();
-    oscillator.volume.gain.value = 1;
-    oscillator.frequency.value = 5;
-
     previousOffset = 0;
 
     motion = false;
@@ -382,6 +376,12 @@ $(document).ready(function() {
         ab[n] = 0;
     }
     resumedWave = ab;
+
+    drawAcc(60, effectRatio);
+
+    oscillator = createOscillator();
+    oscillator.volume.gain.value = 1;
+    oscillator.frequency.value = 5;
 
     loadImages();
 
@@ -603,33 +603,25 @@ var loadImages = function(callback) {
 };
 
 var drawAcc = function(length = 15, effect = 0.01) {
-    var c0 = { x: 0, y: 0 };
-    var c1 = { x: 0, y: 0 };
-
-    var p0 = { x: c0.x, y: c0.y+0.5 };
-    var p1 = { x: c1.x, y: c1.y-0.5 };
+    var c = { x: 0, y: 0 };
+    var p = { x: c.x+0.05, y: c.y };
 
     var size = Math.floor(length/3);
 
     frequencyPath = [];
-    frequencyPath.push({ x: -0.5, y: 0.5 });
-    for (var n = 0; n < size; n++) {
-        frequencyPath.push({ x: -0.5+((0.5/size))*n, y: 0.5, angle: 0 });
+    for (var n = 0; n < 100; n++) {
+        frequencyPath.push({ x: 0.5-(n*(0.45/100)), y: 0 });
     }
-    for (var n = 0; n < size; n++) {
-        var pe = { ...p0 };
-        pe.y += (-(effect/2)+(Math.random()*effect));
-        var rp = _rotate2d(c0, pe, n*(180/size));
-        rp.angle = n*(180/size);
+    for (var n = 0; n < 25; n++) {
+        var pe = { ...p };
+        var rp = _rotate2d(c, pe, n*(540/25));
         frequencyPath.push(rp);
     }
-    for (var n = 0; n < size; n++) {
-        var pe = { ...p1 };
-        pe.y += (-(effect/2)+(Math.random()*effect));
-        var rp = _rotate2d(c1, pe, n*(180/size));
-        rp.angle = 180+(n*(180/size));
-        frequencyPath.push(rp);
+    for (var n = 0; n < 100; n++) {
+        frequencyPath.push({ x: -0.05-(n*(0.45/100)), y: 0 })
     }
+
+    //frequencyPath.reverse();
 };
 
 var toHertz = function(no) {
@@ -858,6 +850,7 @@ var download = function(color="#000", mode=0) {
     }, 100);
 };
 
+var accFrame = 0;
 var angle = 0;
 var distance = 0;
 
@@ -1001,6 +994,27 @@ var drawImage = function() {
     ctx.beginPath();
     ctx.arc(moveX, moveY, 2.5, 0, (Math.PI*2));
     //ctx.fill();
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#000";
+
+    var no = (accFrame+15) < frequencyPath.length ? 
+    (accFrame+15) : (frequencyPath.length-1);
+
+    ctx.beginPath();
+    ctx.moveTo(
+    (sw/2)+(frequencyPath[accFrame].x*sw),
+    (sh/4)+(frequencyPath[accFrame].y*sw))
+    for (var n = accFrame; n < no; n++) {
+        ctx.lineTo(
+        (sw/2)+(frequencyPath[n].x*sw),
+        (sh/4)+(frequencyPath[n].y*sw))
+    }
+    ctx.stroke();
+
+    accFrame += 1;
+    if (accFrame > (frequencyPath.length-1))
+    accFrame = 0;
 
     //drawStripe2(pictureView, (sw/2), (sh/2), (sw/8));
     drawStripe();
