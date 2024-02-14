@@ -200,6 +200,29 @@ $(document).ready(function() {
         }
     }
 
+    playbackValue = 0.1;
+    playbackValueView = document.createElement("span");
+    playbackValueView.style.position = "absolute";
+    playbackValueView.style.userSelect = "nnone";
+    playbackValueView.style.color = "#000";
+    playbackValueView.innerText = 
+    "PLAYBACK FROM "+playbackValue;
+    playbackValueView.style.textAlign = "left";
+    playbackValueView.style.left = (10)+"px";
+    playbackValueView.style.top = (sh-70)+"px";
+    playbackValueView.style.width = (200)+"px";
+    playbackValueView.style.height = (25)+"px";
+    playbackValueView.style.zIndex = "15";
+    document.body.appendChild(playbackValueView);
+
+    playbackValueView.onclick = function() {
+        //console.log("plabackRateView click");
+        playbackValue = (playbackValue+0.1) < 1.1 ?
+        parseFloat((playbackValue+0.1).toFixed(1)) : 0.1;
+        playbackValueView.innerText = 
+        "PLAYBACK FROM "+playbackValue;
+    };
+
     isRecording = false;
     playbackRate = 0.5;
 
