@@ -311,8 +311,7 @@ $(document).ready(function() {
         avgFrequency = reachedFrequency;
 
         var currentTime = new Date().getTime();
-        if (avgFrequency > 0.35 && 
-            isRecording && currentTime - micTime > 1000) {
+        if (isRecording && currentTime - micTime > 1000) {
             mic.stopRecording(function(url) {
 
                 mode = 1;
@@ -321,6 +320,8 @@ $(document).ready(function() {
                 console.log("recording stopped");
                 recordedAudio.src = url;
                 recordedAudio.play();
+
+                avgFrequency = 0;
             });
         }
         else if (!isRecording && 
@@ -696,6 +697,8 @@ var drawStripe = function() {
     var offset = (reachedFrequency*0.5);
     var size = recordedAudio.paused ? (1-offset)*(sw/2) : (sw/2);
 
+    var offsetStripeFrame = (1-offset)*stripeFrame;
+
     if (imagesLoaded) {
         var image = img_list[6]
         var imageSize = {
@@ -710,32 +713,32 @@ var drawStripe = function() {
 
         ctx.drawImage(image, 
         -format.left, -format.top, frame.width, frame.height, 
-        -stripeFrame-size, (sh/2)-(size/2), 
+        -offsetStripeFrame-size, (sh/2)-(size/2), 
         (size), (size));
 
         ctx.drawImage(image, 
         -format.left, -format.top, frame.width, frame.height, 
-        -stripeFrame, (sh/2)-(size/2), 
+        -offsetStripeFrame, (sh/2)-(size/2), 
         (size), (size));
 
         ctx.drawImage(image, 
         -format.left, -format.top, frame.width, frame.height, 
-        -stripeFrame+(size), (sh/2)-(size/2), 
+        -offsetStripeFrame+(size), (sh/2)-(size/2), 
         (size), (size));
 
         ctx.drawImage(image, 
         -format.left, -format.top, frame.width, frame.height, 
-        -stripeFrame+(size*2), (sh/2)-(size/2), 
+        -offsetStripeFrame+(size*2), (sh/2)-(size/2), 
         (size), (size));
 
         ctx.drawImage(image, 
         -format.left, -format.top, frame.width, frame.height, 
-        -stripeFrame+(size*3), (sh/2)-(size/2), 
+        -offsetStripeFrame+(size*3), (sh/2)-(size/2), 
         (size), (size));
 
         ctx.drawImage(image, 
         -format.left, -format.top, frame.width, frame.height, 
-        -stripeFrame+(size*4), (sh/2)-(size/2), 
+        -offsetStripeFrame+(size*4), (sh/2)-(size/2), 
         (size), (size));
     }
 
