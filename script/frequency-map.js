@@ -610,15 +610,15 @@ var drawAcc = function(length = 15, effect = 0.01) {
 
     frequencyPath = [];
     for (var n = 0; n < 100; n++) {
-        frequencyPath.push({ x: 0.5-(n*(0.45/100)), y: 0 });
+        frequencyPath.push({ x: 0.6-(n*(0.55/100)), y: 0 });
     }
     for (var n = 0; n < 25; n++) {
         var pe = { ...p };
-        var rp = _rotate2d(c, pe, n*(540/25));
+        var rp = _rotate2d(c, pe, -n*(540/25));
         frequencyPath.push(rp);
     }
     for (var n = 0; n < 100; n++) {
-        frequencyPath.push({ x: -0.05-(n*(0.45/100)), y: 0 })
+        frequencyPath.push({ x: -0.05-(n*(0.35/100)), y: 0 })
     }
 
     //frequencyPath.reverse();
@@ -995,26 +995,44 @@ var drawImage = function() {
     ctx.arc(moveX, moveY, 2.5, 0, (Math.PI*2));
     //ctx.fill();
 
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "#000";
+    if (!imagesLoaded) {
+        ctx.fillStyle = "#000";
+        ctx.font = ((0.07)*sw)+"px sans serif";
+        ctx.fontWeight = "900";
+        ctx.textAlign ="center";
+        ctx.textBaseline ="middle";
 
-    var no = (accFrame+15) < frequencyPath.length ? 
-    (accFrame+15) : (frequencyPath.length-1);
+        ctx.fillText("L", (sw/2)-((0.2)*sw), (sh/4));
+        ctx.fillText("A", (sw/2), (sh/4));
+        ctx.fillText("D", (sw/2)+((0.05)*sw), (sh/4));
+        ctx.fillText("I", (sw/2)+((0.1)*sw), (sh/4));
+        ctx.fillText("N", (sw/2)+((0.15)*sw), (sh/4));
+        ctx.fillText("G", (sw/2)+((0.2)*sw), (sh/4));
 
-    ctx.beginPath();
-    ctx.moveTo(
-    (sw/2)+(frequencyPath[accFrame].x*sw),
-    (sh/4)+(frequencyPath[accFrame].y*sw))
-    for (var n = accFrame; n < no; n++) {
-        ctx.lineTo(
-        (sw/2)+(frequencyPath[n].x*sw),
-        (sh/4)+(frequencyPath[n].y*sw))
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, (sh/4)-2.5, sw, 5);
+
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#000";
+
+        var no0 = (accFrame+15) < frequencyPath.length ? 
+        (accFrame+15) : (frequencyPath.length-1);
+
+        ctx.beginPath();
+        ctx.moveTo(
+        ((sw/2)-((0.1)*sw))+(frequencyPath[accFrame].x*sw),
+        (sh/4)+(frequencyPath[accFrame].y*sw))
+        for (var n = accFrame; n < no0; n++) {
+            ctx.lineTo(
+            ((sw/2)-((0.1)*sw))+(frequencyPath[n].x*sw),
+            (sh/4)+(frequencyPath[n].y*sw))
+        }
+        ctx.stroke();
+
+        accFrame += 1;
+        if (accFrame > (frequencyPath.length-1))
+        accFrame = 0;
     }
-    ctx.stroke();
-
-    accFrame += 1;
-    if (accFrame > (frequencyPath.length-1))
-    accFrame = 0;
 
     //drawStripe2(pictureView, (sw/2), (sh/2), (sw/8));
     drawStripe();
