@@ -74,6 +74,28 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
+    recordedVideo = document.createElement("video");
+    recordedVideo.style.position = "absolute";
+    recordedVideo.autoplay = true;
+    recordedVideo.style.objectFit = "cover";
+    recordedVideo.width = (sw/1.5);
+    recordedVideo.height = (sw/2); 
+    recordedVideo.style.left = ((sw/2)-(sw/3))+"px";
+    recordedVideo.style.top = ((sh/2)-(sw/4))+"px";
+    recordedVideo.style.width = (sw/1.5)+"px";
+    recordedVideo.style.height = (sw/2)+"px";
+    recordedVideo.style.zIndex = "15";
+    document.body.appendChild(recordedVideo);
+
+    recordedVideo.oncanplay = function() {
+        console.log("video loaded");
+        recordedVideo.muted = true;
+        recordedVideo.play();
+    };
+
+    recordedVideo.src = 
+    "https://192.168.15.2:8443/movies/scary-movie_4.mp4";
+
     downloadView = document.createElement("canvas");
     downloadView.style.position = "absolute";
     //pictureView.style.background = "#fff";
@@ -200,6 +222,54 @@ $(document).ready(function() {
         }
     }
 
+    recordedVideoPlayView = document.createElement("span");
+    recordedVideoPlayView.style.position = "absolute";
+    recordedVideoPlayView.style.userSelect = "nnone";
+    recordedVideoPlayView.style.color = "#000";
+    recordedVideoPlayView.innerText = 
+    "PLAY VIDEO";
+    recordedVideoPlayView.style.textAlign = "left";
+    recordedVideoPlayView.style.left = (10)+"px";
+    recordedVideoPlayView.style.top = (sh-140)+"px";
+    recordedVideoPlayView.style.width = (200)+"px";
+    recordedVideoPlayView.style.height = (25)+"px";
+    recordedVideoPlayView.style.zIndex = "15";
+    document.body.appendChild(recordedVideoPlayView);
+
+    recordedVideoPlayView.onclick = function() {
+        if (recordedVideo.paused) {
+            recordedVideoPlayView.innerText = 
+            "PAUSE VIDEO";
+            recordedVideo.play();
+        }
+        else {
+            recordedVideoPlayView.innerText = 
+            "PLAY VIDEO";
+            recordedVideo.pause();
+        }
+    };
+
+    canPlayBack = false;
+    playbackEnabledView = document.createElement("span");
+    playbackEnabledView.style.position = "absolute";
+    playbackEnabledView.style.userSelect = "nnone";
+    playbackEnabledView.style.color = "#000";
+    playbackEnabledView.innerText = 
+    "PLAYBACK: "+(canPlayBack ? "ON" : "OFF");
+    playbackEnabledView.style.textAlign = "left";
+    playbackEnabledView.style.left = (10)+"px";
+    playbackEnabledView.style.top = (sh-105)+"px";
+    playbackEnabledView.style.width = (200)+"px";
+    playbackEnabledView.style.height = (25)+"px";
+    playbackEnabledView.style.zIndex = "15";
+    document.body.appendChild(playbackEnabledView);
+
+    playbackEnabledView.onclick = function() {
+        canPlayBack = !canPlayBack;
+        playbackEnabledView.innerText = 
+        "PLAYBACK: "+(canPlayBack ? "ON" : "OFF");
+    };
+
     playbackValue = 0.1;
     playbackValueView = document.createElement("span");
     playbackValueView.style.position = "absolute";
@@ -224,7 +294,7 @@ $(document).ready(function() {
     };
 
     isRecording = false;
-    playbackRate = 0.5;
+    playbackRate = 2;
 
     playbackRateView = document.createElement("span");
     playbackRateView.style.position = "absolute";
@@ -329,12 +399,15 @@ $(document).ready(function() {
         if (recordedAudio.paused)
         micAvgValue = avgValue;
 
+        recordedVideo.playbackRate = 1+(micAvgValue*9);
+
         reachedFrequency = (1/250)*reachedFreq;
         if (reachedFrequency > avgFrequency)
         avgFrequency = reachedFrequency;
 
         var currentTime = new Date().getTime();
-        if (isRecording && currentTime - micTime > 1000) {
+        if (canPlayBack && 
+            isRecording && currentTime - micTime > 1000) {
             mic.stopRecording(function(url) {
 
                 mode = 1;
