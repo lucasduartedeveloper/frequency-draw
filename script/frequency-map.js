@@ -285,6 +285,8 @@ $(document).ready(function() {
         }
         else if (!canPlayBack) {
 
+            recordedAudio.pause();
+
             mode = 0;
             isRecording = true;
 
