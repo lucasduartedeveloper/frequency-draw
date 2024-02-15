@@ -76,7 +76,8 @@ $(document).ready(function() {
 
     recordedVideo = document.createElement("video");
     recordedVideo.style.position = "absolute";
-    recordedVideo.autoplay = true;
+    recordedVideo.style.display = "none";
+    //recordedVideo.autoplay = true;
     recordedVideo.style.objectFit = "cover";
     recordedVideo.width = (sw/1.5);
     recordedVideo.height = (sw/2); 
@@ -90,7 +91,7 @@ $(document).ready(function() {
     recordedVideo.oncanplay = function() {
         console.log("video loaded");
         recordedVideo.muted = true;
-        recordedVideo.play();
+        //recordedVideo.play();
     };
 
     recordedVideo.src = 
@@ -224,7 +225,8 @@ $(document).ready(function() {
 
     recordedVideoPlayView = document.createElement("span");
     recordedVideoPlayView.style.position = "absolute";
-    recordedVideoPlayView.style.userSelect = "nnone";
+    recordedVideoPlayView.style.display = "none";
+    recordedVideoPlayView.style.userSelect = "none";
     recordedVideoPlayView.style.color = "#000";
     recordedVideoPlayView.innerText = 
     "PLAY VIDEO";
@@ -252,7 +254,7 @@ $(document).ready(function() {
     canPlayBack = false;
     playbackEnabledView = document.createElement("span");
     playbackEnabledView.style.position = "absolute";
-    playbackEnabledView.style.userSelect = "nnone";
+    playbackEnabledView.style.userSelect = "none";
     playbackEnabledView.style.color = "#000";
     playbackEnabledView.innerText = 
     "PLAYBACK: "+(canPlayBack ? "ON" : "OFF");
@@ -266,14 +268,38 @@ $(document).ready(function() {
 
     playbackEnabledView.onclick = function() {
         canPlayBack = !canPlayBack;
-        playbackEnabledView.innerText = 
-        "PLAYBACK: "+(canPlayBack ? "ON" : "OFF");
+
+        var currentTime = new Date().getTime();
+        if (canPlayBack) {
+            mic.stopRecording(function(url) {
+
+                mode = 1;
+                isRecording = false;
+
+                console.log("recording stopped");
+                recordedAudio.src = url;
+                recordedAudio.play();
+
+                avgFrequency = 0;
+            });
+        }
+        else if (!canPlayBack) {
+
+            mode = 0;
+            isRecording = true;
+
+            //console.clear();
+            console.log("started recording");
+            mic.record();
+            micTime = currentTime;
+        }
     };
 
     playbackValue = 0.1;
     playbackValueView = document.createElement("span");
     playbackValueView.style.position = "absolute";
-    playbackValueView.style.userSelect = "nnone";
+    playbackValueView.style.display = "none";
+    playbackValueView.style.userSelect = "none";
     playbackValueView.style.color = "#000";
     playbackValueView.innerText = 
     "PLAYBACK FROM "+playbackValue;
@@ -298,7 +324,7 @@ $(document).ready(function() {
 
     playbackRateView = document.createElement("span");
     playbackRateView.style.position = "absolute";
-    playbackRateView.style.userSelect = "nnone";
+    playbackRateView.style.userSelect = "none";
     playbackRateView.style.color = "#000";
     playbackRateView.innerText = "PLAYBACK "+playbackRate+"x";
     playbackRateView.style.textAlign = "left";
@@ -319,7 +345,7 @@ $(document).ready(function() {
     slideRate = 0.5;
     slideRateView = document.createElement("span");
     slideRateView.style.position = "absolute";
-    slideRateView.style.userSelect = "nnone";
+    slideRateView.style.userSelect = "none";
     slideRateView.style.color = "#000";
     slideRateView.innerText = "SLIDE RATE "+slideRate+"x";
     slideRateView.style.textAlign = "left";
@@ -406,35 +432,6 @@ $(document).ready(function() {
         avgFrequency = reachedFrequency;
 
         var currentTime = new Date().getTime();
-        if (canPlayBack && 
-            isRecording && currentTime - micTime > 1000) {
-            mic.stopRecording(function(url) {
-
-                mode = 1;
-                isRecording = false;
-
-                console.log("recording stopped");
-                recordedAudio.src = url;
-                recordedAudio.play();
-
-                avgFrequency = 0;
-            });
-        }
-        else if (!isRecording && 
-            recordedAudio.paused && micAvgValue > 0.1) {
-
-            mode = 0;
-            isRecording = true;
-
-            //console.clear();
-            console.log("started recording");
-            mic.record();
-            micTime = currentTime;
-        }
-        else if (micAvgValue > 0.1) {
-            micTime = currentTime;
-        }
-
         if (isRecording) { 
             angle = -micAvgValue*(Math.PI/4);
             frequencyDirection = angle < 0 ? 
@@ -445,10 +442,14 @@ $(document).ready(function() {
             angle = 0;
         }
 
-        if (recordedAudio.paused)
-        titleView.style.display = "none";
-        else
-        titleView.style.display = "initial";
+        if (isRecording)
+        playbackEnabledView.innerText = 
+        "PLAYBACK: "+
+        moment(currentTime-micTime).format("mm:ss");
+        else 
+        playbackEnabledView.innerText = 
+        "PLAYBACK: -"+
+        moment(recordedAudio.currentTime*1000).format("mm:ss");
 
         if (isRecording)
         resumedWave = resumeWave(freqArray);
