@@ -379,6 +379,7 @@ $(document).ready(function() {
             duration + " " + moment(duration).format("mm:ss")
         );
 
+        recordedAudio.loop = true;
         recordedAudio.playbackRate = playbackRate;
         recordedAudio.preservesPitch = false;
 
