@@ -1167,7 +1167,12 @@ var drawImage =
 
     for (var n = -1; n < 2; n++) {
         var timestamp = 
-        frequencyPath[0].timestamp + (n*periodLength);
+        frequencyPath[0].timestamp + (n*(periodLength*5));
+
+        ctx.beginPath();
+        ctx.moveTo((sw/2)-(n*100), (sh/2)+(sw/4));
+        ctx.lineTo((sw/2)-(n*100), (sh/2)+(sw/4)+10);
+        ctx.stroke();
 
         ctx.fillStyle = "#fff";
         ctx.font = "10px sans serif";
@@ -1176,7 +1181,7 @@ var drawImage =
         ctx.fillText(
         moment(timestamp).format("HH:mm"),
         (sw/2)+(n*100), 
-        (sh/2)+(sw/4));
+        (sh/2)+(sw/4)+20);
     }
 
     if (drawingMode == 0)
