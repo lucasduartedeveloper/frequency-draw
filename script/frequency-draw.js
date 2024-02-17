@@ -201,8 +201,7 @@ $(document).ready(function() {
         value: 0,
         direction: 0,
         ready: false,
-        met: false,
-        openValue: 0
+        met: false
     };
 
     var ontouch = false;
@@ -385,14 +384,15 @@ $(document).ready(function() {
     buttonBuyView.style.position = "absolute";
     buttonBuyView.style.background = "#595";
     buttonBuyView.style.color = "#fff";
-    buttonBuyView.innerText = "WILL ENTER";
+    buttonBuyView.innerHTML = 
+    "<i class=\"fa-solid fa-arrow-up\"></i>&nbsp;BUY";
     buttonBuyView.style.fontFamily = "Khand";
     buttonBuyView.style.fontSize = "15px";
-    buttonBuyView.style.left = (sw-110)+"px";
+    buttonBuyView.style.left = (sw-130)+"px";
     buttonBuyView.style.top = (sh-180)+"px";
-    buttonBuyView.style.width = (100)+"px";
+    buttonBuyView.style.width = (120)+"px";
     buttonBuyView.style.height = (50)+"px";
-    //buttonBuyView.style.border = "1px solid white";
+    buttonBuyView.style.border = "0px solid white";
     buttonBuyView.style.borderRadius = "5px";
     buttonBuyView.style.zIndex = "15";
     document.body.appendChild(buttonBuyView);
@@ -401,20 +401,24 @@ $(document).ready(function() {
         prediction.met = false;
         prediction.ready = true;
         prediction.direction = -1;
+        prediction.positionY = 
+        (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4));
+        prediction.value = frequencyPath[0].closeValue;
     };
 
     buttonSellView = document.createElement("button");
     buttonSellView.style.position = "absolute";
     buttonSellView.style.background = "#955";
     buttonSellView.style.color = "#fff";
-    buttonSellView.innerText = "WILL LEAVE";
+    buttonSellView.innerHTML = 
+    "<i class=\"fa-solid fa-arrow-down\"></i>&nbsp;SELL";
     buttonSellView.style.fontFamily = "Khand";
     buttonSellView.style.fontSize = "15px";
-    buttonSellView.style.left = (sw-110)+"px";
+    buttonSellView.style.left = (sw-130)+"px";
     buttonSellView.style.top = (sh-120)+"px";
-    buttonSellView.style.width = (100)+"px";
+    buttonSellView.style.width = (120)+"px";
     buttonSellView.style.height = (50)+"px";
-    //buttonBuyView.style.border = "1px solid white";
+    buttonSellView.style.border = "0px solid white";
     buttonSellView.style.borderRadius = "5px";
     buttonSellView.style.zIndex = "15";
     document.body.appendChild(buttonSellView);
@@ -423,6 +427,9 @@ $(document).ready(function() {
         prediction.met = false;
         prediction.ready = true;
         prediction.direction = 1;
+        prediction.positionY = 
+        (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4));
+        prediction.value = frequencyPath[0].closeValue;
     };
 
     exampleDataEnabled = false;
@@ -896,32 +903,33 @@ var updateValue = function(value, callback) {
         });
 
         if (prediction.direction == -1 && 
-            closeValue >= prediction.value) {
+            closeValue > prediction.value) {
 
-            if (closeValue > openValue) {
-                predictionCount += 1;
-            }
+            predictionCount += 1;
 
             prediction.met = true;
             prediction.direction = 0;
             prediction.ready = false;
-            prediction.openValue = openValue;
 
             correctPredictionCountView.innerText = 
             predictionCount;
         }
+        else if (prediction.direction == 1 && 
+            closeValue < prediction.value) {
 
-        if (prediction.direction == 1 && 
-            closeValue <= prediction.value) {
-
-            if (openValue > closeValue) {
-                predictionCount += 1;
-            }
+            predictionCount += 1;
 
             prediction.met = true;
             prediction.direction = 0;
             prediction.ready = false;
-            prediction.openValue = openValue;
+
+            correctPredictionCountView.innerText = 
+            predictionCount;
+        }
+        else {
+            prediction.met = true;
+            prediction.direction = 0;
+            prediction.ready = false;
 
             correctPredictionCountView.innerText = 
             predictionCount;
@@ -1093,20 +1101,13 @@ var drawImage =
 
         ctx.beginPath();
         ctx.moveTo(sw-(sw/4), prediction.positionY);
-        ctx.lineTo(sw-(sw/4), 
-        (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
-        if (!prediction.met)
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(sw-(sw/4), prediction.positionY);
         ctx.lineTo(sw, prediction.positionY);
         ctx.stroke();
 
         ctx.fillStyle = "#000";
 
         ctx.beginPath();
-        ctx.rect(!prediction.met ? sw-(sw/4)-25 : sw-(sw/4)+30,
+        ctx.rect(sw-(sw/4)+30,
         prediction.positionY-10, 50, 20);
         ctx.fill();
         ctx.stroke();
@@ -1116,31 +1117,11 @@ var drawImage =
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(prediction.value.toFixed(2), 
-        !prediction.met ? sw-(sw/4) : sw-(sw/4)+55, 
+        sw-(sw/4)+55, 
         prediction.positionY);
 
         ctx.strokeStyle = "#555";
         ctx.fillStyle = "#000";
-
-        if (prediction.met) {
-            ctx.fillStyle = "#000";
-            if (prediction.correct)
-            ctx.strokeStyle = "#55f";
-            else 
-            ctx.strokeStyle = "#555";
-
-            ctx.beginPath();
-            ctx.rect(sw-(sw/4)-25, prediction.positionY-10, 50, 20);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.fillStyle = "#fff";
-            ctx.font = "15px sans serif";
-             ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(prediction.openValue.toFixed(2), 
-            sw-(sw/4), prediction.positionY);
-        }
     }
 
     for (var n = -1; n < 2; n++) {
