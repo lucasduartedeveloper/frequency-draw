@@ -195,6 +195,8 @@ $(document).ready(function() {
     var moveX = 0;
     var moveY = 0;
 
+    offsetX = 0;
+
     prediction = {
         positionY: -1,
         startValue: 0,
@@ -232,6 +234,8 @@ $(document).ready(function() {
             }
         }
 
+        offset_startX = startX;
+
         prediction.ready = false;
         prediction.met = false;
         prediction.correct = false;
@@ -262,6 +266,9 @@ $(document).ready(function() {
             moveX = e.clientX;
             moveY = e.clientY;
         }
+
+        offsetX += (moveX - offset_startX)
+        offset_startX = moveX;
 
         var y = moveY;
         if (moveY < (sh/2)-((sw/gridSize)*2))
@@ -979,13 +986,13 @@ var drawImage =
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, sw, sh);
 
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, sw, sh);
+
     ctx.save();
     ctx.translate((sw/2), (sh/2));
     ctx.rotate(angle);
     ctx.translate(-(sw/2), -(sh/2));
-
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, sw, sh);
 
     ctx.strokeStyle = gridColor;
     ctx.lineWidth = 1;
@@ -1073,6 +1080,9 @@ var drawImage =
     (sw/2), (sw/2));
 
     ctx.restore();
+
+    ctx.save();
+    ctx.translate(-offsetX, 0);
 
     ctx.lineWidth = 2;
 
@@ -1375,6 +1385,7 @@ var drawImage =
         ctx.fill();
     }
 
+    ctx.restore();
     ctx.restore();
 };
 
