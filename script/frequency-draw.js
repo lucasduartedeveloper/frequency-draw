@@ -1143,6 +1143,20 @@ var drawImage =
         }
     }
 
+    for (var n = -1; n < 2; n++) {
+        var timestamp = 
+        frequencyPath[0].timestamp + (n*periodLength);
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "10px sans serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(
+        moment(timestamp).format("HH:mm"),
+        (sw/2)+(n*100), 
+        (sh/2)+(sw/4));
+    }
+
     if (drawingMode == 0)
     for (var n = 0; n < frequencyPath.length; n++) {
         ctx.lineWidth = 2;

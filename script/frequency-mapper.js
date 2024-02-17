@@ -146,11 +146,42 @@ $(document).ready(function() {
              else {
                  map_startX = e.touches[0].clientX;
                  map_startY = e.touches[0].clientY;
+
+                 map_moveX = 0;
+                 map_moveY = 0;
              }
         }
     };
 
-    imageRatio = 8;
+    map_startX = 0;
+    map_startY = 0;
+    map_moveX = 0;
+    map_moveY = 0;
+
+    map_offset = {
+       x: 0, y: 0
+    };
+
+    map_acc = {
+       x: 0, y: 0
+    };
+
+    pictureView.ontouchmove = function(e) {
+        map_moveX = e.touches[0].clientX - map_startX;
+        map_moveY = e.touches[0].clientY - map_startY;
+
+        map_acc.x = -(map_moveX/8);
+        map_acc.y = -(map_moveY/8);
+    };
+
+    pictureView.ontouchend = function(e) {
+        input.move.value = -1;
+
+        map_moveX = 0;
+        map_moveY = 0;
+    }
+
+    imageRatio = 1;
     ratioView = document.createElement("span");
     ratioView.style.position = "absolute";
     ratioView.style.userSelect = "none";
@@ -193,6 +224,25 @@ $(document).ready(function() {
         else {
             camera.play();
         }
+    };
+
+    angle = 0;
+    angleView = document.createElement("span");
+    angleView.style.position = "absolute";
+    angleView.style.userSelect = "none";
+    angleView.style.color = "#fff";
+    angleView.innerText = (angle)+"°";
+    angleView.style.textAlign = "center";
+    angleView.style.left = ((sw/2)-160)+"px";
+    angleView.style.top = (60)+"px";
+    angleView.style.width = (100)+"px";
+    angleView.style.height = (50)+"px";
+    angleView.style.zIndex = "15";
+    document.body.appendChild(angleView);
+
+    angleView.onclick = function() {
+        angle = angle != 0 ? 0 : -45;
+        angleView.innerText = (angle)+"°";
     };
 
     downloadView = document.createElement("span");
@@ -260,29 +310,6 @@ $(document).ready(function() {
         }, 100);
     };
 
-    map_startX = 0;
-    map_startY = 0;
-
-    map_offset = {
-       x: 0, y: 0
-    };
-
-    map_acc = {
-       x: 0, y: 0
-    };
-
-    pictureView.ontouchmove = function(e) {
-        var map_moveX = e.touches[0].clientX - map_startX;
-        var map_moveY = e.touches[0].clientY - map_startY;
-
-        map_acc.x = -(map_moveX/8);
-        map_acc.y = -(map_moveY/8);
-    };
-
-    pictureView.ontouchend = function(e) {
-        input.move.value = -1;
-    }
-
     oscillator = createOscillator();
     oscillator.volume.gain.value = 1;
     oscillator.frequency.value = 5;
@@ -299,7 +326,8 @@ var getImage = function() {
 };
 
 var img_list = [
-    "img/wallpaper-0.png"
+    "img/wallpaper-0.png",
+    "img/weight-0.png"
 ];
 
 var imagesLoaded = false;
@@ -347,11 +375,14 @@ var animate = function() {
         map_offset.x += map_acc.x;
         map_offset.y += map_acc.y;
 
-        var accX = map_acc.x - 1;
-        var accY = map_acc.y - 1;
+        var accX = Math.floor(map_acc.x);
+        var accY = Math.floor(map_acc.y);
 
-        if (accX < 0) accX = 0;
-        if (accY < 0) accY = 0;
+        if (accX > 0) accX -= 1;
+        if (accX < 0) accX += 1;
+
+        if (accY > 0) accY -= 1;
+        if (accY < 0) accY += 1;
 
         map_acc.x = accX;
         map_acc.y = accY;
@@ -390,9 +421,9 @@ var drawImage = function() {
     ctx.fillRect(0, 0, sw, sh);
 
     ctx.save();
-    ctx.translate(map_offset.x, map_offset.y);
-    ctx.rotate(-(Math.PI/4));
-    ctx.translate(-map_offset.x, -map_offset.y);
+    ctx.translate((sw/2), (sh/2));
+    ctx.rotate(angle*(Math.PI/180));
+    ctx.translate(-(sw/2), -(sh/2));
 
     ctx.save();
     ctx.translate(map_offset.x, map_offset.y);
@@ -418,12 +449,6 @@ var drawImage = function() {
         (sw/2)-(size.width/4), (sh/2)-(size.height/4), 
         (size.width/2), (size.height/2));
     }
-
-    ctx.restore();
-    ctx.restore();
-
-    ctx.save();
-    ctx.translate(map_offset.x, map_offset.y);
 
     if (cameraOn) {
         var image = camera;
@@ -475,6 +500,51 @@ var drawImage = function() {
     }
 
     ctx.restore();
+    ctx.restore();
+
+    if (map_moveX != 0 && map_moveY != 0) {
+        ctx.beginPath();
+        ctx.arc(map_startX, map_startY, 10, 
+        0, (Math.PI*2));
+        ctx.stroke();
+    
+        ctx.beginPath();
+        ctx.moveTo(map_startX, map_startY);
+        ctx.lineTo(map_startX+map_moveX, map_startY+map_moveY);
+        ctx.stroke();
+    }
+
+    if (imagesLoaded) {
+        var image = img_list[1];
+        var size = {
+            width: image.naturalWidth,
+            height: image.naturalHeight
+        };
+        var frame = {
+            width: getSquare(size),
+            height: getSquare(size)
+        };
+        var format = fitImageCover(size, frame);
+
+        ctx.fillStyle = "#fff";
+
+        ctx.beginPath();
+        ctx.arc(map_startX, map_startY-17.5, 15, 0, (Math.PI*2));
+        ctx.fill();
+
+        ctx.drawImage(image, 
+        -format.left, -format.top, frame.width, frame.height, 
+        map_startX-25, map_startY-50, 
+        50, 50);
+    }
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#000";
+
+    ctx.beginPath();
+    ctx.moveTo(map_startX-25, map_startY);
+    ctx.lineTo(map_startX+25, map_startY);
+    ctx.stroke();
 
     var c = input.move;
     var p = {
@@ -482,7 +552,6 @@ var drawImage = function() {
         y: c.y-(sw/8)-5
     };
 
-    ctx.lineWidth = 1;
     ctx.strokeStyle = "#fff";
 
     ctx.beginPath();
