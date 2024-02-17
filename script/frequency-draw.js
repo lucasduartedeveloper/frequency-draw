@@ -201,7 +201,8 @@ $(document).ready(function() {
         value: 0,
         direction: 0,
         ready: false,
-        met: false
+        met: false,
+        correct: false
     };
 
     var ontouch = false;
@@ -233,6 +234,7 @@ $(document).ready(function() {
 
         prediction.ready = false;
         prediction.met = false;
+        prediction.correct = false;
         prediction.openValue = 0;
 
         var y = startY;
@@ -908,6 +910,7 @@ var updateValue = function(value, callback) {
             predictionCount += 1;
 
             prediction.met = true;
+            prediction.correct = true;
             prediction.direction = 0;
             prediction.ready = false;
 
@@ -920,6 +923,7 @@ var updateValue = function(value, callback) {
             predictionCount += 1;
 
             prediction.met = true;
+            prediction.correct = true;
             prediction.direction = 0;
             prediction.ready = false;
 
@@ -927,7 +931,10 @@ var updateValue = function(value, callback) {
             predictionCount;
         }
         else {
+            prediction.positionY = -1;
+
             prediction.met = true;
+            prediction.correct = false;
             prediction.direction = 0;
             prediction.ready = false;
 
@@ -1094,11 +1101,6 @@ var drawImage =
         ctx.lineWidth = 1;
         ctx.strokeStyle = "#555";
 
-        if (prediction.direction == -1)
-        ctx.strokeStyle = currentColorPallete[0];
-        if (prediction.direction == 1)
-        ctx.strokeStyle = currentColorPallete[1];
-
         ctx.beginPath();
         ctx.moveTo(sw-(sw/4), prediction.positionY);
         ctx.lineTo(sw, prediction.positionY);
@@ -1120,8 +1122,47 @@ var drawImage =
         sw-(sw/4)+55, 
         prediction.positionY);
 
-        ctx.strokeStyle = "#555";
-        ctx.fillStyle = "#000";
+        if (prediction.direction == -1)
+        ctx.fillStyle = currentColorPallete[0];
+        if (prediction.direction == 1)
+        ctx.fillStyle = currentColorPallete[1];
+
+        ctx.lineWidth = 2;
+
+        if (!prediction.met && prediction.direction == -1) {
+            ctx.beginPath();
+            ctx.moveTo(sw-(sw/4)-5, prediction.positionY+5);
+            ctx.lineTo(sw-(sw/4)+5, prediction.positionY+5);
+            ctx.lineTo(sw-(sw/4), prediction.positionY-5);
+            ctx.lineTo(sw-(sw/4)-5, prediction.positionY+5);
+            ctx.fill();
+        }
+        else if (!prediction.met && prediction.direction == 1) {
+            ctx.beginPath();
+            ctx.moveTo(sw-(sw/4)-5, prediction.positionY-5);
+            ctx.lineTo(sw-(sw/4)+5, prediction.positionY-5);
+            ctx.lineTo(sw-(sw/4), prediction.positionY+5);
+            ctx.lineTo(sw-(sw/4)-5, prediction.positionY-5);
+            ctx.fill();
+        }
+        else if (prediction.correct) {
+            ctx.beginPath();
+            ctx.moveTo(sw-(sw/4)-5, prediction.positionY);
+            ctx.lineTo(sw-(sw/4), prediction.positionY+5);
+            ctx.lineTo(sw-(sw/4)+5, prediction.positionY-5);
+            ctx.stroke();
+        }
+        else if (!prediction.correct) {
+            ctx.beginPath();
+            ctx.moveTo(sw-(sw/4)+5, prediction.positionY-5);
+            ctx.lineTo(sw-(sw/4)-5, prediction.positionY+5);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(sw-(sw/4)-5, prediction.positionY-5);
+            ctx.lineTo(sw-(sw/4)+5, prediction.positionY+5);
+            ctx.stroke();
+        }
     }
 
     for (var n = -1; n < 2; n++) {
