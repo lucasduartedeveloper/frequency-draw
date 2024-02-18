@@ -204,7 +204,8 @@ $(document).ready(function() {
         direction: 0,
         ready: false,
         met: false,
-        correct: false
+        correct: false,
+        timestamp: 0
     };
 
     var ontouch = false;
@@ -407,6 +408,10 @@ $(document).ready(function() {
     document.body.appendChild(buttonBuyView);
 
     buttonBuyView.onclick = function() {
+        var currentTime = new Date().getTime();
+        var offset = currentTime % 1000;
+        prediction.timestamp = currentTime + 60000 - offset;
+
         prediction.met = false;
         prediction.ready = true;
         prediction.direction = -1;
@@ -433,6 +438,10 @@ $(document).ready(function() {
     document.body.appendChild(buttonSellView);
 
     buttonSellView.onclick = function() {
+        var currentTime = new Date().getTime();
+        var offset = currentTime % 1000;
+        prediction.timestamp = currentTime + 60000 - offset;
+
         prediction.met = false;
         prediction.ready = true;
         prediction.direction = 1;
@@ -880,38 +889,8 @@ var updateValue = function(value, callback) {
     frequencyPath[0].volumeValue = 
     (volumeValue/readingCount);
 
-    if (currentTime - frequencyPath[0].timestamp >= 
-        periodLength) {
-        closeValue = frequency;
-
-        currentValueView.innerText = 
-        closeValue.toFixed(2);
-
-        // clip to last 100 periods
-        if (frequencyPath.length > 99)
-        frequencyPath.splice(99, (frequencyPath.length-99));
-
-        // reset fixed fields
-        openValue = closeValue;
-        highValue = frequency;
-        lowValue = frequency;
-        closeValue = frequency;
-
-        readingCount = 0;
-        volumeValue = 0;
-
-        // start new period
-        frequencyPath.splice(0, 0, { 
-            timestamp: currentTime,
-            openValue: openValue,
-            highValue: highValue,
-            lowValue: lowValue,
-            closeValue: closeValue,
-            readingCount: readingCount,
-            volumeValue: (volumeValue/readingCount)
-        });
-
-        if (prediction.direction == -1 && 
+    if (!prediction.met && currentTime > prediction.timestamp) {
+       if (prediction.direction == -1 && 
             closeValue > prediction.value) {
 
             predictionCount += 1;
@@ -948,6 +927,38 @@ var updateValue = function(value, callback) {
             correctPredictionCountView.innerText = 
             predictionCount;
         }
+    }
+
+    if (currentTime - frequencyPath[0].timestamp >= 
+        periodLength) {
+        closeValue = frequency;
+
+        currentValueView.innerText = 
+        closeValue.toFixed(2);
+
+        // clip to last 100 periods
+        if (frequencyPath.length > 99)
+        frequencyPath.splice(99, (frequencyPath.length-99));
+
+        // reset fixed fields
+        openValue = closeValue;
+        highValue = frequency;
+        lowValue = frequency;
+        closeValue = frequency;
+
+        readingCount = 0;
+        volumeValue = 0;
+
+        // start new period
+        frequencyPath.splice(0, 0, { 
+            timestamp: currentTime,
+            openValue: openValue,
+            highValue: highValue,
+            lowValue: lowValue,
+            closeValue: closeValue,
+            readingCount: readingCount,
+            volumeValue: (volumeValue/readingCount)
+        });
 
         periodTimestampView.innerText = 
         "Period start: "+
@@ -1108,6 +1119,17 @@ var drawImage =
     (sh/2)-((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
 
     if (prediction.positionY != -1) {
+        var currentTime = new Date().getTime();
+        var countdown = (prediction.timestamp-currentTime);
+        countdown = countdown < 0 ? 0 : countdown;
+        ctx.fillStyle = "#fff";
+        ctx.font = "25px sans serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(moment(countdown).format("mm:ss"), 
+        (sw/2)+(sw/4), 
+        (sh/2)-(sw/4));
+
         ctx.lineWidth = 1;
         ctx.strokeStyle = "#555";
 
