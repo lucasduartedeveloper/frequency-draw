@@ -1197,6 +1197,50 @@ var drawImage =
         }
     }
 
+    var increaseCount = 0;
+    for (var n = 0; n < frequencyPath.length; n++) {
+        if (frequencyPath[n].closeValue > frequencyPath[n].openValue)
+        increaseCount += 1;
+    }
+    var increaseRatio = (1/frequencyPath.length)*increaseCount;
+
+    if (frequencyPath.length > 1) {
+        ctx.save();
+        ctx.lineWidth = 2;
+        ctx.opacity = 0.5;
+        ctx.strokeStyle = currentColorPallete[0];
+
+        ctx.beginPath();
+        ctx.moveTo((sw/2), (sh/2)-(sw/4));
+        ctx.lineTo((sw/2)-(increaseRatio*(sw/2)), (sh/2)-(sw/4));
+        ctx.stroke();
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "10px sans serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText((increaseRatio*100).toFixed(2)+"%",
+        (sw/2)-(increaseRatio*(sw/4)), 
+        (sh/2)-(sw/4)-20);
+
+        ctx.strokeStyle = currentColorPallete[1];
+
+        ctx.beginPath();
+        ctx.moveTo((1-increaseRatio)*(sw/2), (sh/2)-(sw/4));
+        ctx.lineTo(0, (sh/2)-(sw/4));
+        ctx.stroke();
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "10px sans serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(((1-increaseRatio)*100).toFixed(2)+"%",
+        (1-increaseRatio)*(sw/4), 
+        (sh/2)-(sw/4)-20);
+
+        ctx.restore();
+    }
+
     for (var n = -1; n < 2; n++) {
         var timestamp = 
         frequencyPath[0].timestamp + (n*(periodLength*5));
