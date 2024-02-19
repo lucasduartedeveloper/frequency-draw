@@ -1241,6 +1241,28 @@ var drawImage =
         ctx.restore();
     }
 
+    ctx.lineWidth = 10;
+
+    ctx.beginPath();
+    ctx.moveTo((sw/2)-(sw/4)-10, (sh/2)-(sw/2));
+    ctx.lineTo((sw/2)-(sw/4)-10, (sh/2)-((sw/2)-20));
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo((sw/2)-(sw/4)-20, (sh/2)-((sw/2)-20));
+    ctx.lineTo((sw/2)-(sw/4)-20, (sh/2)-((sw/2)-40));
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo((sw/2)-(sw/4)-10, (sh/2)-((sw/2)-40));
+    ctx.lineTo((sw/2)-(sw/4)-10, (sh/2)-((sw/2)-60));
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo((sw/2)-(sw/4)+10, (sh/2)-(sw/2));
+    ctx.lineTo((sw/2)-(sw/4)+10, (sh/2)-((sw/2)-60));
+    ctx.stroke();
+
     for (var n = -1; n < 2; n++) {
         var timestamp = 
         frequencyPath[0].timestamp + (n*(periodLength*5));
@@ -1525,27 +1547,7 @@ window.addEventListener("devicelight", function(e) {
     ambientLight_currentValue = 
     (1/ambientLight_topValue)*e.value;
 
-    updateValue(ambientLight_currentValue);
-
-    var elapsedTime = new Date().getTime() - lightTime;
-    //console.clear();
-    //console.log(lightAmmount, e.value, elapsedTime);
-
-    if (Math.abs(e.value-lightAmmount) > 50) {
-        lightTime = new Date().getTime();
-
-        //console.log(
-        //Math.floor(elapsedTime/1000) + " seconds ago");
-
-        if (elapsedTime > 0 && elapsedTime < 86400000 &&
-            new Date().getTime() - alertTime > 30000) {
-            alertTime = new Date().getTime();
-
-            say(toTimestamp(elapsedTime));
-        }
-    }
-
-    lightAmmount = e.value;
+    updateValue(1-ambientLight_currentValue);
 });
 
 var toTimestamp = function(ms, lang=language) {

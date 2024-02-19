@@ -31,7 +31,7 @@ $script = [
     6 => "script/audio-helper.js",
     7 => "script/math-helper.js",
     8 => "script/login-helper.js",
-    9 => "script/frequency-mapper.js"
+    9 => "script/frequency-size.js"
 ];
 
 $module = [];
