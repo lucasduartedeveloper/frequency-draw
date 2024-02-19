@@ -128,8 +128,7 @@ $(document).ready(function() {
     document.body.appendChild(ratioView);
 
     ratioView.onclick = function() {
-        var ratio = (imageRatio+2) < 18 ? 
-        (imageRatio+2) : 1;
+        var ratio = (imageRatio*2) < 64 ? (imageRatio*2) : 1;
         ratio = (ratio > 1) ? (Math.floor(ratio/2)*2) : ratio;
 
         imageRatio = ratio;
@@ -151,9 +150,9 @@ $(document).ready(function() {
 
     pauseView.onclick = function() {
         if (!camera.paused) {
-            setTimeout(function() {
+            //setTimeout(function() {
                 camera.pause();
-            }, 10000);
+            //}, 10000);
         }
         else {
             camera.play();
