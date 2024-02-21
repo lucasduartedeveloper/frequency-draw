@@ -87,6 +87,27 @@ $(document).ready(function() {
     pictureView.ontouchstart = function(e) {
         direction = Math.floor((e.touches[0].clientX)/(sw/4));
 
+        var thereIsObject = false;
+        for (var n = 0; n < positionArr.length; n++) {
+            var obj = positionArr[n];
+            if (obj.direction == direction) {
+                thereIsObject = true;
+                break;
+            }
+        }
+
+        if (!thereIsObject) {
+            text = "FAILED";
+
+            pause = true;
+            startX = lineArr[direction];
+            startY = ((sh/2)+(sh/4));
+            objX = lineArr[direction];
+            objY = 0;
+
+            return;
+        }
+
         for (var n = 0; n < positionArr.length; n++) {
             var obj = positionArr[n];
 
