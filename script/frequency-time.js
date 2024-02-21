@@ -78,6 +78,7 @@ $(document).ready(function() {
     text = "";
     direction = -1;
     lineHeight = (sw);
+    perfectMargin = 0.01;
 
     pause = false;
     startX = 0;
@@ -163,7 +164,7 @@ $(document).ready(function() {
             else if (obj.direction == direction && 
                 distanceY <= (lineHeight)) {
                 obj.remove = true;
-                if (hit == 0) text = "PERFECT";
+                if (hit >= 0 && hit <= (0 + perfectMargin)) text = "PERFECT";
                 else if (hit < 0.25) text = "GREAT";
                 else if (hit < 0.75) text = "GOOD";
                 else text = "POOR";
@@ -278,6 +279,12 @@ var drawImage = function() {
     ctx.beginPath();
     ctx.moveTo(0, ((sh/2)+(sh/4))-(lineHeight*0.25));
     ctx.lineTo(sw, ((sh/2)+(sh/4))-(lineHeight*0.25));
+    ctx.stroke();
+
+    ctx.strokeStyle = "#555";
+    ctx.beginPath();
+    ctx.moveTo(0, ((sh/2)+(sh/4))-(lineHeight*(0+perfectMargin)));
+    ctx.lineTo(sw, ((sh/2)+(sh/4))-(lineHeight*(0+perfectMargin)));
     ctx.stroke();
 
     var y = (sh/2)+(sh/4);
