@@ -77,13 +77,15 @@ $(document).ready(function() {
 
     text = "";
     direction = -1;
-    lineHeight = sw;
+    lineHeight = (sw);
 
     pause = false;
     startX = 0;
     startY = 0;
     objX = 0;
     objY = 0;
+
+    hitCount = 0;
 
     pictureView.ontouchstart = function(e) {
         direction = Math.floor((e.touches[0].clientX)/(sw/4));
@@ -109,14 +111,40 @@ $(document).ready(function() {
             return;
         }
 
+        var distanceY0 = Math.abs(((sh/2)+(sh/4)) - positionArr[0].y);
+        var hit0 = (1/(lineHeight))*distanceY0;
+
+        console.log(" --- hit no: "+hitCount);
+        console.log("direction: "+direction);
+
+        console.log(" --- obj #0");
+        console.log("direction: "+positionArr[0].direction);
+        console.log("distance: "+distanceY0);
+        console.log("hit value: "+hit0);
+
+        var distanceY1 = Math.abs(((sh/2)+(sh/4)) - positionArr[1].y);
+        var hit1 = (1/(lineHeight))*distanceY1;
+
+        console.log(" --- obj #1");
+        console.log("direction: "+positionArr[1].direction);
+        console.log("distance: "+distanceY1);
+        console.log("hit value: "+hit1);
+
+        hitCount += 1;
+
         for (var n = 0; n < positionArr.length; n++) {
             var obj = positionArr[n];
 
             var distanceY = Math.abs(((sh/2)+(sh/4)) - obj.y);
             var hit = (1/(lineHeight))*distanceY;
 
-            if (obj.direction == direction)
-            console.log(distanceY, hit);
+            console.log("failed", 
+            (obj.direction == direction),
+            (distanceY > (lineHeight)));
+
+            console.log("accepted", 
+            (obj.direction == direction),
+            (distanceY <= (lineHeight)));
 
             if (obj.direction == direction && distanceY > (lineHeight)) {
                 //positionArr = [];
@@ -133,7 +161,7 @@ $(document).ready(function() {
                 break;
             }
             else if (obj.direction == direction && 
-                Math.abs(e.touches[0].clientY -obj.y) <= (lineHeight)) {
+                distanceY <= (lineHeight)) {
                 obj.remove = true;
                 if (hit == 0) text = "PERFECT";
                 else if (hit < 0.25) text = "GREAT";
@@ -160,45 +188,12 @@ $(document).ready(function() {
     animate();
 });
 
-var img_list = [
-    "img/picture-0.png",
-    "img/weight-0.png"
-];
-
-var imagesLoaded = false;
-var loadImages = function(callback) {
-    var count = 0;
-    for (var n = 0; n < img_list.length; n++) {
-        var img = document.createElement("img");
-        img.n = n;
-        img.onload = function() {
-            count += 1;
-            console.log("loading ("+count+"/"+img_list.length+")");
-            img_list[this.n] = this;
-            if (count == img_list.length) {
-                imagesLoaded = true;
-                //callback();
-            }
-        };
-        var rnd = Math.random();
-        img.src = img_list[n].includes("img") ? 
-        img_list[n]+"?f="+rnd : 
-        img_list[n];
-    }
-};
-
-var frequencyDirection = 0;
-var frequencyNo = 0;
-var lap = 0;
-
 var updateImage = true;
 
 var updateTime = 0;
 var renderTime = 0;
 var elapsedTime = 0;
 var animationSpeed = 0;
-
-var effectRatio = 0;
 
 var animate = function() {
     elapsedTime = new Date().getTime()-renderTime;
@@ -340,15 +335,6 @@ var drawImage = function() {
     ctx.fillText(text, (sw/2), (sh/4));
 };
 
-var getSquare = function(item) {
-    var width = item.naturalWidth ? 
-    item.naturalWidth : item.width;
-    var height = item.naturalHeight ? 
-    item.naturalHeight : item.height;
-
-    return width < height ? width : height;
-};
-
 var visibilityChange;
 if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
   visibilityChange = "visibilitychange";
@@ -361,11 +347,14 @@ if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and 
 
 var backgroundMode = false;
 document.addEventListener(visibilityChange, function(){
+    var currentTime = new Date().getTime();
     backgroundMode = !backgroundMode;
     if (backgroundMode) {
-        console.log("backgroundMode: "+backgroundMode);
+        console.log("backgroundMode: "+backgroundMode+" - "+
+        moment(currentTime).format("HH:mm SSS"));
     }
     else {
-        console.log("backgroundMode: "+backgroundMode);
+        console.log("backgroundMode: "+backgroundMode+" - "+
+        moment(currentTime).format("HH:mm SSS"));
     }
 }, false);
