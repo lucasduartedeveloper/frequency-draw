@@ -90,6 +90,41 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
+    textView = document.createElement("span");
+    textView.style.position = "absolute";
+    textView.style.display = "none";
+    textView.style.animationDuration = "1s";
+    textView.style.color = "#fff";
+    textView.innerText = "POOR";
+    textView.style.fontSize = "25px";
+    textView.style.lineHeight = "25px";
+    textView.style.textAlign = "center";
+    textView.style.left = ((sw/2)-125)+"px";
+    textView.style.top = ((sh/4)-12.5)+"px";
+    textView.style.width = (250)+"px";
+    textView.style.height = (25)+"px";
+    textView.style.zIndex = "15";
+    document.body.appendChild(textView);
+
+    textView.onanimationend = function() {
+        textView.className = "";
+    };
+
+    clearTextTimeout = 0;
+
+    showText = function(text) {
+        textView.innerText = text;
+
+        textView.style.display = "initial";
+        textView.className = 
+        "animate__animated animate__rubberBand";
+
+        clearTimeout(clearTextTimeout);
+        clearTextTimeout= setTimeout(function() {
+            textView.style.display = "none";
+        }, 2500);
+    };
+
     text = "";
     direction = -1;
     lineHeight = (swo/2);
@@ -102,8 +137,6 @@ $(document).ready(function() {
     objY = 0;
 
     hitCount = 0;
-
-    clearTextTimeout = 0;
 
     userInteracted = false;
 
@@ -205,7 +238,7 @@ $(document).ready(function() {
                 else if (hit < 0.75) text = "GOOD";
                 else text = "POOR";
 
-                //sfxPool.play("audio/"+(text.toLowercase())+".wav");
+                sfxPool.play("audio/sfx-"+(text.toLowerCase())+".wav");
                 //oscillator.frequency.value = (1-hit)*250;
 
                 switch (text) {
@@ -223,11 +256,7 @@ $(document).ready(function() {
                         break;
                 }
 
-                clearTimeout(clearTextTimeout);
-                clearTextTimeout= setTimeout(function() {
-                    text = "";
-                    oscillator.frequency.value = 0;
-                }, 2500);
+                showText(text);
 
                 //pause = true;
                 startX = lineArr[obj.direction];
@@ -422,12 +451,6 @@ var drawImage = function() {
     100+((swo/4)*3)-(swo/8), y, (swo/4)-5, colorArr[2], 2);
     drawButton(ctx, 
     100+((swo/4)*4)-(swo/8), y, (swo/4)-5, colorArr[3], 3);
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "25px sans serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(text, (sw/2), (sh/4));
 
     if (pause) {
         ctx.lineWidth = 1;
