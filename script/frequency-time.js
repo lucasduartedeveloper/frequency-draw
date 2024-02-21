@@ -92,7 +92,7 @@ $(document).ready(function() {
 
     text = "";
     direction = -1;
-    lineHeight = (swo/4);
+    lineHeight = (swo/2);
     perfectMargin = 0.01;
 
     pause = false;
@@ -112,6 +112,8 @@ $(document).ready(function() {
     greatCount = 0;
     perfectCount = 0;
 
+    buttonMap = [ 0, 1, 2, 3 ];
+
     pictureView.ontouchstart = function(e) {
         if (userInteracted && oscillator.paused) {
             oscillator.start();
@@ -120,7 +122,8 @@ $(document).ready(function() {
 
         if (e.touches[0].clientX < 100) return;
 
-        direction = Math.floor((e.touches[0].clientX-100)/(swo/4));
+        direction = 
+        buttonMap[Math.floor((e.touches[0].clientX-100)/(swo/4))];
 
         var thereIsObject = false;
         for (var n = 0; n < positionArr.length; n++) {
@@ -232,7 +235,7 @@ $(document).ready(function() {
                 objX = lineArr[obj.direction];
                 objY = obj.y;
 
-                audioStream.play();
+                //audioStream.play();
 
                 positionArr = positionArr.filter((o) => { return !o.remove; });
                 break;
