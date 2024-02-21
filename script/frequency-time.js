@@ -97,14 +97,18 @@ $(document).ready(function() {
             console.log(distanceY, hit);
 
             if (obj.direction == direction && distanceY > (sw/4)) {
-                positionArr = [];
+                //positionArr = [];
                 text = "FAILED";
+
+                obj.highlight = true;
 
                 pause = true;
                 startX = lineArr[obj.direction];
                 startY = ((sh/2)+(sh/4));
                 objX = lineArr[obj.direction];
                 objY = obj.y;
+
+                break;
             }
             else if (Math.abs(e.touches[0].clientY -obj.y) <= (sw/8)) {
                 obj.remove = true;
@@ -119,10 +123,9 @@ $(document).ready(function() {
                 objX = lineArr[obj.direction];
                 objY = obj.y;
 
+                positionArr = positionArr.filter((o) => { return !o.remove; });
                 break;
             }
-
-            positionArr = positionArr.filter((o) => { return !o.remove; });
         }
     };
 
@@ -182,7 +185,8 @@ var animate = function() {
             var obj = {
                 y: -(sw/8),
                 direction: dir,
-                remove: false
+                remove: false,
+                hightlight: false
             };
             positionArr.push(obj);
 
@@ -242,8 +246,24 @@ var drawImage = function() {
 
     for (var n = 0; n < positionArr.length; n++) {
         var obj = positionArr[n];
+
+        var distanceY = ((sh/2)+(sh/4)) - obj.y;
+        if (distanceY < -(sw/4)) {
+            text = "FAILED";
+
+            obj.highlight = true;
+
+            pause = true;
+            startX = lineArr[obj.direction];
+            startY = ((sh/2)+(sh/4));
+            objX = lineArr[obj.direction];
+            objY = obj.y;
+        }
+
         var x = lineArr[obj.direction];
-        drawButton(ctx, x, obj.y, (sw/4)-10, "#777", obj.direction);
+        var color = obj.highlight ? "#5f5" : "#777";
+        drawButton(ctx, x, obj.y, (sw/4)-10, color, obj.direction);
+
         obj.y += 1;
     }
 
