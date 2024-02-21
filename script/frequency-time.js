@@ -88,7 +88,16 @@ $(document).ready(function() {
 
     hitCount = 0;
 
+    clearTextTimeout = 0;
+
+    userInteracted = false;
+
     pictureView.ontouchstart = function(e) {
+        if (userInteracted && oscillator.paused) {
+            oscillator.start();
+            oscillator.paused = false;
+        }
+
         direction = Math.floor((e.touches[0].clientX)/(sw/4));
 
         var thereIsObject = false;
@@ -169,6 +178,15 @@ $(document).ready(function() {
                 else if (hit < 0.75) text = "GOOD";
                 else text = "POOR";
 
+                //sfxPool.play("audio/"+(text.toLowercase())+".wav");
+                oscillator.frequency.value = (1-hit)*50;
+
+                clearTimeout(clearTextTimeout);
+                clearTextTimeout= setTimeout(function() {
+                    text = "";
+                    oscillator.frequency.value = 0;
+                }, 2500);
+
                 //pause = true;
                 startX = lineArr[obj.direction];
                 startY = ((sh/2)+(sh/4));
@@ -181,8 +199,13 @@ $(document).ready(function() {
         }
     };
 
+    oscillator = createOscillator();
+    oscillator.paused = true;
+    oscillator.volume.gain.value = 1;
+
     pictureView.ontouchend = function(e) {
         direction = -1;
+        userInteracted = true;
     };
 
     drawImage();
