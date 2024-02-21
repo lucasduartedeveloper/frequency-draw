@@ -95,7 +95,6 @@ $(document).ready(function() {
     textView.style.display = "none";
     textView.style.animationDuration = "1s";
     textView.style.color = "#fff";
-    textView.innerText = "POOR";
     textView.style.fontSize = "25px";
     textView.style.lineHeight = "25px";
     textView.style.textAlign = "center";
@@ -108,6 +107,7 @@ $(document).ready(function() {
 
     textView.onanimationend = function() {
         textView.className = "";
+        textView.innerText = "";
     };
 
     clearTextTimeout = 0;
@@ -217,6 +217,9 @@ $(document).ready(function() {
             if (obj.direction == direction && distanceY > (lineHeight)) {
                 //positionArr = [];
                 text = "FAILED";
+
+                textView.innerText = text;
+                textView.style.display = "initial";
 
                 obj.highlight = true;
 
@@ -418,6 +421,9 @@ var drawImage = function() {
         var distanceY = ((sh/2)+(sh/4)) - obj.y;
         if (distanceY < -(sw/4)) {
             text = "FAILED";
+
+            textView.innerText = text;
+            textView.style.display = "initial";
 
             obj.highlight = true;
 
