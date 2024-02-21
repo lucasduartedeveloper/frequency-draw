@@ -77,6 +77,7 @@ $(document).ready(function() {
 
     text = "";
     direction = -1;
+    lineHeight = sw;
 
     pause = false;
     startX = 0;
@@ -112,12 +113,12 @@ $(document).ready(function() {
             var obj = positionArr[n];
 
             var distanceY = Math.abs(((sh/2)+(sh/4)) - obj.y);
-            var hit = (1/(sw/4))*distanceY;
+            var hit = (1/(lineHeight))*distanceY;
 
             if (obj.direction == direction)
             console.log(distanceY, hit);
 
-            if (obj.direction == direction && distanceY > (sw/4)) {
+            if (obj.direction == direction && distanceY > (lineHeight)) {
                 //positionArr = [];
                 text = "FAILED";
 
@@ -131,11 +132,12 @@ $(document).ready(function() {
 
                 break;
             }
-            else if (Math.abs(e.touches[0].clientY -obj.y) <= (sw/8)) {
+            else if (obj.direction == direction && 
+                Math.abs(e.touches[0].clientY -obj.y) <= (lineHeight)) {
                 obj.remove = true;
                 if (hit == 0) text = "PERFECT";
-                if (hit < 0.25) text = "GREAT";
-                if (hit < 0.75) text = "GOOD";
+                else if (hit < 0.25) text = "GREAT";
+                else if (hit < 0.75) text = "GOOD";
                 else text = "POOR";
 
                 //pause = true;
@@ -262,6 +264,26 @@ var drawImage = function() {
 
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, sw, sh);
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#5f5";
+
+    ctx.beginPath();
+    ctx.moveTo(0, ((sh/2)+(sh/4))-(lineHeight));
+    ctx.lineTo(sw, ((sh/2)+(sh/4))-(lineHeight));
+    ctx.stroke();
+
+    ctx.strokeStyle = "#ff5";
+    ctx.beginPath();
+    ctx.moveTo(0, ((sh/2)+(sh/4))-(lineHeight*0.75));
+    ctx.lineTo(sw, ((sh/2)+(sh/4))-(lineHeight*0.75));
+    ctx.stroke();
+
+    ctx.strokeStyle = "#55f";
+    ctx.beginPath();
+    ctx.moveTo(0, ((sh/2)+(sh/4))-(lineHeight*0.25));
+    ctx.lineTo(sw, ((sh/2)+(sh/4))-(lineHeight*0.25));
+    ctx.stroke();
 
     var y = (sh/2)+(sh/4);
 
