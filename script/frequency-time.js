@@ -91,6 +91,7 @@ $(document).ready(function() {
     document.body.appendChild(pictureView);
 
     textView = document.createElement("span");
+    textView.style.objectFit = "cover";
     textView.style.position = "absolute";
     textView.style.display = "none";
     textView.style.animationDuration = "1s";
@@ -99,9 +100,9 @@ $(document).ready(function() {
     textView.style.lineHeight = "25px";
     textView.style.textAlign = "center";
     textView.style.left = ((sw/2)-125)+"px";
-    textView.style.top = ((sh/4)-12.5)+"px";
+    textView.style.top = ((sh/4)-25)+"px";
     textView.style.width = (250)+"px";
-    textView.style.height = (25)+"px";
+    textView.style.height = (50)+"px";
     textView.style.zIndex = "15";
     document.body.appendChild(textView);
 
@@ -114,6 +115,7 @@ $(document).ready(function() {
 
     showText = function(text) {
         textView.innerText = text;
+        //textView.src = "img/sfx-"+(text.toLowerCase())+".png";
 
         textView.style.display = "initial";
         textView.className = 
