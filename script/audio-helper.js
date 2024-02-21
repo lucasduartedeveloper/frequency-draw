@@ -192,19 +192,24 @@ var createOscillator = function() {
     volume.gain.value = 0.1;
 
     var delay = audioCtx.createDelay(5);
-    delay.connect(audioCtx.destination);
+    //delay.connect(audioCtx.destination);
 
     var biquadFilter = audioCtx.createBiquadFilter();
     biquadFilter.type = "lowpass";
     biquadFilter.frequency.value = 100;
-    biquadFilter.connect(delay);
+    biquadFilter.connect(audioCtx.destination);
 
-    volume.connect(biquadFilter);
+    // Create a stereo panner
+    var panNode = audioCtx.createStereoPanner();
+    panNode.connect(biquadFilter);
+
+    volume.connect(panNode);
 
     oscillator.type = "square"; //"sine";
     oscillator.frequency.value = 0; // value in hertz
     oscillator.connect(volume);
     oscillator.volume = volume;
+    oscillator.panNode = panNode;
     //oscillator.connect(audioCtx.destination);
 
     return oscillator;

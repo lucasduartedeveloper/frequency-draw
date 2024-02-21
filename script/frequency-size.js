@@ -67,11 +67,11 @@ $(document).ready(function() {
     pictureView.style.position = "absolute";
     //pictureView.style.background = "#fff";
     pictureView.width = (sw);
-    pictureView.height = (sh); 
+    pictureView.height = (539); 
     pictureView.style.left = (0)+"px";
     pictureView.style.top = (0)+"px";
     pictureView.style.width = (sw)+"px";
-    pictureView.style.height = (sh)+"px";
+    pictureView.style.height = (539)+"px";
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
@@ -83,10 +83,14 @@ $(document).ready(function() {
             else
             stopCamera();
 
-            if (cameraOn)
-            oscillator.stop();
-            else
-            oscillator.start();
+            if (cameraOn) {
+                leftOscillator.stop();
+                rightOscillator.stop();
+            }
+            else {
+                leftOscillator.start();
+                rightOscillator.start();
+            }
         }
         else {
             userInteracted = true;
@@ -113,7 +117,7 @@ $(document).ready(function() {
         ratioView.innerText = imageRatio+"x/"+divide;
     };
 
-    imageRatio = 1;
+    imageRatio = 16;
     ratioView = document.createElement("button");
     ratioView.style.position = "absolute";
     ratioView.style.userSelect = "none";
@@ -173,45 +177,8 @@ $(document).ready(function() {
     document.body.appendChild(downloadView);
 
     downloadView.onclick = function() {
-        var resolutionCanvas;
-        if (imagesLoaded && ! cameraOn) {
-            var image = img_list[0];
-            var size = {
-                width: image.naturalWidth,
-                height: image.naturalHeight
-            };
-
-            var resolutionCanvas = document.createElement("canvas");
-            resolutionCanvas.width = (size.width/imageRatio);
-            resolutionCanvas.height = (size.height/imageRatio);
-
-            var resolutionCtx = resolutionCanvas.getContext("2d");
-            resolutionCtx.imageSmoothingEnabled = false;
-
-            resolutionCtx.drawImage(image, 
-            0, 0, (size.width/imageRatio), (size.height/imageRatio));
-        }
-
-        if (cameraOn) {
-            var image = camera;
-            var size = {
-                width: vw,
-                height: vh
-            };
-
-            var resolutionCanvas = document.createElement("canvas");
-            resolutionCanvas.width = (size.width/imageRatio);
-            resolutionCanvas.height = (size.height/imageRatio);
-
-            var resolutionCtx = resolutionCanvas.getContext("2d");
-            resolutionCtx.imageSmoothingEnabled = false;
-
-            resolutionCtx.drawImage(image, 
-            0, 0, (size.width/imageRatio), (size.height/imageRatio));
-        }
-
         var name = "download.png";
-        var url = resolutionCanvas.toDataURL();
+        var url = pictureView.toDataURL();
         var a = document.createElement("a");
         a.style.display = "none";
         a.href = url;
@@ -224,15 +191,34 @@ $(document).ready(function() {
         }, 100);
     };
 
-    oscillator = createOscillator();
-    oscillator.volume.gain.value = 1;
-    oscillator.frequency.value = 0;
+    leftOscillator = createOscillator();
+    leftOscillator.panNode.pan.value = -1;
+    leftOscillator.volume.gain.value = 1;
+    leftOscillator.frequency.value = 0;
+
+    rightOscillator = createOscillator();
+    rightOscillator.panNode.pan.value = 1;
+    rightOscillator.volume.gain.value = 1;
+    rightOscillator.frequency.value = 0;
 
     loadImages();
 
-    motion = true;
+    virtualAcc = 0;
+
+    motion = false;
     gyroUpdated = function(e) {
-        oscillator.frequency.value = 50+((1/9.8)*e.accX)*50
+        var accX = Math.abs(e.accX);
+        var accY = Math.abs(e.accY);
+        var accZ = Math.abs(e.accZ);
+
+        var acc = (accX+accY+accZ);
+
+        virtualAcc += e.accX;
+        virtualAcc = virtualAcc < 0 ? 0 : virtualAcc;
+        //console.log(virtualAcc);
+
+        leftOscillator.frequency.value = ((1/9.8)*e.accX)*50;
+        rightOscillator.frequency.value = ((1/9.8)*-e.accX)*50;
     };
 
     sh = 539;
@@ -285,12 +271,31 @@ var animationSpeed = 0;
 
 var effectRatio = 0;
 
+var angle = 0;
+
 var animate = function() {
     elapsedTime = new Date().getTime()-renderTime;
     if (!backgroundMode) {
         if ((new Date().getTime() - updateTime) > 1000) {
             updateTime = new Date().getTime();
         }
+
+        var c = {
+            x: 0,
+            y: 1
+        };
+        var p = {
+            x: -1,
+            y: 1
+        };
+        var rp0 = _rotate2d(c, p, angle);
+        var rp1 = _rotate2d(c, p, angle-180);
+
+        //console.log(rp.y);
+        leftOscillator.frequency.value = 10+(rp0.y*100);
+        //rightOscillator.frequency.value = 10+(rp1.y*100);
+
+        angle -= 5;
 
         drawImage();
     }
@@ -437,6 +442,10 @@ var getHeight = function(item) {
     var r1 = (height/width);
 
     return width < height ? width*r0 : height;
+};
+
+var setColorDistance = function(canvas) {
+    
 };
 
 var visibilityChange;
