@@ -165,7 +165,7 @@ $(document).ready(function() {
 
     text = "";
     direction = -1;
-    lineHeight = (swo/2);
+    lineHeight = (swo);
     perfectMargin = 0.01;
 
     pause = false;
@@ -328,6 +328,12 @@ $(document).ready(function() {
 
                 textView.innerText = text;
                 textView.style.display = "initial";
+
+                doubleHit = false;
+
+                setTimeout(function() {
+                    restartView.style.display = "initial";
+                }, 1000);
             }, 3500);
         }
     };
@@ -381,10 +387,12 @@ var renderTime = 0;
 var elapsedTime = 0;
 var animationSpeed = 0;
 
+var resetTme = 2500;
+
 var animate = function() {
     elapsedTime = new Date().getTime()-renderTime;
     if (!backgroundMode) {
-        if ((new Date().getTime() - updateTime) > 2500) {
+        if ((new Date().getTime() - updateTime) > resetTme) {
             var dir = Math.floor(Math.random()*4);
             var obj = {
                 y: Math.floor(-(sw/8)),
@@ -395,6 +403,7 @@ var animate = function() {
             positionArr.push(obj);
 
             updateTime = new Date().getTime();
+            resetTme = 1000+Math.floor(Math.random()*1500);
         }
 
         drawImage();
