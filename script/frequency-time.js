@@ -150,6 +150,8 @@ $(document).ready(function() {
 
     buttonMap = [ 0, 1, 2, 3 ];
 
+    lastHit = 0;
+
     pictureView.ontouchstart = function(e) {
         if (userInteracted && oscillator.paused) {
             oscillator.start();
@@ -245,6 +247,10 @@ $(document).ready(function() {
             else if (obj.direction == direction && 
                 distanceY <= (lineHeight)) {
                 obj.remove = true;
+
+                text = "";
+                textNo = 0;
+
                 if (hit >= 0 && hit <= (0 + perfectMargin)) text = "PERFECT";
                 else if (hit < 0.25) text = "GREAT";
                 else if (hit < 0.75) text = "GOOD";
@@ -281,6 +287,22 @@ $(document).ready(function() {
                 positionArr = positionArr.filter((o) => { return !o.remove; });
                 break;
             }
+        }
+
+        if (hitCount == 10) {
+            positionArr = [];
+            pause = true;
+
+            setTimeout(function() { 
+                var result = (1/40)*
+                (poorCount+(goodCount*2)+
+                (greatCount*3)+(perfectCount*4));
+
+                text = "RESULT: " + (result*100).toFixed(2) + "%";
+
+                textView.innerText = text;
+                textView.style.display = "initial";
+            }, 3500);
         }
     };
 
@@ -453,10 +475,10 @@ var drawImage = function() {
     }
 
     var colorArr = [
-        direction == 0 ? "#fff" : "#555",
-        direction == 1 ? "#fff" : "#555",
-        direction == 2 ? "#fff" : "#555",
-        direction == 3 ? "#fff" : "#555"
+        direction == 0 ? "#fff" : "#aaa",
+        direction == 1 ? "#fff" : "#aaa",
+        direction == 2 ? "#fff" : "#aaa",
+        direction == 3 ? "#fff" : "#aaa"
     ];
 
     drawButton(ctx, 100+(swo/4)-(swo/8), y, (swo/4)-5, colorArr[0], 0);
