@@ -163,6 +163,29 @@ $(document).ready(function() {
         animate();
     };
 
+    pauseView = document.createElement("span");
+    pauseView.style.position = "absolute";
+    pauseView.style.userSelect = "none";
+    pauseView.innerText = "PAUSE";
+    pauseView.style.objectFit = "cover";
+    pauseView.style.animationDuration = "1s";
+    pauseView.style.color = "#fff";
+    pauseView.style.fontWeight = "900";
+    pauseView.style.fontSize = "25px";
+    pauseView.style.lineHeight = "25px";
+    pauseView.style.textAlign = "center";
+    pauseView.style.left = (10)+"px";
+    pauseView.style.top = (sh-60)+"px";
+    pauseView.style.width = (100)+"px";
+    pauseView.style.height = (50)+"px";
+    pauseView.style.zIndex = "15";
+    document.body.appendChild(pauseView);
+
+    pauseView.onclick = function() {
+       if (!pause) pause = true;
+       else { pause = false; animate(); }
+    };
+
     text = "";
     direction = -1;
     lineHeight = (swo);
@@ -187,6 +210,10 @@ $(document).ready(function() {
 
     lastHit = 0;
     doubleHit = false;
+    tripleHit = false;
+    quadraHit = false;
+
+    predictedHit = 0;
 
     pictureView.ontouchstart = function(e) {
         if (userInteracted && oscillator.paused) {
@@ -280,25 +307,32 @@ $(document).ready(function() {
 
                 switch (text) {
                     case "POOR":
-                        lastHit = 0;
+                        if (!doubleHit) lastHit = 0;
                         poorCount += (doubleHit ? 2 : 1);
                         break;
                     case "GOOD":
-                        lastHit = 1;
+                        if (!doubleHit) lastHit = 1;
                         goodCount += (doubleHit ? 2 : 1);
                         break;
                     case "GREAT":
-                        lastHit = 2;
+                        if (!doubleHit) lastHit = 2;
                         greatCount += (doubleHit ? 2 : 1);
                         break;
                     case "PERFECT":
-                        lastHit = 3;
+                        if (!doubleHit) lastHit = 3;
                         perfectCount += (doubleHit ? 2 : 1);
                         break;
                 }
 
-                showText((doubleHit ? "DOUBLE " : "") + text);
+                var suffix = "";
+                if (doubleHit) suffix = "DOUBLE ";
+                if (tripleHit) suffix = "TRIPLE ";
+                if (quadraHit) suffix = "QUADRA ";
+
+                showText(suffix + text);
                 doubleHit = false;
+                tripleHit = false;
+                quadraHit = false;
 
                 //pause = true;
                 startX = lineArr[obj.direction];
@@ -310,7 +344,9 @@ $(document).ready(function() {
 
                 positionArr = positionArr.filter((o) => { return !o.remove; });
 
-                if (n == 1) doubleHit = true;
+                if (n == 3) quadraHit = true;
+                else if (n == 2) tripleHit = true;
+                else if (n == 1) doubleHit = true;
                 break;
             }
         }
@@ -324,7 +360,13 @@ $(document).ready(function() {
                 (poorCount+(goodCount*2)+
                 (greatCount*3)+(perfectCount*4));
 
-                text = "RESULT: " + (result*100).toFixed(2) + "%";
+                text = "RESULT: "; //(result*100).toFixed(2) + "%";
+
+                var hit = (1-result);
+                if (hit >= 0 && hit <= (0 + perfectMargin)) text += "PERFECT";
+                else if (hit < 0.25) text += "GREAT";
+                else if (hit < 0.75) text += "GOOD";
+                else text += "POOR";
 
                 textView.innerText = text;
                 textView.style.display = "initial";
