@@ -96,6 +96,7 @@ $(document).ready(function() {
     textView.style.display = "none";
     textView.style.animationDuration = "1s";
     textView.style.color = "#fff";
+    textView.style.fontWeight = "900";
     textView.style.fontSize = "25px";
     textView.style.lineHeight = "25px";
     textView.style.textAlign = "center";
@@ -115,7 +116,7 @@ $(document).ready(function() {
 
     showText = function(text) {
         textView.innerText = text;
-        //textView.src = "img/sfx-"+(text.toLowerCase())+".png";
+        //textView.src = "img/fx-"+(text.toLowerCase())+".png";
 
         textView.style.display = "initial";
         textView.className = 
@@ -181,31 +182,37 @@ $(document).ready(function() {
             return;
         }
 
-        var distanceY0 = Math.abs(((sh/2)+(sh/4)) - positionArr[0].y);
-        var hit0 = (1/(lineHeight))*distanceY0;
+        if (positionArr.length > 0) {
+            var distanceY0 = Math.abs(((sh/2)+(sh/4)) - positionArr[0].y);
+            var hit0 = (1/(lineHeight))*distanceY0;
 
-        console.log(" --- hit no: "+hitCount);
-        console.log("direction: "+direction);
+            console.log(" --- hit no: "+hitCount);
+            console.log("direction: "+direction);
 
-        console.log(" --- obj #0");
-        console.log("direction: "+positionArr[0].direction);
-        console.log("distance: "+distanceY0);
-        console.log("hit value: "+hit0);
+            console.log(" --- obj #0");
+            console.log("direction: "+positionArr[0].direction);
+            console.log("distance: "+distanceY0);
+            console.log("hit value: "+hit0);
+        }
 
-        var distanceY1 = Math.abs(((sh/2)+(sh/4)) - positionArr[1].y);
-        var hit1 = (1/(lineHeight))*distanceY1;
+        if (positionArr.length > 1) {
+            var distanceY1 = Math.abs(((sh/2)+(sh/4)) - positionArr[1].y);
+            var hit1 = (1/(lineHeight))*distanceY1;
 
-        console.log(" --- obj #1");
-        console.log("direction: "+positionArr[1].direction);
-        console.log("distance: "+distanceY1);
-        console.log("hit value: "+hit1);
+            console.log(" --- obj #1");
+            console.log("direction: "+positionArr[1].direction);
+            console.log("distance: "+distanceY1);
+            console.log("hit value: "+hit1);
 
-        hitCount += 1;
+            hitCount += 1;
+        }
 
         for (var n = 0; n < positionArr.length; n++) {
             var obj = positionArr[n];
 
-            var distanceY = Math.abs(((sh/2)+(sh/4)) - obj.y);
+            var setLine = Math.floor((sh/2)+(sh/4));
+
+            var distanceY = Math.abs(setLine - obj.y);
             var hit = (1/(lineHeight))*distanceY;
 
             console.log("failed", 
@@ -303,7 +310,7 @@ var animate = function() {
         if ((new Date().getTime() - updateTime) > 2500) {
             var dir = Math.floor(Math.random()*4);
             var obj = {
-                y: -(sw/8),
+                y: Math.floor(-(sw/8)),
                 direction: dir,
                 remove: false,
                 hightlight: false
