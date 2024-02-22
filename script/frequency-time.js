@@ -206,7 +206,7 @@ $(document).ready(function() {
     greatCount = 0;
     perfectCount = 0;
 
-    buttonMap = [ 0, 1, 2, 3 ];
+    buttonMap = [ 0, 1, 2, 3, 4 ];
 
     lastHit = 0;
     doubleHit = false;
@@ -224,7 +224,7 @@ $(document).ready(function() {
         if (e.touches[0].clientX < 100) return;
 
         direction = 
-        buttonMap[Math.floor((e.touches[0].clientX-100)/(swo/4))];
+        buttonMap[Math.floor((e.touches[0].clientX-100)/(swo/5))];
 
         var thereIsObject = false;
         for (var n = 0; n < positionArr.length; n++) {
@@ -297,9 +297,6 @@ $(document).ready(function() {
                 else if (hit < 0.75) text = "GOOD";
                 else text = "POOR";
 
-                sfxPool.play("audio/sfx-"+(text.toLowerCase())+".wav");
-                //oscillator.frequency.value = (1-hit)*250;
-
                 if (doubleHit && lastHit == 0) poorCount -= 1;
                 if (doubleHit && lastHit == 1) goodCount -= 1;
                 if (doubleHit && lastHit == 2) greatCount -= 1;
@@ -341,6 +338,16 @@ $(document).ready(function() {
                 if (n == 0 && predictedHit == 2) suffix = "TRIPLE ";
                 if (n == 0 && predictedHit == 3) suffix = "QUADRA ";
 
+                if (n == 0 && predictedHit > 0) {
+                    sfxPool.play(
+                    "audio/sfx-"+(suffix.toLowerCase().trimEnd())+".wav", 
+                    function() {
+                        sfxPool.play("audio/sfx-"+(text.toLowerCase())+".wav");
+                    });
+                }
+                else sfxPool.play("audio/sfx-"+(text.toLowerCase())+".wav");
+                //oscillator.frequency.value = (1-hit)*250;
+
                 showText(suffix + text);
                 doubleHit = false;
                 tripleHit = false;
@@ -362,7 +369,7 @@ $(document).ready(function() {
             }
         }
 
-        if ((poorCount+goodCount+greatCount+perfectCount) == 10) {
+        if ((poorCount+goodCount+greatCount+perfectCount) == 50) {
             positionArr = [];
             pause = true;
 
@@ -472,12 +479,13 @@ var animate = function() {
 
 var positionArr = [];
 
-var directionArr = [  -90, 0, -270, -180 ];
+var directionArr = [  -72, 0, -288, -216, -144 ];
 var lineArr = [ 
-    (swo/4)-(swo/8), 
-    ((swo/4)*2)-(swo/8), 
-    ((swo/4)*3)-(swo/8), 
-    ((swo/4)*4)-(swo/8) 
+    (swo/5)-(swo/10), 
+    ((swo/5)*2)-(swo/10), 
+    ((swo/5)*3)-(swo/10), 
+    ((swo/5)*4)-(swo/10),
+    ((swo/5)*5)-(swo/10), 
 ];
 
 var drawButton = function(ctx, x, y, size, color, direction) {
@@ -495,6 +503,11 @@ var drawButton = function(ctx, x, y, size, color, direction) {
     ctx.lineTo(0, -(size/3));
     ctx.lineTo((size/4), -(size/10));
     ctx.stroke();
+
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(x, y);
 
     ctx.beginPath();
     ctx.roundRect(-(size/2), -(size/2), size, size, (size/10));
@@ -573,7 +586,7 @@ var drawImage = function() {
 
         var x = lineArr[obj.direction];
         var color = obj.highlight ? "#5f5" : "#777";
-        drawButton(ctx, 100+x, obj.y, (swo/4)-10, color, obj.direction);
+        drawButton(ctx, 100+x, obj.y, (swo/5)-10, color, obj.direction);
 
         obj.y += 1;
     }
@@ -585,13 +598,15 @@ var drawImage = function() {
         direction == 3 ? "#fff" : "#aaa"
     ];
 
-    drawButton(ctx, 100+(swo/4)-(swo/8), y, (swo/4)-5, colorArr[0], 0);
+    drawButton(ctx, 100+(swo/5)-(swo/10), y, (swo/5)-5, colorArr[0], 0);
     drawButton(ctx, 
-    100+((swo/4)*2)-(swo/8), y, (swo/4)-5, colorArr[1], 1);
+    100+((swo/5)*2)-(swo/10), y, (swo/5)-5, colorArr[1], 1);
     drawButton(ctx, 
-    100+((swo/4)*3)-(swo/8), y, (swo/4)-5, colorArr[2], 2);
+    100+((swo/5)*3)-(swo/10), y, (swo/5)-5, colorArr[2], 2);
     drawButton(ctx, 
-    100+((swo/4)*4)-(swo/8), y, (swo/4)-5, colorArr[3], 3);
+    100+((swo/5)*4)-(swo/10), y, (swo/5)-5, colorArr[3], 3);
+    drawButton(ctx, 
+    100+((swo/5)*5)-(swo/10), y, (swo/5)-5, colorArr[0], 4);
 
     if (pause) {
         ctx.lineWidth = 1;
