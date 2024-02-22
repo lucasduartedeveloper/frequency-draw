@@ -374,7 +374,7 @@ $(document).ready(function() {
             pause = true;
 
             setTimeout(function() { 
-                var result = (1/40)*
+                var result = (1/200)*
                 (poorCount+(goodCount*2)+
                 (greatCount*3)+(perfectCount*4));
 
