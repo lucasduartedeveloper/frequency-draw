@@ -186,6 +186,7 @@ $(document).ready(function() {
     buttonMap = [ 0, 1, 2, 3 ];
 
     lastHit = 0;
+    doubleHit = false;
 
     pictureView.ontouchstart = function(e) {
         if (userInteracted && oscillator.paused) {
@@ -272,22 +273,32 @@ $(document).ready(function() {
                 sfxPool.play("audio/sfx-"+(text.toLowerCase())+".wav");
                 //oscillator.frequency.value = (1-hit)*250;
 
+                if (doubleHit && lastHit == 0) poorCount -= 1;
+                if (doubleHit && lastHit == 1) goodCount -= 1;
+                if (doubleHit && lastHit == 2) greatCount -= 1;
+                if (doubleHit && lastHit == 3) perfectCount -= 1;
+
                 switch (text) {
                     case "POOR":
-                        poorCount += 1;
+                        lastHit = 0;
+                        poorCount += (doubleHit ? 2 : 1);
                         break;
                     case "GOOD":
-                        goodCount += 1;
+                        lastHit = 1;
+                        goodCount += (doubleHit ? 2 : 1);
                         break;
                     case "GREAT":
-                        greatCount += 1;
+                        lastHit = 2;
+                        greatCount += (doubleHit ? 2 : 1);
                         break;
                     case "PERFECT":
-                        perfectCount += 1;
+                        lastHit = 3;
+                        perfectCount += (doubleHit ? 2 : 1);
                         break;
                 }
 
-                showText(text);
+                showText((doubleHit ? "DOUBLE " : "") + text);
+                doubleHit = false;
 
                 //pause = true;
                 startX = lineArr[obj.direction];
@@ -298,6 +309,8 @@ $(document).ready(function() {
                 //audioStream.play();
 
                 positionArr = positionArr.filter((o) => { return !o.remove; });
+
+                if (n == 1) doubleHit = true;
                 break;
             }
         }
