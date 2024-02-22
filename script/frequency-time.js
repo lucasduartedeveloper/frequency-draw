@@ -208,16 +208,7 @@ $(document).ready(function() {
         }
 
         if (!thereIsObject) {
-            text = "FAILED";
-
-            pause = true;
-            startX = lineArr[direction];
-            startY = ((sh/2)+(sh/4));
-            objX = lineArr[direction];
-            objY = 0;
-
-            restartView.style.display = "initial";
-
+            failed();
             return;
         }
 
@@ -263,24 +254,7 @@ $(document).ready(function() {
             (distanceY <= (lineHeight)));
 
             if (obj.direction == direction && distanceY > (lineHeight)) {
-                //positionArr = [];
-                text = "FAILED";
-
-                textView.innerText = text;
-                textView.style.display = "initial";
-
-                obj.highlight = true;
-
-                pause = true;
-                startX = lineArr[obj.direction];
-                startY = ((sh/2)+(sh/4));
-                objX = lineArr[obj.direction];
-                objY = obj.y; 
-
-                audioStream.pause();
-
-                restartView.style.display = "initial";
-
+                failed(obj);
                 break;
             }
             else if (obj.direction == direction && 
@@ -357,6 +331,35 @@ $(document).ready(function() {
     drawImage();
     animate();
 });
+
+var failed = function(obj=false) {
+    text = "FAILED";
+
+    textView.innerText = text;
+    textView.style.display = "initial";
+
+    obj.highlight = true;
+
+    pause = true;
+    if (obj) {
+        startX = lineArr[obj.direction];
+        startY = ((sh/2)+(sh/4));
+        objX = lineArr[obj.direction];
+        objY = obj.y; 
+    }
+    else {
+        startX = lineArr[direction];
+        startY = ((sh/2)+(sh/4));
+        objX = lineArr[direction];
+        objY = 0;
+    }
+
+    audioStream.pause();
+
+    setTimeout(function() {
+        restartView.style.display = "initial";
+    }, 1000);
+};
 
 var updateImage = true;
 
@@ -490,22 +493,7 @@ var drawImage = function() {
 
         var distanceY = ((sh/2)+(sh/4)) - obj.y;
         if (distanceY < -(sw/4)) {
-            text = "FAILED";
-
-            textView.innerText = text;
-            textView.style.display = "initial";
-
-            obj.highlight = true;
-
-            pause = true;
-            startX = lineArr[obj.direction];
-            startY = ((sh/2)+(sh/4));
-            objX = lineArr[obj.direction];
-            objY = obj.y;
-
-            audioStream.pause();
-
-            restartView.style.display = "initial";
+            failed(obj)
         }
 
         var x = lineArr[obj.direction];
