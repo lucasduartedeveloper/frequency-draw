@@ -307,27 +307,39 @@ $(document).ready(function() {
 
                 switch (text) {
                     case "POOR":
-                        if (!doubleHit) lastHit = 0;
-                        poorCount += (doubleHit ? 2 : 1);
+                        if (predictedHit == 0) lastHit = 0;
+                        if (n == 0 && predictedHit > 0)
+                        poorCount += (predictedHit+1);
+                        else if (n == 0 && predictedHit == 0)
+                        poorCount += 1;
                         break;
                     case "GOOD":
-                        if (!doubleHit) lastHit = 1;
-                        goodCount += (doubleHit ? 2 : 1);
+                        if (predictedHit == 0) lastHit = 1;
+                        if (n == 0 && predictedHit > 0)
+                        goodCount += (predictedHit+1);
+                        else if (n == 0 && predictedHit == 0)
+                        goodCount += 1;
                         break;
                     case "GREAT":
-                        if (!doubleHit) lastHit = 2;
-                        greatCount += (doubleHit ? 2 : 1);
+                        if (predictedHit == 0) lastHit = 2;
+                        if (n == 0 && predictedHit > 0)
+                        greatCount += (predictedHit+1);
+                        else if (n == 0 && predictedHit == 0)
+                        greatCount += 1;
                         break;
                     case "PERFECT":
-                        if (!doubleHit) lastHit = 3;
-                        perfectCount += (doubleHit ? 2 : 1);
+                        if (predictedHit == 0) lastHit = 3;
+                        if (n == 0 && predictedHit > 0)
+                        perfectCount += (predictedHit+1);
+                        else if (n == 0 && predictedHit == 0)
+                        perfectCount += 1;
                         break;
                 }
 
                 var suffix = "";
-                if (doubleHit) suffix = "DOUBLE ";
-                if (tripleHit) suffix = "TRIPLE ";
-                if (quadraHit) suffix = "QUADRA ";
+                if (n == 0 && predictedHit == 1) suffix = "DOUBLE ";
+                if (n == 0 && predictedHit == 2) suffix = "TRIPLE ";
+                if (n == 0 && predictedHit == 3) suffix = "QUADRA ";
 
                 showText(suffix + text);
                 doubleHit = false;
@@ -344,14 +356,13 @@ $(document).ready(function() {
 
                 positionArr = positionArr.filter((o) => { return !o.remove; });
 
-                if (n == 3) quadraHit = true;
-                else if (n == 2) tripleHit = true;
-                else if (n == 1) doubleHit = true;
+                if (n == 0 && predictedHit > 0) predictedHit = 0;
+                else if (predictedHit == 0) predictedHit = n;
                 break;
             }
         }
 
-        if (hitCount == 10) {
+        if ((poorCount+goodCount+greatCount+perfectCount) == 10) {
             positionArr = [];
             pause = true;
 
