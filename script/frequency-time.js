@@ -206,7 +206,7 @@ $(document).ready(function() {
     greatCount = 0;
     perfectCount = 0;
 
-    buttonMap = [ 0, 1, 2, 3, 4 ];
+    buttonMap = [ 0, 1, 2, 3 ];
 
     lastHit = 0;
     doubleHit = false;
@@ -224,7 +224,7 @@ $(document).ready(function() {
         if (e.touches[0].clientX < 100) return;
 
         direction = 
-        buttonMap[Math.floor((e.touches[0].clientX-100)/(swo/5))];
+        buttonMap[Math.floor((e.touches[0].clientX-100)/(swo/4))];
 
         var thereIsObject = false;
         for (var n = 0; n < positionArr.length; n++) {
@@ -479,13 +479,12 @@ var animate = function() {
 
 var positionArr = [];
 
-var directionArr = [  -72, 0, -288, -216, -144 ];
+var directionArr = [  -90, 0, -270, -180 ];
 var lineArr = [ 
-    (swo/5)-(swo/10), 
-    ((swo/5)*2)-(swo/10), 
-    ((swo/5)*3)-(swo/10), 
-    ((swo/5)*4)-(swo/10),
-    ((swo/5)*5)-(swo/10), 
+    (swo/4)-(swo/8), 
+    ((swo/4)*2)-(swo/8), 
+    ((swo/4)*3)-(swo/8), 
+    ((swo/4)*4)-(swo/8)
 ];
 
 var drawButton = function(ctx, x, y, size, color, direction) {
@@ -586,7 +585,7 @@ var drawImage = function() {
 
         var x = lineArr[obj.direction];
         var color = obj.highlight ? "#5f5" : "#777";
-        drawButton(ctx, 100+x, obj.y, (swo/5)-10, color, obj.direction);
+        drawButton(ctx, 100+x, obj.y, (swo/4)-10, color, obj.direction);
 
         obj.y += 1;
     }
@@ -598,15 +597,13 @@ var drawImage = function() {
         direction == 3 ? "#fff" : "#aaa"
     ];
 
-    drawButton(ctx, 100+(swo/5)-(swo/10), y, (swo/5)-5, colorArr[0], 0);
+    drawButton(ctx, 100+(swo/4)-(swo/8), y, (swo/4)-5, colorArr[0], 0);
     drawButton(ctx, 
-    100+((swo/5)*2)-(swo/10), y, (swo/5)-5, colorArr[1], 1);
+    100+((swo/4)*2)-(swo/8), y, (swo/4)-5, colorArr[1], 1);
     drawButton(ctx, 
-    100+((swo/5)*3)-(swo/10), y, (swo/5)-5, colorArr[2], 2);
+    100+((swo/4)*3)-(swo/8), y, (swo/4)-5, colorArr[2], 2);
     drawButton(ctx, 
-    100+((swo/5)*4)-(swo/10), y, (swo/5)-5, colorArr[3], 3);
-    drawButton(ctx, 
-    100+((swo/5)*5)-(swo/10), y, (swo/5)-5, colorArr[0], 4);
+    100+((swo/4)*4)-(swo/8), y, (swo/4)-5, colorArr[3], 3);
 
     if (pause) {
         ctx.lineWidth = 1;
