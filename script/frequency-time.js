@@ -91,8 +91,9 @@ $(document).ready(function() {
     document.body.appendChild(pictureView);
 
     textView = document.createElement("span");
-    textView.style.objectFit = "cover";
     textView.style.position = "absolute";
+    textView.style.userSelect = "none";
+    textView.style.objectFit = "cover";
     textView.style.display = "none";
     textView.style.animationDuration = "1s";
     textView.style.color = "#fff";
@@ -126,6 +127,40 @@ $(document).ready(function() {
         clearTextTimeout= setTimeout(function() {
             textView.style.display = "none";
         }, 2500);
+    };
+
+    restartView = document.createElement("span");
+    restartView.style.position = "absolute";
+    restartView.style.userSelect = "none";
+    restartView.style.objectFit = "cover";
+    restartView.style.display = "none";
+    restartView.style.animationDuration = "1s";
+    restartView.innerText = "RESTART";
+    restartView.style.color = "#fff";
+    restartView.style.fontWeight = "900";
+    restartView.style.fontSize = "25px";
+    restartView.style.lineHeight = "25px";
+    restartView.style.textAlign = "center";
+    restartView.style.left = ((sw/2)-125)+"px";
+    restartView.style.top = ((sh/4)+25)+"px";
+    restartView.style.width = (250)+"px";
+    restartView.style.height = (50)+"px";
+    restartView.style.zIndex = "15";
+    document.body.appendChild(restartView);
+
+    restartView.onclick = function() {
+        textView.style.display = "none";
+        restartView.style.display = "none";
+
+        positionArr = [];
+        pause = false;
+
+        poorCount = 0;
+        goodCount = 0;
+        greatCount = 0;
+        perfectCount = 0;
+
+        animate();
     };
 
     text = "";
@@ -180,6 +215,8 @@ $(document).ready(function() {
             startY = ((sh/2)+(sh/4));
             objX = lineArr[direction];
             objY = 0;
+
+            restartView.style.display = "initial";
 
             return;
         }
@@ -238,9 +275,11 @@ $(document).ready(function() {
                 startX = lineArr[obj.direction];
                 startY = ((sh/2)+(sh/4));
                 objX = lineArr[obj.direction];
-                objY = obj.y;
+                objY = obj.y; 
 
                 audioStream.pause();
+
+                restartView.style.display = "initial";
 
                 break;
             }
@@ -465,6 +504,8 @@ var drawImage = function() {
             objY = obj.y;
 
             audioStream.pause();
+
+            restartView.style.display = "initial";
         }
 
         var x = lineArr[obj.direction];
