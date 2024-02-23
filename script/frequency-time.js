@@ -160,6 +160,8 @@ $(document).ready(function() {
         greatCount = 0;
         perfectCount = 0;
 
+        predictedHit = 0;
+
         animate();
     };
 
@@ -337,6 +339,7 @@ $(document).ready(function() {
                 if (n == 0 && predictedHit == 1) suffix = "DOUBLE ";
                 if (n == 0 && predictedHit == 2) suffix = "TRIPLE ";
                 if (n == 0 && predictedHit == 3) suffix = "QUADRA ";
+                if (n == 0 && predictedHit == 4) suffix = "PENTA ";
 
                 if (n == 0 && predictedHit > 0) {
                     sfxPool.play(
@@ -364,6 +367,7 @@ $(document).ready(function() {
                 positionArr = positionArr.filter((o) => { return !o.remove; });
 
                 if (n == 0 && predictedHit > 0) predictedHit = 0;
+                else if (n > 0 && n >= predictedHit) predictedHit = n+1;
                 else if (predictedHit == 0) predictedHit = n;
                 break;
             }
@@ -406,6 +410,8 @@ $(document).ready(function() {
         direction = -1;
         userInteracted = true;
     };
+
+    loadImages();
 
     drawImage();
     animate();
@@ -463,7 +469,7 @@ var animate = function() {
             positionArr.push(obj);
 
             updateTime = new Date().getTime();
-            resetTme = 1000+Math.floor(Math.random()*1500);
+            resetTme = 500+Math.floor(Math.random()*2000);
         }
 
         drawImage();
@@ -475,6 +481,32 @@ var animate = function() {
 
     if (!pause)
     requestAnimationFrame(animate);
+};
+
+var img_list = [
+    "img/ball.png"
+];
+
+var imagesLoaded = false;
+var loadImages = function(callback) {
+    var count = 0;
+    for (var n = 0; n < img_list.length; n++) {
+        var img = document.createElement("img");
+        img.n = n;
+        img.onload = function() {
+            count += 1;
+            console.log("loading ("+count+"/"+img_list.length+")");
+            img_list[this.n] = this;
+            if (count == img_list.length) {
+                imagesLoaded = true;
+                //callback();
+            }
+        };
+        var rnd = Math.random();
+        img.src = img_list[n].includes("img") ? 
+        img_list[n]+"?f="+rnd : 
+        img_list[n];
+    }
 };
 
 var positionArr = [];
@@ -502,6 +534,14 @@ var drawButton = function(ctx, x, y, size, color, direction) {
     ctx.lineTo(0, -(size/3));
     ctx.lineTo((size/4), -(size/10));
     ctx.stroke();
+
+    if (imagesLoaded) {
+        var image = img_list[0];
+        var r = image.naturalHeight/image.naturalWidth;
+        var height = size*r;
+
+        //ctx.drawImage(image, -(size/2), -(height/2), size, height);
+    }
 
     ctx.restore();
 
@@ -614,6 +654,15 @@ var drawImage = function() {
         ctx.lineTo(100+objX, objY);
         ctx.stroke();
     }
+};
+
+var getSquare = function(item) {
+    var width = item.naturalWidth ? 
+    item.naturalWidth : item.width;
+    var height = item.naturalHeight ? 
+    item.naturalHeight : item.height;
+
+    return width < height ? width : height;
 };
 
 var visibilityChange;
