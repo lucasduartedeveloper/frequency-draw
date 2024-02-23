@@ -223,7 +223,7 @@ $(document).ready(function() {
             oscillator.paused = false;
         }
 
-        if (e.touches[0].clientX < 100) return;
+        if (pause || e.touches[0].clientX < 100) return;
 
         direction = 
         buttonMap[Math.floor((e.touches[0].clientX-100)/(swo/4))];
@@ -340,6 +340,9 @@ $(document).ready(function() {
                 if (n == 0 && predictedHit == 2) suffix = "TRIPLE ";
                 if (n == 0 && predictedHit == 3) suffix = "QUADRA ";
                 if (n == 0 && predictedHit == 4) suffix = "PENTA ";
+                if (n == 0 && predictedHit == 5) suffix = "HEXA ";
+                if (n == 0 && predictedHit == 6) suffix = "HEPTA ";
+                if (n == 0 && predictedHit == 7) suffix = "OCTA ";
 
                 if (n == 0 && predictedHit > 0) {
                     sfxPool.play(
@@ -373,9 +376,9 @@ $(document).ready(function() {
             }
         }
 
-        if ((poorCount+goodCount+greatCount+perfectCount) > 10) {
+        if ((poorCount+goodCount+greatCount+perfectCount) > 50) {
             var diff = 
-            (poorCount+goodCount+greatCount+perfectCount) - 10;
+            (poorCount+goodCount+greatCount+perfectCount) - 50;
 
             poorCount = poorCount - diff;
             diff = -poorCount;
@@ -400,12 +403,12 @@ $(document).ready(function() {
             }
         }
 
-        if ((poorCount+goodCount+greatCount+perfectCount) == 10) {
+        if ((poorCount+goodCount+greatCount+perfectCount) == 50) {
             positionArr = [];
             pause = true;
 
             setTimeout(function() { 
-                var result = (1/40)*
+                var result = (1/200)*
                 (poorCount+(goodCount*2)+
                 (greatCount*3)+(perfectCount*4));
 
@@ -496,7 +499,7 @@ var animate = function() {
             positionArr.push(obj);
 
             updateTime = new Date().getTime();
-            resetTme = 500+Math.floor(Math.random()*2000);
+            resetTme = Math.floor(Math.random()*2500);
         }
 
         drawImage();
