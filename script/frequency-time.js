@@ -412,13 +412,14 @@ $(document).ready(function() {
                 (poorCount+(goodCount*2)+
                 (greatCount*3)+(perfectCount*4));
 
-                text = "RESULT: "; //(result*100).toFixed(2) + "%";
+                text = "RESULT: " + (result*100).toFixed(2) + "%";
 
+                /*
                 var hit = (1-result);
                 if (hit >= 0 && hit <= (0 + perfectMargin)) text += "PERFECT";
                 else if (hit < 0.25) text += "GREAT";
                 else if (hit < 0.75) text += "GOOD";
-                else text += "POOR";
+                else text += "POOR";*/
 
                 textView.innerText = text;
                 textView.style.display = "initial";
