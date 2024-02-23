@@ -8,8 +8,10 @@ class SfxPool {
        this.volume = 1;
     }
     play(url, callback=false, obj=false) {
+       var rnd = Math.random();
        var stored = this.stored.filter((o) => { return o.url == url; });
-       var sfx0 = stored.length > 0 ? stored[0] : new Audio(url);
+       var sfx0 = stored.length > 0 ? stored[0] : 
+       new Audio(url+"?rnd="+rnd);
        var n = this.stored.indexOf(sfx0);
        this.stored.splice(n, 1);
        /*var beep0 = this.stored.length > 0 ?

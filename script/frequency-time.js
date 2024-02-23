@@ -289,7 +289,10 @@ $(document).ready(function() {
             }
             else if (obj.direction == direction && 
                 distanceY <= (lineHeight)) {
+                if (n == 0)
                 obj.remove = true;
+                else
+                obj.highlight = true;
 
                 text = "";
                 textNo = 0;
@@ -367,6 +370,10 @@ $(document).ready(function() {
 
                 //audioStream.play();
 
+                if (n == 0 && predictedHit > 0)
+                for (k = 1; k < predictedHit; k++)
+                positionArr[k].remove = true;
+
                 positionArr = positionArr.filter((o) => { return !o.remove; });
 
                 if (n == 0 && predictedHit > 0) predictedHit = 0;
@@ -434,8 +441,8 @@ $(document).ready(function() {
     };
 
     oscillator = createOscillator();
-    oscillator.paused = true;
     oscillator.volume.gain.value = 1;
+    oscillator.frequency.value = 0;
 
     pictureView.ontouchend = function(e) {
         direction = -1;
@@ -500,7 +507,7 @@ var animate = function() {
             positionArr.push(obj);
 
             updateTime = new Date().getTime();
-            resetTme = Math.floor(Math.random()*2500);
+            resetTme = Math.floor(Math.random()*1500);
         }
 
         drawImage();
