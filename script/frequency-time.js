@@ -373,12 +373,39 @@ $(document).ready(function() {
             }
         }
 
-        if ((poorCount+goodCount+greatCount+perfectCount) == 50) {
+        if ((poorCount+goodCount+greatCount+perfectCount) > 10) {
+            var diff = 
+            (poorCount+goodCount+greatCount+perfectCount) - 10;
+
+            poorCount = poorCount - diff;
+            diff = -poorCount;
+            if (poorCount < 0) poorCount = 0;
+
+            if (diff > 0) {
+                goodCount = goodCount - diff;
+                diff = -goodCount;
+                if (goodCount < 0) goodCount = 0;
+
+                if (diff > 0) {
+                    greatCount = greatCount - diff;
+                    diff = -greatCount;
+                    if (greatCount < 0) greatCount = 0;
+
+                    if (diff > 0) {
+                        perfectCount = perfectCount - diff;
+                        diff = -perfectCount;
+                        if (perfectCount < 0) perfectCount = 0;
+                    }
+                }
+            }
+        }
+
+        if ((poorCount+goodCount+greatCount+perfectCount) == 10) {
             positionArr = [];
             pause = true;
 
             setTimeout(function() { 
-                var result = (1/200)*
+                var result = (1/40)*
                 (poorCount+(goodCount*2)+
                 (greatCount*3)+(perfectCount*4));
 
