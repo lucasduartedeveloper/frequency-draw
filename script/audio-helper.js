@@ -6,12 +6,18 @@ class SfxPool {
        this.playing = [];
        this.used = 0;
        this.volume = 1;
+       this.playbackRate = 2;
+       this.preservesPitch = false;
     }
     play(url, callback=false, obj=false) {
        var rnd = Math.random();
        var stored = this.stored.filter((o) => { return o.url == url; });
        var sfx0 = stored.length > 0 ? stored[0] : 
        new Audio(url+"?rnd="+rnd);
+
+       sfx0.playbackRate = this.playbackRate;
+       sfx0.preservesPitch = this.preservesPitch;
+
        var n = this.stored.indexOf(sfx0);
        this.stored.splice(n, 1);
        /*var beep0 = this.stored.length > 0 ?
