@@ -6,7 +6,7 @@ class SfxPool {
        this.playing = [];
        this.used = 0;
        this.volume = 1;
-       this.playbackRate = 2;
+       this.playbackRate = 1;
        this.preservesPitch = false;
     }
     play(url, callback=false, obj=false) {
@@ -217,6 +217,7 @@ var createOscillator = function() {
     oscillator.frequency.value = 0; // value in hertz
     oscillator.connect(volume);
     oscillator.volume = volume;
+    oscillator.biquadFilter = biquadFilter;
     oscillator.panNode = panNode;
     //oscillator.connect(audioCtx.destination);
 

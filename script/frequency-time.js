@@ -90,6 +90,21 @@ $(document).ready(function() {
     pictureView.style.zIndex = "15";
     document.body.appendChild(pictureView);
 
+    spriteView = document.createElement("img");
+    spriteView.style.position = "absolute";
+    spriteView.style.left = (10)+"px";
+    spriteView.style.top = ((sh/4)-25)+"px";
+    spriteView.style.width = (50)+"px";
+    spriteView.style.height = (50)+"px";
+    spriteView.style.zIndex = "15";
+    document.body.appendChild(spriteView);
+
+    spriteView.src = "img/sprite.png";
+
+    spriteView.onanimationend = function() {
+        spriteView.className = "";
+    };
+
     textView = document.createElement("span");
     textView.style.position = "absolute";
     textView.style.userSelect = "none";
@@ -122,6 +137,10 @@ $(document).ready(function() {
         textView.style.display = "initial";
         textView.className = 
         "animate__animated animate__rubberBand";
+
+        /*
+        spriteView.className = 
+        "animate__animated animate__rubberBand";*/
 
         clearTimeout(clearTextTimeout);
         clearTextTimeout= setTimeout(function() {
@@ -161,8 +180,7 @@ $(document).ready(function() {
         perfectCount = 0;
 
         predictedHit = 0;
-
-        animate();
+        scrollSpeed = 1;
     };
 
     pauseView = document.createElement("span");
@@ -185,7 +203,7 @@ $(document).ready(function() {
 
     pauseView.onclick = function() {
        if (!pause) pause = true;
-       else { pause = false; animate(); }
+       else pause = false;
     };
 
     text = "";
@@ -291,6 +309,16 @@ $(document).ready(function() {
                 distanceY <= (lineHeight)) {
                 obj.remove = true;
 
+                if (obj.clear) {
+                    predictedHit = positionArr.length-1;
+                }
+
+                if (obj.confuse) {
+                    for (var k = 0; k < positionArr.length; k++)
+                    positionArr[k].direction = 
+                    Math.floor(Math.random()*4);
+                }
+
                 text = "";
                 textNo = 0;
 
@@ -343,6 +371,8 @@ $(document).ready(function() {
                 if (n == 0 && predictedHit == 5) suffix = "HEXA ";
                 if (n == 0 && predictedHit == 6) suffix = "HEPTA ";
                 if (n == 0 && predictedHit == 7) suffix = "OCTA ";
+                if (n == 0 && predictedHit == 8) suffix = "NONA ";
+                if (n == 0 && predictedHit == 9) suffix = "DECA ";
 
                 if (n == 0 && predictedHit > 0) {
                     sfxPool.play(
@@ -374,11 +404,17 @@ $(document).ready(function() {
 
                 positionArr = positionArr.filter((o) => { return !o.remove; });
 
+                if (n == 0 && predictedHit == 4) scrollSpeed += 1;
+
                 if (predictedHit == 0) predictedHit = n;
                 else if (n == 0 && predictedHit > 0) predictedHit = 0;
                 else if (n > 0 && n >= predictedHit) predictedHit = n+1;
                 break;
             }
+        }
+
+        if ((poorCount+goodCount+greatCount+perfectCount) > 10) {
+            //sfxPool.playbackRate = 1;
         }
 
         if ((poorCount+goodCount+greatCount+perfectCount) > 50) {
@@ -410,6 +446,8 @@ $(document).ready(function() {
 
         if ((poorCount+goodCount+greatCount+perfectCount) == 50) {
             positionArr = [];
+            drawImage();
+
             pause = true;
 
             setTimeout(function() { 
@@ -462,6 +500,7 @@ var failed = function(obj=false) {
     obj.highlight = true;
 
     pause = true;
+
     if (obj) {
         startX = lineArr[obj.direction];
         startY = ((sh/2)+(sh/4));
@@ -474,6 +513,7 @@ var failed = function(obj=false) {
         objX = lineArr[direction];
         objY = 0;
     }
+    drawImage();
 
     audioStream.pause();
 
@@ -489,9 +529,15 @@ var renderTime = 0;
 var elapsedTime = 0;
 var animationSpeed = 0;
 
+var scrollSpeed = 1;
 var resetTme = 2500;
 
 var animate = function() {
+    if (pause) { 
+        requestAnimationFrame(animate);
+        return;
+    }
+
     elapsedTime = new Date().getTime()-renderTime;
     if (!backgroundMode) {
         if ((new Date().getTime() - updateTime) > resetTme) {
@@ -500,8 +546,12 @@ var animate = function() {
                 y: Math.floor(-(sw/8)),
                 direction: dir,
                 remove: false,
-                hightlight: false
+                hightlight: false,
+                clear: Math.floor(Math.random()*50) == 0,
+                confuse: Math.floor(Math.random()*50) == 0,
+                frame: 0
             };
+            obj.confuse = obj.clear ? false : obj.confuse;
             positionArr.push(obj);
 
             updateTime = new Date().getTime();
@@ -515,7 +565,6 @@ var animate = function() {
     if (audioStream.currentTime > 7)
     audioStream.currentTime = 0;
 
-    if (!pause)
     requestAnimationFrame(animate);
 };
 
@@ -555,21 +604,68 @@ var lineArr = [
     ((swo/4)*4)-(swo/8)
 ];
 
-var drawButton = function(ctx, x, y, size, color, direction) {
+var drawButton = function(ctx, x, y, size, color, direction, mirror=false, frame=0) {
     ctx.lineWidth = 3;
     ctx.strokeStyle =color;
 
     ctx.save();
     ctx.translate(x, y);
-    ctx.rotate(directionArr[direction]*(Math.PI/180));
+    ctx.rotate(directionArr[direction]*(Math.PI/180)-
+    (frame*(Math.PI/180)));
+
+    ctx.beginPath();
+    ctx.moveTo(0, -(size/3));
+    ctx.lineTo(0, (size/3));
+    ctx.stroke();
 
     ctx.beginPath();
     ctx.moveTo(-(size/4), -(size/10));
     ctx.lineTo(0, -(size/3));
-    ctx.lineTo(0, (size/3));
-    ctx.lineTo(0, -(size/3));
     ctx.lineTo((size/4), -(size/10));
     ctx.stroke();
+
+    if (mirror) {
+       ctx.beginPath();
+       ctx.lineTo(-(size/4), (size/10));
+       ctx.lineTo(0, (size/3));
+       ctx.lineTo((size/4), (size/10));
+       ctx.stroke();
+    }
+
+    if (imagesLoaded) {
+        var image = img_list[0];
+        var r = image.naturalHeight/image.naturalWidth;
+        var height = size*r;
+
+        //ctx.drawImage(image, -(size/2), -(height/2), size, height);
+    }
+
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    ctx.beginPath();
+    ctx.roundRect(-(size/2), -(size/2), size, size, (size/10));
+    ctx.stroke();
+
+    ctx.restore();
+};
+
+var drawNumericButton = 
+    function(ctx, x, y, size, color, number, frame=0) {
+    ctx.lineWidth = 3;
+    ctx.strokeStyle =color;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(frame*(Math.PI/180));
+
+    ctx.fillStyle = color;
+    ctx.font = (size-10)+"px sans serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(number, 0, 2.5);
 
     if (imagesLoaded) {
         var image = img_list[0];
@@ -661,9 +757,21 @@ var drawImage = function() {
 
         var x = lineArr[obj.direction];
         var color = obj.highlight ? "#5f5" : "#777";
-        drawButton(ctx, 100+x, obj.y, (swo/4)-10, color, obj.direction);
+        if (obj.clear) color = "lightblue";
+        if (obj.confuse) color = "orange";
 
-        obj.y += 1;
+        if (!obj.clear && !obj.confuse)
+        drawButton(ctx, 100+x, obj.y, (swo/4)-10, color, obj.direction);
+        else if (obj.clear)
+        drawNumericButton(ctx, 
+        100+x, obj.y, (swo/4)-10, color, positionArr.length);
+        else if (obj.confuse)
+        drawButton(ctx, 
+        100+x, obj.y, (swo/4)-10, color, obj.direction, true);
+
+        if (obj.clear) obj.frame += 1;
+
+        obj.y += scrollSpeed;
     }
 
     var colorArr = [

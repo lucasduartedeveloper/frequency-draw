@@ -93,10 +93,10 @@ $(document).ready(function() {
     userInteracted = false;
     pictureView.ontouchstart = function(e) {
         if (userInteracted) {
-            recordedAudio.play();
+            oscillator.start();
 
             if (mic.closed)
-            mic.open();
+            mic.open(false, 1);
         }
     };
 
@@ -104,11 +104,12 @@ $(document).ready(function() {
         userInteracted = true;
     };
 
+    receive = true;
     textView = document.createElement("span");
     textView.style.position = "absolute";
-    textView.style.userSelect = "none";
     textView.style.objectFit = "cover";
-    textView.style.display = "none";
+    textView.style.userSelect = "none";
+    textView.innerText = "0 Hz OUT";
     textView.style.animationDuration = "1s";
     textView.style.color = "#fff";
     textView.style.fontWeight = "900";
@@ -116,80 +117,28 @@ $(document).ready(function() {
     textView.style.lineHeight = "25px";
     textView.style.textAlign = "center";
     textView.style.left = ((sw/2)-125)+"px";
-    textView.style.top = ((sh/4)-25)+"px";
+    textView.style.top = ((sh/4)-75)+"px";
     textView.style.width = (250)+"px";
     textView.style.height = (50)+"px";
     textView.style.zIndex = "15";
     document.body.appendChild(textView);
 
-    textView.onanimationend = function() {
-        textView.className = "";
-        textView.innerText = "";
+    textView.onclick = function() {
+        receive = !receive;
+        if (receive) {
+            motion = true;
+            micFrequency = 0;
+            textView.innerText = 
+            oscillator.frequency.value.toFixed(2)+" Hz OUT";
+        }
+        else {
+            motion = false;
+            oscillator.frequency.value = 0;
+            textView.innerText = micFrequency.toFixed(2)+" Hz IN";
+        }
     };
 
-    clearTextTimeout = 0;
-
-    showText = function(text) {
-        textView.innerText = text;
-        //textView.src = "img/fx-"+(text.toLowerCase())+".png";
-
-        textView.style.display = "initial";
-        textView.className = 
-        "animate__animated animate__rubberBand";
-
-        clearTimeout(clearTextTimeout);
-        clearTextTimeout= setTimeout(function() {
-            textView.style.display = "none";
-        }, 2500);
-    };
-
-    keepTime = 0;
-    keepView = document.createElement("span");
-    keepView.style.position = "absolute";
-    keepView.style.userSelect = "none";
-    keepView.style.objectFit = "cover";
-    //keepView.innerText = "KEEP";
-    keepView.style.animationDuration = "1s";
-    keepView.style.color = "#fff";
-    keepView.style.fontWeight = "900";
-    keepView.style.fontSize = "25px";
-    keepView.style.lineHeight = "25px";
-    keepView.style.textAlign = "center";
-    keepView.style.left = (10)+"px";
-    keepView.style.top = (sh-60)+"px";
-    keepView.style.width = (100)+"px";
-    keepView.style.height = (50)+"px";
-    keepView.style.zIndex = "15";
-    document.body.appendChild(keepView);
-
-    keepView.onclick = function() {
-        pictureView.requestFullscreen();
-        return;
-
-        var currentTime = new Date().getTime();
-        keepTime = currentTime;
-
-        previousResumedWave = [ ...resumedWave ];
-    };
-
-    dataView = document.createElement("span");
-    dataView.style.position = "absolute";
-    dataView.style.userSelect = "none";
-    dataView.style.objectFit = "cover";
-    dataView.innerText = "0.00%";
-    dataView.style.animationDuration = "1s";
-    dataView.style.color = "#fff";
-    dataView.style.fontWeight = "900";
-    dataView.style.fontSize = "25px";
-    dataView.style.lineHeight = "25px";
-    dataView.style.textAlign = "center";
-    dataView.style.left = (120)+"px";
-    dataView.style.top = (sh-60)+"px";
-    dataView.style.width = (100)+"px";
-    dataView.style.height = (50)+"px";
-    dataView.style.zIndex = "15";
-    //document.body.appendChild(dataView);
-
+    micFrequency = 0;
     mic = new EasyMicrophone();
     mic.onsuccess = function() { 
         mic.audio.play();
@@ -197,120 +146,28 @@ $(document).ready(function() {
     mic.onupdate = function(freqArray, reachedFreq, avgValue) {
         micAvgValue = avgValue;
 
-        resumedWave = resumeWave(freqArray);
-        compareData();
+        //var value = (24000/512)*(freqArray.length/2);
+        micFrequency = reachedFreq;
     };
     mic.onclose = function() { 
         //mic.audio.loop = true;
         //mic.audio.play();
     };
-    var ab = new Array(50);
-    for (var n = 0; n < 50; n++) {
-        ab[n] = 0;
-    }
-    resumedWave = [ ...ab ];
-    previousResumedWave = [ ...ab ];
 
-    recordedAudio = new Audio("audio/sfx-hexa.wav");
+    oscillator = createOscillator();
+    oscillator.volume.gain.value = 1;
+    oscillator.biquadFilter.frequency.value = 100;
+    oscillator.frequency.value = 0;
 
-    media = new MediaAnalyser(recordedAudio);
-    media.onupdate = function(freqArray, reachedFreq, avgValue) {
-        var media = resumeWave(freqArray);
-        for (var n = 0; n < media.length; n++) {
-            if (media[n] > previousResumedWave[n])
-            previousResumedWave[n] = media[n];
-        }
+    motion = true;
+    gyroUpdated = function(e) {
+        var value = (1/18.6)*Math.abs((-9.8+e.accY));
+        oscillator.frequency.value = (value*500);
     };
 
     drawImage();
     animate();
 });
-
-var compareData = function() {
-    var sum = 0;
-    for (var n = 0; n < resumedWave.length; n++) {
-        var previousValue = previousResumedWave[n];
-        var value = resumedWave[n];
-
-        sum += 100-((Math.abs(previousValue-value)/2)*100);
-    }
-
-    var result = (sum/resumedWave.length);
-    dataView.innerText = result.toFixed(2) + "%";
-
-    var currentTime = new Date().getTime();
-    keepDuration = currentTime-keepTime;
-
-    if (keepDuration > 1000 && result > 98) {
-        var ab = new Array(50);
-        for (var n = 0; n < 50; n++) {
-            ab[n] = 0;
-        }
-        previousResumedWave = ab;
-    }
-};
-
-var drawAB = 
-function(freqArray=false, y, direction=1) {
-    var canvas = pictureView;
-    var ctx = canvas.getContext("2d");
-
-    var offset = 0;
-    var polygon = [];
-
-    // create waveform A
-    if (freqArray) 
-    offset = (canvas.width/freqArray.length)/2;
-    if (freqArray) 
-    for (var n = 0; n < freqArray.length; n++) {
-        var obj = {
-            x: offset+(n*(canvas.width/freqArray.length)),
-            y0: (y)+
-            (direction*(freqArray[n]*25)),
-            y1: (y)+
-            (direction*(freqArray[n]*25)+1)
-        };
-        polygon.push(obj);
-    }
-
-    // draw waveform A
-    ctx.strokeStyle = "#fff";
-
-    if (freqArray) {
-        ctx.lineWidth = (canvas.width/freqArray.length)-2;
-        //ctx.clearRect(0, 0, canvas.width, 100);
-    }
-    if (freqArray)
-    for (var n = 0; n < polygon.length; n++) {
-        ctx.beginPath();
-        ctx.moveTo(polygon[n].x, polygon[n].y0-1);
-        ctx.lineTo(polygon[n].x, polygon[n].y1+1);
-        ctx.stroke();
-    }
-};
-
-var resumeWave = function(freqArray) {
-    var blocks = 50;
-    var blockSize = Math.floor(freqArray.length / blocks);
-
-    var resumedArray = [];
-    var sum = 0;
-    for (var n = 0; n < blocks; n++) {
-        sum = 0;
-        for (var k = 0; k < blockSize; k++) {
-            var m = (n * blockSize) + k;
-             if ((m+1) <= freqArray.length) {
-                 sum += freqArray[m];
-             }
-        }
-
-        resumedArray.push(sum/blockSize);
-    }
-    //console.log(blockSize);
-    //console.log(resumedArray);
-
-    return resumedArray;
-};
 
 var updateImage = true;
 
@@ -328,6 +185,13 @@ var animate = function() {
             updateTime = new Date().getTime();
         }
 
+        if (receive)
+        textView.innerText = 
+        oscillator.frequency.value.toFixed(2)+" Hz OUT";
+        else
+        textView.innerText = 
+        micFrequency.toFixed(2)+" Hz IN";
+
         drawImage();
     }
     renderTime = new Date().getTime();
@@ -335,7 +199,6 @@ var animate = function() {
     requestAnimationFrame(animate);
 };
 
-var textFrame = 0;
 var drawImage = function() {
     var ctx = pictureView.getContext("2d");
     ctx.imageSmoothingEnabled = false;
@@ -348,27 +211,38 @@ var drawImage = function() {
     ctx.strokeStyle = "#555";
 
     ctx.beginPath();
-    ctx.moveTo(0, (sh/2));
-    ctx.lineTo(sw, (sh/2));
-    //ctx.stroke();
+    ctx.moveTo((sw/2), (sh/4));
+    ctx.lineTo((sw/2), (sh/2)+(sh/4));
+    ctx.stroke();
 
-    textFrame += 1;
-    if (textFrame == sw) textFrame = 0;
+    ctx.beginPath();
+    ctx.moveTo((sw/2)-(sw/8), (sh/4));
+    ctx.lineTo((sw/2)+(sw/8), (sh/4));
+    ctx.stroke();
 
-    //drawAB(resumedWave, (sh/2)+10);
-    //drawAB(previousResumedWave, (sh/2)-10, -1);
+    ctx.beginPath();
+    ctx.moveTo((sw/2)-(sw/8), (sh/2)+(sh/4));
+    ctx.lineTo((sw/2)+(sw/8), (sh/2)+(sh/4));
+    ctx.stroke();
 
+    for (var n = 1; n < 10; n++) {
+        ctx.beginPath();
+        ctx.moveTo((sw/2)-(sw/16), (sh/4)+(n*((sh/2)/10)));
+        ctx.lineTo((sw/2)+(sw/16), (sh/4)+(n*((sh/2)/10)));
+        ctx.stroke();
+    };
+
+    var value = (1/500)*oscillator.frequency.value;
     ctx.save();
-    ctx.translate((sw/2), (sh/2));
-    //ctx.rotate(-(Math.PI/2));
-    ctx.translate(-(sw/2), -(sh/2));
+    ctx.translate((sw/2)-(sw/8)-5, (sh/2)+(sh/4)-(value*(sh/2)))
 
     ctx.fillStyle = "#fff";
-    ctx.font = "50px sans serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("RETORNO", (sw/2)-textFrame, (sh/2));
-    ctx.fillText("RETORNO", sw+(sw/2)-textFrame, (sh/2));
+
+    ctx.beginPath();
+    ctx.moveTo(-10, +5);
+    ctx.lineTo(-10, -5);
+    ctx.lineTo(0, 0);
+    ctx.fill();
 
     ctx.restore();
 };

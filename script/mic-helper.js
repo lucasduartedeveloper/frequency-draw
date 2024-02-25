@@ -28,6 +28,7 @@ class EasyMicrophone {
         // wave drawing setup
         this.audioContent = new AudioContext();
         this.analyser = 0;
+        this.processor = 0;
         this.frequencyArray = [];
         this.audioStream = 0;
         this.frequencyLength = 0;
@@ -184,9 +185,44 @@ class EasyMicrophone {
 
         averageValue = (sum/reachedFrequency);
         averageValue = isNaN(averageValue) ? 0 : averageValue;
+
+        var audioData = new Float32Array(this.analyser.fftSize);
+        this.analyser.getFloatTimeDomainData(audioData);
+        reachedFrequency = this.getAutocorrolatedPitch(audioData);
+
         this.onupdate(floatArray, reachedFrequency, averageValue);
 
         if (!this.closed) requestAnimationFrame(animate);
+    }
+
+    getAutocorrolatedPitch(audioData) {
+        var corrolatedSignal = new Float32Array(this.analyser.fftSize);
+        var localMaxima = new Array(10);
+
+        // First: autocorrolate the signal
+        var maximaCount = 0;
+        for (var n = 0; n < this.analyser.fftSize; n++) {
+            corrolatedSignal[n] = 0;
+            for (var k = 0; k < this.analyser.fftSize - n; k++) {
+                corrolatedSignal[n] += audioData[k] * audioData[k + n];
+            }
+            if (n > 1) {
+                if ((corrolatedSignal[n - 2] - corrolatedSignal[n - 1]) < 0
+                    && (corrolatedSignal[n - 1] - corrolatedSignal[n]) > 0) {
+                    localMaxima[maximaCount] = (n - 1);
+                    maximaCount++;
+                    if ((maximaCount >= localMaxima.length))
+                    break;
+                }
+            }
+        }
+
+        // Second: find the average distance in samples between maxima
+        var maximaMean = localMaxima[0];
+        for (var n = 1; n < maximaCount; n++)
+            maximaMean += localMaxima[n] - localMaxima[n - 1];
+        maximaMean /= maximaCount;
+        return (this.audioContent.sampleRate / maximaMean);
     }
 
     download(file_name) {
