@@ -53,14 +53,14 @@ $(document).ready(function() {
     backgroundView.style.position = "absolute";
     //pictureView.style.background = "#fff";
     backgroundView.style.objectFit = "cover";
-    backgroundView.width = (sw);
+    backgroundView.width = (sw-100);
     backgroundView.height = (sh); 
-    backgroundView.style.left = (0)+"px";
+    backgroundView.style.left = (100)+"px";
     backgroundView.style.top = (0)+"px";
-    backgroundView.style.width = (sw)+"px";
+    backgroundView.style.width = (sw-100)+"px";
     backgroundView.style.height = (sh)+"px";
     backgroundView.style.zIndex = "15";
-    //backgroundView.src = "img/background-0.png";
+    //backgroundView.src = "img/background-1.png";
     //document.body.appendChild(backgroundView);
 
     camera = document.createElement("video");
@@ -92,6 +92,7 @@ $(document).ready(function() {
 
     spriteView = document.createElement("img");
     spriteView.style.position = "absolute";
+    spriteView.style.background = "limegreen";
     spriteView.style.left = (10)+"px";
     spriteView.style.top = ((sh/4)-25)+"px";
     spriteView.style.width = (50)+"px";
@@ -319,6 +320,13 @@ $(document).ready(function() {
                     Math.floor(Math.random()*4);
                 }
 
+                if (obj.acc) {
+                    lineHeight = (2*swo);
+                    setTimeout(function() {
+                        lineHeight = swo;
+                    }, 5000);
+                }
+
                 text = "";
                 textNo = 0;
 
@@ -448,6 +456,8 @@ $(document).ready(function() {
             positionArr = [];
             drawImage();
 
+            spriteView.src = "img/sprite.png";
+
             pause = true;
 
             setTimeout(function() { 
@@ -532,6 +542,9 @@ var animationSpeed = 0;
 var scrollSpeed = 1;
 var resetTme = 2500;
 
+var spriteTime = 0;
+var spriteImage = "right";
+
 var animate = function() {
     if (pause) { 
         requestAnimationFrame(animate);
@@ -549,13 +562,22 @@ var animate = function() {
                 hightlight: false,
                 clear: Math.floor(Math.random()*50) == 0,
                 confuse: Math.floor(Math.random()*50) == 0,
+                acc: Math.floor(Math.random()*50) == 0,
                 frame: 0
             };
-            obj.confuse = obj.clear ? false : obj.confuse;
+            if (obj.clear) { obj.confuse = false; obj.acc = false };
+            if (obj.confuse) { obj.acc = false };
             positionArr.push(obj);
 
             updateTime = new Date().getTime();
             resetTme = 1000+Math.floor(Math.random()*1500);
+        }
+
+        if ((new Date().getTime() - spriteTime) > 250) {
+            spriteImage = spriteImage == "left" ? "right" : "left";
+            spriteView.src = "img/sprite-"+spriteImage+".png";
+
+            spriteTime = new Date().getTime();
         }
 
         drawImage();
@@ -665,7 +687,85 @@ var drawNumericButton =
     ctx.font = (size-10)+"px sans serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(number, 0, 2.5);
+    //ctx.fillText(number, 0, 2.5);
+
+    if (imagesLoaded) {
+        var image = img_list[0];
+        var r = image.naturalHeight/image.naturalWidth;
+        var height = size*r;
+
+        //ctx.drawImage(image, -(size/2), -(height/2), size, height);
+    }
+
+    ctx.fillStyle = color;
+
+    var buttonSize = (((size/1.5)-4)/3);
+
+    ctx.beginPath();
+    ctx.rect(-(size/3), -(size/3), (buttonSize*3)+4, buttonSize);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.rect(-(size/3), -(size/3)+buttonSize+2, 
+    buttonSize, buttonSize);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.rect(-(size/3)+buttonSize+2, -(size/3)+buttonSize+2, 
+    buttonSize, buttonSize);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.rect(-(size/3), -(size/3)+(buttonSize*2)+4, 
+    buttonSize, buttonSize);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.rect(-(size/3)+buttonSize+2, -(size/3)+(buttonSize*2)+4, 
+    buttonSize, buttonSize);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.rect(-(size/3)+(buttonSize*2)+4, -(size/3)+buttonSize+2, 
+    buttonSize, (buttonSize*2)+2);
+    ctx.fill();
+
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(x, y);
+
+    ctx.beginPath();
+    ctx.roundRect(-(size/2), -(size/2), size, size, (size/10));
+    ctx.stroke();
+
+    ctx.restore();
+};
+
+var drawButton2 = function(ctx, x, y, size, color, direction, type=0, frame=0) {
+    ctx.lineWidth = 3;
+    ctx.strokeStyle =color;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(directionArr[direction]*(Math.PI/180)-
+    (frame*(Math.PI/180)));
+
+    if (type == 1) {
+       ctx.beginPath();
+       ctx.lineTo(-(size/4), -(((size/3)-(size/10))/2)-10);
+       ctx.lineTo(0, (((size/3)-(size/10))/2)-10);
+       ctx.lineTo((size/4), -(((size/3)-(size/10))/2)-10);
+       ctx.stroke();
+    }
+
+    if (type == 1) {
+       ctx.beginPath();
+       ctx.lineTo(-(size/4), -(((size/3)-(size/10))/2)+10);
+       ctx.lineTo(0, (((size/3)-(size/10))/2)+10);
+       ctx.lineTo((size/4), -(((size/3)-(size/10))/2)+10);
+       ctx.stroke();
+    }
 
     if (imagesLoaded) {
         var image = img_list[0];
@@ -751,7 +851,7 @@ var drawImage = function() {
         var obj = positionArr[n];
 
         var distanceY = ((sh/2)+(sh/4)) - obj.y;
-        if (distanceY < -(sw/4)) {
+        if (!pause && distanceY < -(sw/4)) {
             failed(obj)
         }
 
@@ -759,8 +859,9 @@ var drawImage = function() {
         var color = obj.highlight ? "#5f5" : "#777";
         if (obj.clear) color = "lightblue";
         if (obj.confuse) color = "orange";
+        if (obj.acc) color = "purple";
 
-        if (!obj.clear && !obj.confuse)
+        if (!obj.clear && !obj.confuse && !obj.acc)
         drawButton(ctx, 100+x, obj.y, (swo/4)-10, color, obj.direction);
         else if (obj.clear)
         drawNumericButton(ctx, 
@@ -768,6 +869,9 @@ var drawImage = function() {
         else if (obj.confuse)
         drawButton(ctx, 
         100+x, obj.y, (swo/4)-10, color, obj.direction, true);
+        else if (obj.acc)
+        drawButton2(ctx, 
+        100+x, obj.y, (swo/4)-10, color, 1, 1);
 
         if (obj.clear) obj.frame += 1;
 
