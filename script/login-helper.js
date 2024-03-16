@@ -132,7 +132,7 @@ var createLogin = function() {
     //areaPositionView.style.background = "#000";
     areaPositionView.style.border = "1px solid #55f";
     areaPositionView.style.zIndex = "50";
-    loginContainerView.appendChild(areaPositionView);
+    //loginContainerView.appendChild(areaPositionView);
 
     lockPosX = 
     10+(((size-20)/3)/2)+(Math.random()*(((size-20)/3)*2));

@@ -93,10 +93,13 @@ $(document).ready(function() {
     userInteracted = false;
     pictureView.ontouchstart = function(e) {
         if (userInteracted) {
-            oscillator.start();
+            //oscillator.start();
 
             if (mic.closed)
             mic.open(false, 1);
+
+            if (!cameraOn)
+            startCamera();
         }
     };
 
@@ -111,7 +114,7 @@ $(document).ready(function() {
     textView.style.userSelect = "none";
     textView.innerText = "0 Hz OUT";
     textView.style.animationDuration = "1s";
-    textView.style.color = "#fff";
+    textView.style.color = "#000";
     textView.style.fontWeight = "900";
     textView.style.fontSize = "25px";
     textView.style.lineHeight = "25px";
@@ -136,7 +139,21 @@ $(document).ready(function() {
             oscillator.frequency.value = 0;
             textView.innerText = micFrequency.toFixed(2)+" Hz IN";
         }
+
+        if (receive) {
+            baseRotation = 0;
+            frontRotation = 0;
+        }
+        else {
+            baseRotation = 1;
+            frontRotation = 1;
+        }
     };
+
+    baseRotation = 0;
+    frontRotation = 0;
+
+    torchTime = 0;
 
     micFrequency = 0;
     mic = new EasyMicrophone();
@@ -146,8 +163,18 @@ $(document).ready(function() {
     mic.onupdate = function(freqArray, reachedFreq, avgValue) {
         micAvgValue = avgValue;
 
-        //var value = (24000/512)*(freqArray.length/2);
-        micFrequency = reachedFreq;
+        baseRotation = (5/50)*freqArray.length;
+        frontRotation = (5/50)*freqArray.length;
+
+        //console.log(freqArray.length);
+        var currentTime = new Date().getTime();
+        if (freqArray.length > 100 && (currentTime-torchTime) > 5000) {
+            setTorch("on");
+            torchTime = currentTime;
+        }
+
+        textView.innerText = 
+        ((24000/512)*freqArray.length).toFixed(2)+" Hz IN";
     };
     mic.onclose = function() { 
         //mic.audio.loop = true;
@@ -187,7 +214,8 @@ var animate = function() {
 
         if (receive)
         textView.innerText = 
-        oscillator.frequency.value.toFixed(2)+" Hz OUT";
+        //oscillator.frequency.value.toFixed(2)+" Hz OUT";
+        "0 Hz OUT";
         else
         textView.innerText = 
         micFrequency.toFixed(2)+" Hz IN";
@@ -199,52 +227,142 @@ var animate = function() {
     requestAnimationFrame(animate);
 };
 
+var baseFrame = 0;
+var frontFrame = 0;
+
 var drawImage = function() {
     var ctx = pictureView.getContext("2d");
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, sw, sh);
 
-    ctx.fillStyle = "#000";
-    //ctx.fillRect(0, 0, sw, sh);
-
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "#555";
-
-    ctx.beginPath();
-    ctx.moveTo((sw/2), (sh/4));
-    ctx.lineTo((sw/2), (sh/2)+(sh/4));
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo((sw/2)-(sw/8), (sh/4));
-    ctx.lineTo((sw/2)+(sw/8), (sh/4));
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo((sw/2)-(sw/8), (sh/2)+(sh/4));
-    ctx.lineTo((sw/2)+(sw/8), (sh/2)+(sh/4));
-    ctx.stroke();
-
-    for (var n = 1; n < 10; n++) {
-        ctx.beginPath();
-        ctx.moveTo((sw/2)-(sw/16), (sh/4)+(n*((sh/2)/10)));
-        ctx.lineTo((sw/2)+(sw/16), (sh/4)+(n*((sh/2)/10)));
-        ctx.stroke();
-    };
-
-    var value = (1/500)*oscillator.frequency.value;
-    ctx.save();
-    ctx.translate((sw/2)-(sw/8)-5, (sh/2)+(sh/4)-(value*(sh/2)))
-
     ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, sw, sh);
 
-    ctx.beginPath();
-    ctx.moveTo(-10, +5);
-    ctx.lineTo(-10, -5);
-    ctx.lineTo(0, 0);
-    ctx.fill();
+    ctx.lineWidth = 10;
+    ctx.strokeStyle = "#000";
+
+    ctx.save();
+    ctx.translate((sw/2), (sh/2));
+    ctx.rotate(-(baseFrame*((Math.PI*2)/120)));
+    ctx.translate(-(sw/2), -(sh/2));
+
+    //drawCircle(ctx, (sw/2), (sh/2), (sw/3));
+    ctx.restore();
+
+    baseFrame += baseRotation;
+
+    ctx.save();
+    ctx.translate((sw/2), (sh/2));
+    ctx.rotate(-(frontFrame*((Math.PI*2)/180)));
+    ctx.translate(-(sw/2), -(sh/2));
+
+    //drawCircle(ctx, (sw/2), (sh/2), (sw/3), true);
+    ctx.restore();
+
+    frontFrame += frontRotation;
+
+    //drawHexagon(ctx, (sw/2), (sh/2), (sw/3), true);
+    //drawHexagon(ctx, (sw/2), (sh/2)+(sw/3), (sw/3), true);
+
+    ctx.globalAlpha = 0.3;
+
+    var numColumns = 20;
+    var size = (sw/numColumns);
+    var numRows = Math.floor(sh/size);
+
+    for (var y = 0; y < numRows; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, y*size);
+        ctx.lineTo(sw, y*size);
+        if ((y-3)%4 != 0) ctx.stroke();
+    }
+
+    for (var x = 0; x < 20; x++) {
+        ctx.beginPath();
+        ctx.moveTo(x*size, 0);
+        ctx.lineTo(x*size, sh);
+        if ((x-3)%4 != 0) ctx.stroke();
+    }
+
+    ctx.globalAlpha = 1;
 
     ctx.restore();
+};
+
+var drawHexagon = function(ctx, x, y, height, rotated=false) {
+    var c = {
+        x: x,
+        y: y
+    };
+    var p = {
+        x: c.x,
+        y: c.y-(height/2)
+    };
+
+    var offset = rotated ? -(360/12) : 0;
+
+    ctx.beginPath();
+    var rp = _rotate2d(c, p, offset);
+    ctx.moveTo(rp.x, rp.y);
+
+    for (var n = 1; n <= 6; n++) {
+        var rp = _rotate2d(c, p, offset+(n*(360/6)));
+        ctx.lineTo(rp.x, rp.y);
+    }
+    ctx.stroke();
+};
+
+var calcHexagon = function(width) {
+    var c = {
+        x: 0,
+        y: 0
+    };
+    var p = {
+        x: c.x,
+        y: c.y-(width/2)
+    };
+
+    var rp0 = _rotate2d(c, p, (360/12));
+    var rp1 = _rotate2d(c, p, (360/12)-(360/6));
+    var rp2 = _rotate2d(c, p, (360/12)-(4*(360/6)));
+
+    console.log(rp0, rp1);
+
+    var size = (rp1.x-rp0.x);
+    var height = (rp2.y-rp0.y);
+
+    console.log("hexagon size: "+size.toFixed(2)+"cm");
+    console.log("hexagon width: "+width.toFixed(2)+"cm");
+    console.log("hexagon height: "+height.toFixed(2)+"cm");
+};
+
+var drawCircle = function(ctx, x, y, size, reverse=false) {
+    var c = {
+        x: x,
+        y: y
+    };
+
+    var numLines = 10;
+    var numPoints = 25;
+
+    for (var n = 0; n < numLines; n++) {
+        ctx.beginPath();
+        ctx.moveTo(c.x, c.y);
+        for (var k = 0; k < numPoints; k++) {
+            var p = {
+                x: c.x,
+                y: c.y-(k*(size/numPoints))
+            };
+
+            var effect = 
+            (reverse ? -(k*(360/(numLines*8))) : (k*(360/(numLines*8))));
+
+            var rp = _rotate2d(c, p, 
+            (n*(360/numLines))+effect);
+            ctx.lineTo(rp.x, rp.y);
+        }
+        ctx.stroke();
+    }
 };
 
 var visibilityChange;

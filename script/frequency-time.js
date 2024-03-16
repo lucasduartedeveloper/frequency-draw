@@ -92,7 +92,6 @@ $(document).ready(function() {
 
     spriteView = document.createElement("img");
     spriteView.style.position = "absolute";
-    spriteView.style.background = "limegreen";
     spriteView.style.left = (10)+"px";
     spriteView.style.top = ((sh/4)-25)+"px";
     spriteView.style.width = (50)+"px";
@@ -105,6 +104,24 @@ $(document).ready(function() {
     spriteView.onanimationend = function() {
         spriteView.className = "";
     };
+
+    resultOffsetView = document.createElement("span");
+    resultOffsetView.style.position = "absolute";
+    resultOffsetView.style.userSelect = "none";
+    resultOffsetView.style.objectFit = "cover";
+    resultOffsetView.innerText = "0.00%";
+    resultOffsetView.style.animationDuration = "1s";
+    resultOffsetView.style.color = "#fff";
+    resultOffsetView.style.fontWeight = "900";
+    resultOffsetView.style.fontSize = "10px";
+    resultOffsetView.style.lineHeight = "25px";
+    resultOffsetView.style.textAlign = "center";
+    resultOffsetView.style.left = (10)+"px";
+    resultOffsetView.style.top = ((sh/4)+25)+"px";
+    resultOffsetView.style.width = (50)+"px";
+    resultOffsetView.style.height = (25)+"px";
+    resultOffsetView.style.zIndex = "15";
+    document.body.appendChild(resultOffsetView);
 
     textView = document.createElement("span");
     textView.style.position = "absolute";
@@ -465,7 +482,25 @@ $(document).ready(function() {
                 (poorCount+(goodCount*2)+
                 (greatCount*3)+(perfectCount*4));
 
+                var offset = lastResult > 0 ? ((result*100) - lastResult) : 0;
                 text = "RESULT: " + (result*100).toFixed(2) + "%";
+
+                if (offset == 0) {
+                    spriteView.style.background = "initial";
+                    resultOffsetView.style.color = "#fff";
+                }
+                else if (offset > 0) {
+                    spriteView.style.background = "limegreen";
+                    resultOffsetView.style.color = "limegreen";
+                }
+                else if (offset < 0) {
+                    spriteView.style.background = "red";
+                    resultOffsetView.style.color = "red";
+                }
+
+                resultOffsetView.innerText = 
+                (offset > 0 ? "+" : "") + offset.toFixed(2)+"%";
+                lastResult = (result*100);
 
                 /*
                 var hit = (1-result);
@@ -501,8 +536,12 @@ $(document).ready(function() {
     animate();
 });
 
+var lastResult = 0;
+
 var failed = function(obj=false) {
     text = "FAILED";
+
+    spriteView.src = "img/sprite-getting-ready.png";
 
     textView.innerText = text;
     textView.style.display = "initial";

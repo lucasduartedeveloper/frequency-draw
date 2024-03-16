@@ -249,7 +249,7 @@ $(document).ready(function() {
         if (startY > (sh/2)+((sw/gridSize)*2))
         y = (sh/2)+((sw/gridSize)*2);
 
-        prediction.positionY = y;
+        //prediction.positionY = y;
         prediction.startValue = 
         (1/((sw/gridSize)* 4)) * (((sh/2)+((sw/gridSize)*2))-y);
         prediction.value = 
@@ -269,6 +269,7 @@ $(document).ready(function() {
         }
 
         offsetX += (moveX - offset_startX)
+        if (offsetX > 0) offsetX = 0;
         offset_startX = moveX;
 
         var y = moveY;
@@ -278,7 +279,7 @@ $(document).ready(function() {
         if (moveY > (sh/2)+((sw/gridSize)*2))
         y = (sh/2)+((sw/gridSize)*2);
 
-        prediction.positionY = y;
+        //prediction.positionY = y;
         prediction.value = 
         (1/((sw/gridSize)* 4)) * (((sh/2)+((sw/gridSize)*2))-y);
     };
@@ -490,14 +491,23 @@ $(document).ready(function() {
             volumeValue: 0
         }];
 
-        var min = 0;
-        var minArr = [ 0, (1/5), (2/5), (3/5), (4/5)];
+        var rnd = -2+Math.floor(Math.random()*5);
+        var value = rnd*0.01;
         exampleDataInterval = setInterval(function() {
-            var frequency = min + Math.random()*(1/5);
+            rnd = -2+Math.floor(Math.random()*5);
+            value = rnd*0.01;
+
+            if (value < 0 && frequencyPath[0].closeValue < (value*-1))
+            value = -frequencyPath[0].closeValue;
+
+            if (value > 0 && 
+            (frequencyPath[0].closeValue + value) > 1)
+            value = (1-frequencyPath[0].closeValue);
+
+            var frequency = (frequencyPath[0].closeValue+value);
             updateValue(frequency, function() {
-                min = minArr[Math.floor(Math.random()*5)];
             });
-        }, 250);
+        }, 100);
     }
 
     lastMessageView = document.createElement("span");
@@ -529,7 +539,7 @@ $(document).ready(function() {
     periodTimestampView.style.fontSize = "15px";
     periodTimestampView.style.left = (10)+"px";
     periodTimestampView.style.top = (sh-175)+"px";
-    periodTimestampView.style.width = (150)+"px";
+    periodTimestampView.style.width = (200)+"px";
     periodTimestampView.style.height = (25)+"px";
     //lastMessageView.style.border = "1px solid white";
     //lastMessageView.style.borderRadius = "25px";
@@ -859,6 +869,8 @@ var closeValue = 0;
 var readingCount = 0;
 var volumeValue = 0;
 
+var timeOffset = 0;
+
 var updateValue = function(value, callback) {
     var frequency = value;
     var currentTime = new Date().getTime();
@@ -930,7 +942,10 @@ var updateValue = function(value, callback) {
     }
 
     if (currentTime - frequencyPath[0].timestamp >= 
-        periodLength) {
+        (periodLength-timeOffset)) {
+        timeOffset = 
+        (currentTime - frequencyPath[0].timestamp)-periodLength;
+
         closeValue = frequency;
 
         currentValueView.innerText = 
@@ -963,7 +978,7 @@ var updateValue = function(value, callback) {
         periodTimestampView.innerText = 
         "Period start: "+
         moment(frequencyPath[0].timestamp)
-        .format("HH:mm:ss.SSS");
+        .format("HH:mm:ss.SSS");// + " ("+timeOffset+"ms)";
 
         periodOpenValueView.innerText = 
         "Open value: "+frequencyPath[0].openValue.toFixed(2);
@@ -1094,6 +1109,19 @@ var drawImage =
 
     ctx.save();
     ctx.translate(-offsetX, 0);
+
+    var height = ((frequencyPath[0].closeValue)*((sw/gridSize)*4));
+
+    ctx.beginPath();
+    ctx.moveTo((sw-15), (sh/2)+((sw/gridSize)*2));
+    for (var n = 1; n < 10; n++) {
+        var isOdd = n%2!=0;
+        var x = isOdd ? (sw-10) : (sw-20);
+        ctx.lineTo(x, (sh/2)+((sw/gridSize)*2)-(n*(height/10)));
+    }
+    ctx.lineTo((sw-15), (sh/2)-
+    ((frequencyPath[0].closeValue-0.5)*((sw/gridSize)*4)));
+    //ctx.stroke();
 
     ctx.lineWidth = 2;
 
@@ -1241,28 +1269,6 @@ var drawImage =
         ctx.restore();
     }
 
-    ctx.lineWidth = 10;
-
-    ctx.beginPath();
-    ctx.moveTo((sw/2)-(sw/4)-10, (sh/2)-(sw/2));
-    ctx.lineTo((sw/2)-(sw/4)-10, (sh/2)-((sw/2)-20));
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo((sw/2)-(sw/4)-20, (sh/2)-((sw/2)-20));
-    ctx.lineTo((sw/2)-(sw/4)-20, (sh/2)-((sw/2)-40));
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo((sw/2)-(sw/4)-10, (sh/2)-((sw/2)-40));
-    ctx.lineTo((sw/2)-(sw/4)-10, (sh/2)-((sw/2)-60));
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo((sw/2)-(sw/4)+10, (sh/2)-(sw/2));
-    ctx.lineTo((sw/2)-(sw/4)+10, (sh/2)-((sw/2)-60));
-    ctx.stroke();
-
     for (var n = -1; n < 2; n++) {
         var timestamp = 
         frequencyPath[0].timestamp + (n*(periodLength*5));
@@ -1277,7 +1283,7 @@ var drawImage =
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(
-        moment(timestamp).format("HH:mm"),
+        moment(timestamp).format("HH:mm:ss"),
         (sw/2)+(n*100), 
         (sh/2)+(sw/4)+20);
     }

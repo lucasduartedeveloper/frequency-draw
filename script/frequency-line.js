@@ -148,7 +148,7 @@ $(document).ready(function() {
     keepView.style.position = "absolute";
     keepView.style.userSelect = "none";
     keepView.style.objectFit = "cover";
-    //keepView.innerText = "KEEP";
+    keepView.innerText = "KEEP";
     keepView.style.animationDuration = "1s";
     keepView.style.color = "#fff";
     keepView.style.fontWeight = "900";
@@ -188,7 +188,7 @@ $(document).ready(function() {
     dataView.style.width = (100)+"px";
     dataView.style.height = (50)+"px";
     dataView.style.zIndex = "15";
-    //document.body.appendChild(dataView);
+    document.body.appendChild(dataView);
 
     mic = new EasyMicrophone();
     mic.onsuccess = function() { 
@@ -335,6 +335,20 @@ var animate = function() {
     requestAnimationFrame(animate);
 };
 
+var positionA = {
+    x: (sw/2)-50,
+    y: (sh/2)-(sh/4),
+    speedX: 1,
+    speedY: 1
+};
+
+var positionB = {
+    x: (sw/2)+50,
+    y: (sh/2)-(sh/4),
+    speedX: -1,
+    speedY: 1
+};
+
 var textFrame = 0;
 var drawImage = function() {
     var ctx = pictureView.getContext("2d");
@@ -350,14 +364,53 @@ var drawImage = function() {
     ctx.beginPath();
     ctx.moveTo(0, (sh/2));
     ctx.lineTo(sw, (sh/2));
-    //ctx.stroke();
+    ctx.stroke();
 
     textFrame += 1;
     if (textFrame == sw) textFrame = 0;
 
-    //drawAB(resumedWave, (sh/2)+10);
-    //drawAB(previousResumedWave, (sh/2)-10, -1);
+    drawAB(resumedWave, (sh/2)+10);
+    drawAB(previousResumedWave, (sh/2)-10, -1);
 
+    ctx.fillStyle = "#fff";
+
+    /*
+    positionA.x += positionA.speedX;
+    positionA.y += positionA.speedY;
+
+    if (positionA.x == (sw/2)+50) {
+        positionA.speedX = -1;
+        positionA.speedY = -1;
+    }
+
+    if (positionA.x == (sw/2)-50) {
+        positionA.speedX = 1;
+        positionA.speedY = 1;
+    }
+
+    positionB.x += positionB.speedX;
+    positionB.y += positionB.speedY;
+
+    if (positionB.x == (sw/2)-50) {
+        positionB.speedX = 1;
+        positionB.speedY = -1;
+    }
+
+    if (positionB.x == (sw/2)+50) {
+        positionB.speedX = -1;
+        positionB.speedY = 1;
+    }
+    */
+
+    ctx.beginPath();
+    ctx.arc(positionA.x, positionA.y, 5, 0, (Math.PI*2));
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(positionB.x, positionB.y, 5, 0, (Math.PI*2));
+    ctx.fill();
+
+    return;
     ctx.save();
     ctx.translate((sw/2), (sh/2));
     //ctx.rotate(-(Math.PI/2));
